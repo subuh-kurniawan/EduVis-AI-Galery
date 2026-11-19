@@ -49,6 +49,12 @@
 | :---: | :---: |
 | ![Peluncur 13 Ruang Kerja Hybrid](docs/screenshots/08-eduvis-native-workspace-launcher.webp) | ![Tentang EduVis Native AI](docs/screenshots/09-eduvis-native-about.webp) |
 
+### Tampilan Responsif Multi-Perangkat (iPhone, MacBook, & iPad via LAN HTTPS)
+
+| Chat & Rumus KaTeX Lintas Perangkat (LAN HTTPS) | EduVis Live Futuristik Lintas Perangkat (LAN HTTPS) |
+| :---: | :---: |
+| ![Multi-Device LAN Chat](docs/screenshots/10-multi-device-lan-chat.webp) | ![Multi-Device LAN Live](docs/screenshots/11-multi-device-lan-live.webp) |
+
 ---
 
 ## 🌟 Fitur Utama & Ruang Kerja
