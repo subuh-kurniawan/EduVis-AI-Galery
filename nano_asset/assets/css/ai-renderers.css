@@ -1,0 +1,1700 @@
+:root {
+    --ai-renderer-surface: rgba(15, 23, 42, .72);
+    --ai-renderer-border: rgba(148, 163, 184, .24);
+    --ai-renderer-text: #e2e8f0;
+    --ai-renderer-muted: #94a3b8;
+    --ai-renderer-shadow: 0 12px 32px rgba(15, 23, 42, .14);
+    --glass-blur: 30px;
+    --glass-saturate: 200%;
+    --specular-intensity: 1;
+    --accent-rgb: 10, 132, 255;
+    --eduvis-ai-copilot: #a855f7;
+    --eduvis-radius-capsule: 9999px;
+    --eduvis-radius-card: 20px;
+    --apple-lg-bg: rgba(18, 24, 38, 0.74);
+    --apple-lg-bg-elevated: rgba(28, 34, 52, 0.80);
+    --apple-lg-border: rgba(255, 255, 255, 0.16);
+    --apple-lg-specular: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.28), inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.22);
+    --apple-lg-shadow: 0 24px 56px -14px rgba(0, 0, 0, 0.68), 0 0 32px rgba(99, 102, 241, 0.12);
+    --apple-lg-blur: blur(var(--glass-blur, 28px)) saturate(var(--glass-saturate, 200%)) contrast(105%);
+}
+
+body.light-theme {
+    --ai-renderer-surface: rgba(248, 250, 252, .92);
+    --ai-renderer-border: rgba(100, 116, 139, .22);
+    --ai-renderer-text: #1e293b;
+    --ai-renderer-muted: #64748b;
+    --ai-renderer-shadow: 0 12px 32px rgba(51, 65, 85, .09);
+    --apple-lg-bg: rgba(255, 255, 255, 0.72);
+    --apple-lg-bg-elevated: rgba(255, 255, 255, 0.84);
+    --apple-lg-border: rgba(255, 255, 255, 0.82);
+    --apple-lg-specular: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 1px 0 rgba(15, 23, 42, 0.06);
+    --apple-lg-shadow: 0 20px 48px -12px rgba(15, 23, 42, 0.14), 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.ai-table-export-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: .4rem .5rem;
+    border-bottom: 1px solid var(--ai-renderer-border);
+    background: var(--ai-renderer-surface);
+}
+
+.ai-table-export-button {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .65rem;
+    border: 1px solid var(--ai-renderer-border);
+    border-radius: .65rem;
+    background: rgba(148, 163, 184, .12);
+    color: var(--ai-renderer-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: .75rem;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.ai-table-export-button:hover:not(:disabled) {
+    background: rgba(59, 130, 246, .16);
+    color: #3b82f6;
+}
+
+.ai-table-export-button:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.ai-table-export-button:disabled {
+    cursor: wait;
+    opacity: .7;
+}
+
+/* --- Universal Responsive Table Styling & Smooth Horizontal Scroll for Web Clients --- */
+.table-wrapper,
+.table-wrap,
+.table-container,
+.opfs-model-table-container,
+#messages .table-wrapper,
+#messages .table-wrap,
+#messages .table-container,
+.prose .table-wrapper,
+.prose .table-wrap,
+.prose .table-container {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
+    overscroll-behavior-x: contain !important;
+    margin: 12px 0 !important;
+    border: 1px solid var(--ai-renderer-border, rgba(148, 163, 184, 0.24));
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+}
+
+#messages,
+#messages > div,
+.chat-bubble-ai,
+.chat-bubble-user,
+.v2-chat-reply,
+.prose,
+.ai-col,
+.user-col,
+.msg {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+.table-wrapper > table,
+.table-wrap > table,
+.table-container > table,
+.prose table,
+#messages table {
+    display: table !important;
+    width: max-content !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+}
+
+.table-wrapper > table th,
+.table-wrapper > table td,
+.table-wrap > table th,
+.table-wrap > table td,
+.table-container > table th,
+.table-container > table td,
+.prose table th,
+.prose table td,
+#messages table th,
+#messages table td {
+    padding: 9px 14px !important;
+    border-bottom: 1px solid var(--ai-renderer-border, rgba(148, 163, 184, 0.18)) !important;
+    text-align: left !important;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.table-wrapper > table thead tr,
+.table-wrap > table thead tr,
+.table-container > table thead tr,
+.prose table thead tr,
+#messages table thead tr {
+    background: var(--ai-renderer-surface, rgba(15, 23, 42, 0.72)) !important;
+}
+
+.table-wrapper > table th,
+.table-wrap > table th,
+.table-container > table th,
+.prose table th,
+#messages table th {
+    font-weight: 600 !important;
+    color: var(--ai-renderer-text, #e2e8f0) !important;
+}
+
+/* Scrollbar horizontal halus untuk web client di semua peramban (iOS, Android, Chrome, Safari, Firefox) */
+.table-wrapper::-webkit-scrollbar,
+.table-wrap::-webkit-scrollbar,
+.table-container::-webkit-scrollbar {
+    height: 7px !important;
+    width: 7px !important;
+}
+
+.table-wrapper::-webkit-scrollbar-track,
+.table-wrap::-webkit-scrollbar-track,
+.table-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.15) !important;
+    border-radius: 4px !important;
+}
+
+body.light-theme .table-wrapper::-webkit-scrollbar-track,
+body.light-theme .table-wrap::-webkit-scrollbar-track,
+body.light-theme .table-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb,
+.table-wrap::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35) !important;
+    border-radius: 4px !important;
+}
+
+body.light-theme .table-wrapper::-webkit-scrollbar-thumb,
+body.light-theme .table-wrap::-webkit-scrollbar-thumb,
+body.light-theme .table-container::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.35) !important;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover,
+.table-wrap::-webkit-scrollbar-thumb:hover,
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.6) !important;
+}
+
+body.light-theme .table-wrapper::-webkit-scrollbar-thumb:hover,
+body.light-theme .table-wrap::-webkit-scrollbar-thumb:hover,
+body.light-theme .table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.6) !important;
+}
+
+/* --- High-Performance CSS: Offscreen rendering optimization --- */
+.prose .table-wrap,
+.prose .table-wrapper,
+.diagram-wrapper,
+.chart-container {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 180px;
+}
+
+.ai-chart-export-toolbar {
+    position: absolute;
+    z-index: 4;
+    top: .65rem;
+    right: .65rem;
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .65rem;
+    border: 1px solid var(--ai-renderer-border);
+    border-radius: .65rem;
+    background: var(--ai-renderer-surface);
+    color: var(--ai-renderer-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: .75rem;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+.ai-chart-export-toolbar:hover {
+    background: rgba(59, 130, 246, .16);
+    color: #3b82f6;
+}
+
+.ai-chart-export-toolbar:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.chart-container,
+.mermaid:not(code),
+.mermaid-wrapper,
+.mermaid-svg-container,
+.flowchart-diagram,
+.live-mermaid,
+.live-flowchart {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-block: 1rem;
+    overflow: auto;
+    border: 1px solid var(--ai-renderer-border);
+    border-radius: 1rem;
+    background: var(--ai-renderer-surface);
+    color: var(--ai-renderer-text);
+    box-shadow: var(--ai-renderer-shadow);
+}
+
+html body .mermaid-wrapper.mermaid-controls,
+html body.light-theme .mermaid-wrapper.mermaid-controls {
+    position: relative !important;
+    display: block !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: var(--ai-renderer-surface) !important;
+    border: 1px solid var(--ai-renderer-border) !important;
+    border-radius: 1rem !important;
+    color: var(--ai-renderer-text) !important;
+    box-shadow: var(--ai-renderer-shadow) !important;
+}
+
+html body .mermaid-controls .mermaid-svg-container,
+html body.light-theme .mermaid-controls .mermaid-svg-container {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-height: 12rem;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 1rem 1rem;
+    overflow: auto;
+    background: transparent !important;
+    cursor: grab;
+    touch-action: pan-x pan-y;
+}
+
+.mermaid-controls .mermaid-svg-container.is-panning {
+    cursor: grabbing;
+    user-select: none;
+}
+
+.mermaid-controls .mermaid-content,
+.mermaid-controls .live-mermaid {
+    display: flex;
+    width: max-content;
+    min-width: 100%;
+    min-height: 6rem;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: .75rem;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    text-align: center;
+}
+
+.mermaid-controls .mermaid-content svg,
+.mermaid-controls .live-mermaid svg {
+    max-width: none;
+    flex: none;
+}
+
+.mermaid-toolbar {
+    position: absolute;
+    z-index: 5;
+    top: .75rem;
+    right: .75rem;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .5rem;
+    border: 1px solid var(--ai-renderer-border);
+    border-radius: 1rem;
+    background: var(--ai-renderer-surface);
+    box-shadow: var(--ai-renderer-shadow);
+    opacity: 1 !important;
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+
+.mermaid-toolbar button {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: .75rem;
+    background: rgba(148, 163, 184, .12);
+    color: var(--ai-renderer-text);
+    cursor: pointer;
+    font-size: 1.25rem;
+    transition: background-color .15s ease, color .15s ease, transform .15s ease;
+}
+
+.mermaid-toolbar button:hover {
+    transform: translateY(-1px);
+    background: rgba(59, 130, 246, .16);
+    color: #3b82f6;
+}
+
+.mermaid-toolbar button:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.mermaid-toolbar-divider {
+    width: 1px;
+    height: 1.75rem;
+    margin-inline: .25rem;
+    background: var(--ai-renderer-border);
+}
+
+.mermaid-controls:fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: var(--ai-renderer-surface) !important;
+}
+
+.mermaid-controls:fullscreen .mermaid-svg-container {
+    height: 100%;
+    padding-top: 6rem;
+}
+
+.chart-container {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: clamp(240px, 42vw, 350px) !important;
+    padding: .875rem;
+    box-sizing: border-box;
+}
+
+.chart-container canvas.ai-chart {
+    display: block;
+    width: 100% !important;
+    max-width: 100%;
+}
+
+.mermaid:not(code),
+.live-mermaid {
+    display: flex;
+    min-height: 5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    text-align: center;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.mermaid svg,
+.mermaid-wrapper svg,
+.mermaid-svg-container svg,
+.flowchart-diagram svg,
+.live-mermaid svg,
+.live-flowchart svg {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+}
+
+.flowchart-diagram {
+    min-height: 5rem;
+    padding: 1rem;
+    text-align: center;
+}
+
+.mermaid-svg-container {
+    min-width: 0;
+    overflow: auto;
+}
+
+.flowchart-code {
+    display: block;
+    color: var(--ai-renderer-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .8125rem;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.live-flowchart-source {
+    color: var(--ai-renderer-muted);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.chart-error-container,
+.mermaid-error-container {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid rgba(248, 113, 113, .28);
+    border-radius: .875rem;
+    background: rgba(127, 29, 29, .12);
+    color: #b91c1c;
+}
+
+body:not(.light-theme) .chart-error-container,
+body:not(.light-theme) .mermaid-error-container {
+    color: #fca5a5;
+}
+
+@media (max-width: 640px) {
+    .chart-container {
+        height: 280px !important;
+        padding: .625rem;
+    }
+
+    .mermaid:not(code),
+    .mermaid-wrapper,
+    .mermaid-svg-container,
+    .flowchart-diagram,
+    .live-mermaid,
+    .live-flowchart {
+        padding: .75rem;
+    }
+
+    .mermaid-toolbar {
+        top: .5rem;
+        right: .5rem;
+        gap: .15rem;
+        padding: .35rem;
+    }
+
+    .mermaid-toolbar button {
+        width: 2.25rem;
+        height: 2.25rem;
+        font-size: 1.05rem;
+    }
+
+    .mermaid-controls .mermaid-svg-container {
+        min-height: 10rem;
+        padding: 4rem .5rem .75rem;
+    }
+}
+
+/* ==========================================================================
+   UNIFIED & THEME-INDEPENDENT AI SETTINGS MODAL UI
+   Konsisten, elegan, dan 100% independen dari tema (Dark / Light / OLED / dll)
+   ========================================================================== */
+
+#ai-settings-modal,
+html body #ai-settings-modal,
+html body.light-theme #ai-settings-modal,
+html body.light #ai-settings-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    background-color: rgba(0, 0, 0, 0.78) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+}
+
+#ai-settings-modal.hidden {
+    display: none !important;
+}
+
+#ai-settings-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Modal Dialog Card */
+#ai-settings-modal > div,
+html body #ai-settings-modal > div,
+html body.light-theme #ai-settings-modal > div,
+html body.light #ai-settings-modal > div {
+    background-color: #121318 !important;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 1.5rem !important;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(99, 102, 241, 0.15) !important;
+    color: #e2e8f0 !important;
+    max-height: 90vh !important;
+    overflow: hidden !important;
+    font-family: inherit !important;
+}
+
+/* Modal Header */
+#ai-settings-modal .border-b,
+html body #ai-settings-modal .border-b,
+html body.light-theme #ai-settings-modal .border-b {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+#ai-settings-modal h3,
+html body #ai-settings-modal h3,
+html body.light-theme #ai-settings-modal h3,
+#ai-settings-modal .text-white,
+html body.light-theme #ai-settings-modal .text-white {
+    color: #ffffff !important;
+}
+
+#ai-settings-modal .text-slate-100,
+html body.light-theme #ai-settings-modal .text-slate-100 {
+    color: #f1f5f9 !important;
+}
+
+#ai-settings-modal .text-slate-200,
+html body.light-theme #ai-settings-modal .text-slate-200,
+#ai-settings-modal h4 {
+    color: #e2e8f0 !important;
+}
+
+#ai-settings-modal .text-slate-300,
+html body.light-theme #ai-settings-modal .text-slate-300 {
+    color: #cbd5e1 !important;
+}
+
+#ai-settings-modal .text-slate-400,
+html body.light-theme #ai-settings-modal .text-slate-400,
+#ai-settings-modal label {
+    color: #94a3b8 !important;
+}
+
+#ai-settings-modal .text-slate-500,
+html body.light-theme #ai-settings-modal .text-slate-500 {
+    color: #64748b !important;
+}
+
+/* Inputs, Selects, & Textarea */
+#ai-settings-modal input:not([type="range"]):not([type="radio"]):not([type="checkbox"]),
+#ai-settings-modal select,
+#ai-settings-modal textarea,
+html body #ai-settings-modal input:not([type="range"]):not([type="radio"]):not([type="checkbox"]),
+html body #ai-settings-modal select,
+html body #ai-settings-modal textarea,
+html body.light-theme #ai-settings-modal input:not([type="range"]):not([type="radio"]):not([type="checkbox"]),
+html body.light-theme #ai-settings-modal select,
+html body.light-theme #ai-settings-modal textarea {
+    background-color: #0b0c10 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 0.75rem !important;
+    color: #f1f5f9 !important;
+    padding: 0.65rem 0.9rem !important;
+    font-size: 0.78rem !important;
+    outline: none !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#ai-settings-modal input:focus,
+#ai-settings-modal select:focus,
+#ai-settings-modal textarea:focus {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(99, 102, 241, 0.25) !important;
+}
+
+#ai-settings-modal input::placeholder,
+#ai-settings-modal textarea::placeholder {
+    color: #64748b !important;
+}
+
+#ai-settings-modal select option {
+    background-color: #161822 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Range input */
+#ai-settings-modal input[type="range"] {
+    accent-color: #f59e0b !important;
+}
+
+/* Cards / Sections inside modal */
+#ai-settings-modal .bg-white\/\[0\.03\],
+#ai-settings-modal .bg-white\/5,
+html body.light-theme #ai-settings-modal .bg-white\/\[0\.03\],
+html body.light-theme #ai-settings-modal .bg-white\/5 {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+#ai-settings-modal .bg-purple-500\/5,
+html body.light-theme #ai-settings-modal .bg-purple-500\/5 {
+    background-color: rgba(168, 85, 247, 0.06) !important;
+    border-color: rgba(168, 85, 247, 0.22) !important;
+}
+
+#ai-settings-modal .text-purple-200,
+#ai-settings-modal .text-purple-300,
+html body.light-theme #ai-settings-modal .text-purple-200,
+html body.light-theme #ai-settings-modal .text-purple-300 {
+    color: #d8b4fe !important;
+}
+
+#ai-settings-modal .bg-purple-500\/15,
+html body.light-theme #ai-settings-modal .bg-purple-500\/15 {
+    background-color: rgba(168, 85, 247, 0.16) !important;
+    border-color: rgba(168, 85, 247, 0.3) !important;
+}
+
+#ai-settings-modal .bg-yellow-500\/5,
+html body.light-theme #ai-settings-modal .bg-yellow-500\/5 {
+    background-color: rgba(245, 158, 11, 0.06) !important;
+    border-color: rgba(245, 158, 11, 0.22) !important;
+}
+
+#ai-settings-modal .text-yellow-300,
+#ai-settings-modal .text-yellow-400,
+html body.light-theme #ai-settings-modal .text-yellow-300,
+html body.light-theme #ai-settings-modal .text-yellow-400 {
+    color: #fcd34d !important;
+}
+
+#ai-settings-modal .bg-yellow-500\/15,
+html body.light-theme #ai-settings-modal .bg-yellow-500\/15 {
+    background-color: rgba(245, 158, 11, 0.18) !important;
+}
+
+/* Modal Footer & Buttons */
+#ai-settings-modal .border-t,
+html body #ai-settings-modal .border-t,
+html body.light-theme #ai-settings-modal .border-t {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+#ai-settings-modal button[onclick*="closeAISettingsModal"],
+html body.light-theme #ai-settings-modal button[onclick*="closeAISettingsModal"] {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #cbd5e1 !important;
+    border-radius: 0.75rem !important;
+    transition: all 0.15s ease !important;
+}
+
+#ai-settings-modal button[onclick*="closeAISettingsModal"]:hover,
+html body.light-theme #ai-settings-modal button[onclick*="closeAISettingsModal"]:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+#ai-settings-modal button[onclick*="applyAISettings"],
+html body.light-theme #ai-settings-modal button[onclick*="applyAISettings"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    border-radius: 0.75rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35) !important;
+    transition: all 0.15s ease !important;
+}
+
+#ai-settings-modal button[onclick*="applyAISettings"]:hover,
+html body.light-theme #ai-settings-modal button[onclick*="applyAISettings"]:hover {
+    filter: brightness(1.1) !important;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Imported Models Item List */
+#imported-models-list > div,
+html body.light-theme #imported-models-list > div {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 0.65rem !important;
+    color: #e2e8f0 !important;
+}
+
+#imported-models-list .text-emerald-400,
+html body.light-theme #imported-models-list .text-emerald-400 {
+    color: #34d399 !important;
+}
+
+#imported-models-list .text-red-400,
+html body.light-theme #imported-models-list .text-red-400 {
+    color: #f87171 !important;
+}
+
+/* Tabs in vision_ulti.html */
+#ai-settings-modal button[id^="ai-tab-"],
+html body.light-theme #ai-settings-modal button[id^="ai-tab-"] {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+    border-radius: 0.75rem !important;
+}
+
+#ai-settings-modal button[id^="ai-tab-"]:hover,
+html body.light-theme #ai-settings-modal button[id^="ai-tab-"]:hover {
+    color: #f1f5f9 !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+#ai-settings-modal button[id^="ai-tab-"].active,
+#ai-settings-modal button[id^="ai-tab-"].border-gemini-blue,
+html body.light-theme #ai-settings-modal button[id^="ai-tab-"].active,
+html body.light-theme #ai-settings-modal button[id^="ai-tab-"].border-gemini-blue {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    color: #ffffff !important;
+}
+
+/* Scrollbar inside modal */
+#ai-settings-modal .overflow-y-auto::-webkit-scrollbar {
+    width: 6px !important;
+}
+#ai-settings-modal .overflow-y-auto::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+#ai-settings-modal .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 9999px !important;
+}
+#ai-settings-modal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ==========================================================================
+   UNIFIED & THEME-INDEPENDENT LAN QR MODAL UI (#lan-qr-modal)
+   Standarisasi lintas workspace: kebal tema, kontras tinggi, mandiri
+   ========================================================================== */
+
+#lan-qr-modal,
+html body #lan-qr-modal,
+html body.light-theme #lan-qr-modal,
+html body.light #lan-qr-modal,
+html body.oled-theme #lan-qr-modal,
+html body.hacker-theme #lan-qr-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    background-color: rgba(5, 7, 12, 0.78) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    color-scheme: dark !important;
+}
+
+#lan-qr-modal.hidden {
+    display: none !important;
+}
+
+#lan-qr-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#lan-qr-modal section,
+#lan-qr-modal .lan-qr-card,
+html body.light-theme #lan-qr-modal section,
+html body.light-theme #lan-qr-modal .lan-qr-card {
+    background-color: #131418 !important;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 1.5rem !important;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(99, 102, 241, 0.12) !important;
+    color: #f1f5f9 !important;
+    color-scheme: dark !important;
+}
+
+#lan-qr-modal h2,
+#lan-qr-modal #lan-qr-title,
+html body.light-theme #lan-qr-modal h2,
+html body.light-theme #lan-qr-modal #lan-qr-title {
+    color: #ffffff !important;
+}
+
+#lan-qr-modal p,
+#lan-qr-modal .lan-qr-subtitle,
+#lan-qr-modal label,
+#lan-qr-modal .lan-qr-field,
+html body.light-theme #lan-qr-modal p,
+html body.light-theme #lan-qr-modal .lan-qr-subtitle,
+html body.light-theme #lan-qr-modal label,
+html body.light-theme #lan-qr-modal .lan-qr-field {
+    color: #cbd5e1 !important;
+}
+
+#lan-qr-modal select,
+#lan-qr-modal #lan-qr-address-select,
+html body.light-theme #lan-qr-modal select,
+html body.light-theme #lan-qr-modal #lan-qr-address-select {
+    background-color: #1a1b22 !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color-scheme: dark !important;
+}
+
+#lan-qr-modal select option,
+html body.light-theme #lan-qr-modal select option {
+    background-color: #181920 !important;
+    color: #ffffff !important;
+}
+
+#lan-qr-modal button#lan-qr-copy,
+html body.light-theme #lan-qr-modal button#lan-qr-copy {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+#lan-qr-modal a#lan-qr-ca,
+html body.light-theme #lan-qr-modal a#lan-qr-ca {
+    background-color: rgba(14, 165, 233, 0.12) !important;
+    color: #38bdf8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+}
+
+/* ==========================================================================
+   APPLE LIQUID GLASS & APPLE INTELLIGENCE DESIGN SYSTEM (2025–2026 HIG)
+   Material optik fisika murni: Refraksi, Specular Bevel, dan Dynamic Saturation
+   ========================================================================== */
+
+.apple-liquid-glass,
+#ai-settings-modal > div,
+#lan-qr-modal section,
+#lan-qr-modal .lan-qr-card,
+#opfs-storage-modal-backdrop > div {
+    background: var(--apple-lg-bg, rgba(18, 24, 38, 0.78)) !important;
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
+    backdrop-filter: var(--apple-lg-blur, blur(28px) saturate(200%) contrast(105%)) !important;
+    -webkit-backdrop-filter: var(--apple-lg-blur, blur(28px) saturate(200%) contrast(105%)) !important;
+    border: 1px solid var(--apple-lg-border, rgba(255, 255, 255, 0.14)) !important;
+    box-shadow:
+        var(--apple-lg-specular, inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.25)),
+        var(--apple-lg-shadow, 0 25px 60px -15px rgba(0, 0, 0, 0.75), 0 0 35px rgba(99, 102, 241, 0.12)) !important;
+    border-radius: 1.5rem !important;
+}
+
+.apple-liquid-glass-card {
+    background: var(--apple-lg-bg, rgba(18, 24, 38, 0.74));
+    background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(26px) saturate(200%);
+    -webkit-backdrop-filter: blur(26px) saturate(200%);
+    border: 1px solid var(--apple-lg-border, rgba(255, 255, 255, 0.16));
+    border-radius: 20px;
+    box-shadow: var(--apple-lg-specular), 0 16px 38px -12px rgba(0, 0, 0, 0.36);
+}
+
+.apple-liquid-glass-pill {
+    background: var(--apple-lg-bg-elevated, rgba(28, 34, 52, 0.76));
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid var(--apple-lg-border, rgba(255, 255, 255, 0.18));
+    border-radius: 9999px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.apple-liquid-glass-toolbar {
+    background: var(--apple-lg-bg, rgba(18, 24, 38, 0.72));
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border-bottom: 1px solid var(--apple-lg-border, rgba(255, 255, 255, 0.14));
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+body.light-theme .apple-liquid-glass:not(#ai-settings-modal > div):not(#lan-qr-modal section):not(#lan-qr-modal .lan-qr-card):not(#opfs-storage-modal-backdrop > div),
+body.light-theme .apple-liquid-glass-card,
+body.light-theme .apple-liquid-glass-pill,
+body.light-theme .apple-liquid-glass-toolbar {
+    color: #1d1d1f;
+}
+
+body.light-theme .apple-liquid-glass-pill {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 18px rgba(15, 23, 42, 0.1);
+}
+
+/* Apple Intelligence Active Thinking Aura */
+.apple-ai-aura {
+    position: relative;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    padding: 2px;
+}
+
+.apple-ai-aura::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: conic-gradient(from 0deg at 50% 50%, #38bdf8, #818cf8, #f472b6, #fb923c, #38bdf8);
+    animation: appleAiGlowSpin 3.5s linear infinite;
+    z-index: 0;
+}
+
+.apple-ai-aura::after {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: conic-gradient(from 0deg at 50% 50%, #38bdf8, #818cf8, #f472b6, #fb923c, #38bdf8);
+    animation: appleAiGlowSpin 3.5s linear infinite;
+    filter: blur(18px);
+    opacity: 0.55;
+    z-index: 0;
+}
+
+@keyframes appleAiGlowSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .apple-ai-aura::before,
+    .apple-ai-aura::after {
+        animation: none;
+        opacity: 0.35;
+    }
+}
+
+/* ==========================================================================
+   MACOS THREE-PANE SPLIT VIEW & SEARCH FIELD (APPLE HIG ARCHITECTURE)
+   Sidebar (Left) + Chat Stream (Center) + Inspector/Canvas (Right)
+   ========================================================================== */
+
+.macos-split-container {
+    display: flex !important;
+    width: 100% !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.macos-chat-pane {
+    flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-width: 320px !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.macos-inspector-pane {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    border-left: 1px solid var(--apple-lg-border, rgba(255, 255, 255, 0.12)) !important;
+    background: var(--apple-lg-bg, rgba(18, 24, 38, 0.9)) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.08) !important;
+    transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    z-index: 50 !important;
+}
+
+body.light-theme .macos-inspector-pane {
+    background: rgba(248, 250, 255, 0.84) !important;
+    border-left: 1px solid rgba(15, 23, 42, 0.12) !important;
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.8), -8px 0 28px rgba(15, 23, 42, 0.08) !important;
+    color: #1d1d1f !important;
+}
+
+body.light-theme .macos-inspector-pane #btn-inspector-tab-canvas,
+body.light-theme .macos-inspector-pane #btn-inspector-tab-params {
+    background: rgba(15, 23, 42, 0.06) !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    color: #1d1d1f !important;
+}
+
+body.light-theme .macos-inspector-pane #btn-inspector-tab-canvas.active,
+body.light-theme .macos-inspector-pane #btn-inspector-tab-params.active {
+    background: rgba(10, 132, 255, 0.14) !important;
+    border-color: rgba(10, 132, 255, 0.36) !important;
+    color: #0055d4 !important;
+}
+
+.macos-inspector-pane.hidden {
+    display: none !important;
+}
+
+/* Apple HIG Search Field Capsule */
+.macos-search-field-wrapper {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(18px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 1px 2px rgba(0, 0, 0, 0.18) !important;
+    transition: all 0.2s ease !important;
+}
+
+body.light-theme .macos-search-field-wrapper {
+    background: rgba(255, 255, 255, 0.72) !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+}
+
+body.light-theme .macos-search-field-wrapper input {
+    color: #1d1d1f !important;
+}
+
+.macos-search-field-wrapper:focus-within {
+    border-color: rgba(56, 189, 248, 0.6) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.macos-search-field-wrapper .macos-search-icon {
+    padding-left: 10px !important;
+    font-size: 11px !important;
+    opacity: 0.55 !important;
+    pointer-events: none !important;
+}
+
+.macos-search-field-wrapper input {
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+    color: #f1f5f9 !important;
+    outline: none !important;
+}
+
+.macos-search-field-wrapper .macos-search-clear-btn {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: #cbd5e1 !important;
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 9px !important;
+    cursor: pointer !important;
+    margin-right: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.macos-search-field-wrapper .macos-search-clear-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+}
+
+/* ========================================================
+   Professional Chatbot Enhancements:
+   Thinking Block, Follow-up Chips, and Streaming Cursor
+   ======================================================== */
+
+.ai-think-block {
+    margin: 0.85rem 0 !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    border-radius: 12px !important;
+    background: rgba(15, 23, 42, 0.45) !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    transition: border-color 0.2s ease, background 0.2s ease !important;
+}
+
+.ai-think-block summary {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 14px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.ai-think-block summary:hover {
+    color: #e2e8f0 !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+}
+
+.ai-think-block summary .think-icon {
+    font-size: 15px !important;
+}
+
+.ai-think-block.thinking summary .think-icon {
+    animation: pulse-brain 1.5s infinite ease-in-out !important;
+}
+
+.ai-think-block summary .think-status {
+    font-size: 11px !important;
+    color: #818cf8 !important;
+    font-weight: 500 !important;
+}
+
+.ai-think-block summary .think-badge {
+    margin-left: auto !important;
+    font-size: 10px !important;
+    padding: 2px 8px !important;
+    border-radius: 9999px !important;
+    background: rgba(56, 189, 248, 0.15) !important;
+    color: #38bdf8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    font-weight: 600 !important;
+}
+
+.ai-think-block .think-body {
+    padding: 12px 16px !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.12) !important;
+    font-size: 12.5px !important;
+    line-height: 1.65 !important;
+    color: #94a3b8 !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    font-style: italic !important;
+    white-space: pre-wrap !important;
+}
+
+@keyframes pulse-brain {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.18); opacity: 0.7; }
+}
+
+/* Follow-up Suggestion Chips */
+.followup-chips {
+    margin-top: 1.25rem !important;
+    padding-top: 1rem !important;
+    border-top: 1px dashed rgba(148, 163, 184, 0.22) !important;
+}
+
+.followup-chips-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #818cf8 !important;
+    margin-bottom: 0.65rem !important;
+}
+
+.followup-chips-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+.followup-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 7px 14px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #cbd5e1 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 9999px !important;
+    cursor: pointer !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    text-align: left !important;
+    line-height: 1.3 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.followup-chip:hover {
+    background: rgba(99, 102, 241, 0.18) !important;
+    border-color: rgba(129, 140, 248, 0.45) !important;
+    color: #ffffff !important;
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2) !important;
+}
+
+.followup-chip:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+.followup-chip .chip-icon {
+    font-size: 13px !important;
+    opacity: 0.8 !important;
+    color: #818cf8 !important;
+}
+
+/* Pulsing Streaming Cursor */
+.streaming-cursor {
+    display: inline-block !important;
+    margin-left: 3px !important;
+    color: #38bdf8 !important;
+    font-weight: 900 !important;
+    animation: cursor-blink 0.75s infinite ease-in-out !important;
+    vertical-align: baseline !important;
+}
+
+@keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* ========================================================
+   Apple iOS Human Interface Guidelines (HIG) Universal Mobile View
+   ======================================================== */
+@media (max-width: 768px) {
+    /* 1. Typography & Auto-Zoom Prevention */
+    input, textarea, select {
+        font-size: 16px !important; /* Prevents iOS Safari auto-zoom on input focus */
+    }
+
+    /* 2. Apple iOS Minimum 44x44pt Touch Targets */
+    .icon-btn,
+    .followup-chip,
+    .send,
+    .attach,
+    .composer button,
+    .mermaid-toolbar button,
+    .mindmap-toolbar button,
+    .ai-table-export-button,
+    .ai-chart-export-toolbar {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .followup-chip {
+        min-height: 44px !important;
+        padding: 10px 16px !important;
+        font-size: 13.5px !important;
+        border-radius: 9999px !important;
+    }
+
+    /* 3. Safe Area Insets for Notch, Dynamic Island, and Home Indicator */
+    header,
+    nav,
+    .top,
+    .app-header,
+    .navbar {
+        padding-top: max(0.5rem, env(safe-area-inset-top)) !important;
+        padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+        padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+    }
+
+    footer,
+    .tray,
+    .composer-wrap,
+    .input-container,
+    .chat-input-bar {
+        padding-bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
+        padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+        padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+    }
+
+    /* 4. Native iOS Momentum & Elastic Containment */
+    .thread,
+    #messages,
+    .chat-messages,
+    .sidebar,
+    .drawer {
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior-y: contain !important;
+    }
+
+    /* 5. Fluid Responsive Table Container */
+    .table-wrapper,
+    .table-wrap,
+    .table-container {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior-x: contain !important;
+    }
+
+    /* 6. Translucent Apple Glass Background for Floating Headers/Toolbars */
+    .top,
+    header,
+    .navbar {
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+    }
+}
+
+/* ==========================================================================
+   Universal Dynamic Real-Time Chat Font Sizing System
+   Controls text size across all chat UIs synchronously in real time
+   ========================================================================== */
+:root {
+    --chat-font-size: 15px;
+    --chat-font-size-code: calc(var(--chat-font-size) * 0.9);
+    --chat-font-size-h1: calc(var(--chat-font-size) * 1.5);
+    --chat-font-size-h2: calc(var(--chat-font-size) * 1.3);
+    --chat-font-size-h3: calc(var(--chat-font-size) * 1.15);
+    --chat-font-size-h4: calc(var(--chat-font-size) * 1.05);
+    --chat-line-height: 1.62;
+}
+
+/* Universal selectors targeting chat message containers across all chat UIs */
+.chat-bubble-user,
+.chat-bubble-ai,
+.message-bubble,
+.v2-chat-reply,
+.bubble,
+.bubble-ai,
+.bubble-user,
+.timeline-item,
+.msg .bubble,
+.msg .prose,
+#messages .chat-bubble-user,
+#messages .chat-bubble-ai,
+#messages .prose,
+#messages .chat-bubble-user > div,
+#messages .chat-bubble-ai > div,
+#chatArea .message-bubble,
+#chatArea .prose,
+#conversation .bubble,
+#ragChatTimeline .bubble,
+.timeline-item .prose,
+.chat-row .prose,
+.ai-response-stream-container,
+[data-chat-bubble],
+[data-chat-message] {
+    font-size: var(--chat-font-size) !important;
+    line-height: var(--chat-line-height) !important;
+}
+
+/* Paragraphs, list items, and standard inline spans within chat messages */
+.chat-bubble-user p,
+.chat-bubble-ai p,
+.message-bubble p,
+.v2-chat-reply p,
+.bubble p,
+.timeline-item p,
+.msg p,
+#messages .prose p,
+#chatArea .prose p,
+#conversation .bubble p,
+#ragChatTimeline .bubble p,
+.chat-bubble-user li,
+.chat-bubble-ai li,
+.message-bubble li,
+.v2-chat-reply li,
+.bubble li,
+.timeline-item li,
+.msg li,
+#messages .prose li,
+#chatArea .prose li,
+#conversation .bubble li {
+    font-size: var(--chat-font-size) !important;
+    line-height: var(--chat-line-height) !important;
+}
+
+/* Code blocks and inline code snippets */
+.chat-bubble-user pre,
+.chat-bubble-ai pre,
+.message-bubble pre,
+.v2-chat-reply pre,
+.bubble pre,
+.timeline-item pre,
+.msg pre,
+#messages pre,
+#chatArea pre,
+#conversation .bubble pre,
+.chat-bubble-user code,
+.chat-bubble-ai code,
+.message-bubble code,
+.v2-chat-reply code,
+.bubble code,
+.timeline-item code,
+.msg code,
+#messages code,
+#chatArea code,
+#conversation .bubble code {
+    font-size: var(--chat-font-size-code) !important;
+}
+
+/* Headings inside chat bubbles */
+.chat-bubble-ai h1, .message-bubble h1, .bubble h1, #messages .prose h1, #chatArea .prose h1 { font-size: var(--chat-font-size-h1) !important; }
+.chat-bubble-ai h2, .message-bubble h2, .bubble h2, #messages .prose h2, #chatArea .prose h2 { font-size: var(--chat-font-size-h2) !important; }
+.chat-bubble-ai h3, .message-bubble h3, .bubble h3, #messages .prose h3, #chatArea .prose h3 { font-size: var(--chat-font-size-h3) !important; }
+.chat-bubble-ai h4, .message-bubble h4, .bubble h4, #messages .prose h4, #chatArea .prose h4 { font-size: var(--chat-font-size-h4) !important; }
+
+/* Tables inside chat bubbles */
+.chat-bubble-ai table,
+.message-bubble table,
+.bubble table,
+.timeline-item table,
+#messages table,
+#chatArea table {
+    font-size: calc(var(--chat-font-size) * 0.93) !important;
+}
+
+/* KaTeX math formulas scale naturally */
+.chat-bubble-ai .katex,
+.message-bubble .katex,
+.bubble .katex,
+#messages .katex {
+    font-size: calc(var(--chat-font-size) * 1.05) !important;
+}
+
+/* ==========================================================================
+   Adopted from /Users/subuhkurniawan/liquid_glass (AetherOS & Eduvis-UI)
+   XOR Specular Mask, Material Tiers, Micro-Interactions, & AI Primitives
+   ========================================================================== */
+
+.liquid-glass-card,
+.eduvis-glass-surface {
+    position: relative;
+    backdrop-filter: blur(var(--glass-blur, 30px)) saturate(var(--glass-saturate, 200%));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 30px)) saturate(var(--glass-saturate, 200%));
+    border-radius: var(--eduvis-radius-card, 20px);
+    transform-style: preserve-3d;
+    will-change: transform, box-shadow;
+    transition: background 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.liquid-glass-card::before,
+.eduvis-glass-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, calc(0.42 * var(--specular-intensity, 1))) 0%,
+        rgba(255, 255, 255, calc(0.12 * var(--specular-intensity, 1))) 35%,
+        rgba(255, 255, 255, 0.02) 70%,
+        rgba(255, 255, 255, calc(0.25 * var(--specular-intensity, 1))) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+    transition: opacity 0.35s ease;
+}
+
+.liquid-glass-card .specular-sheen,
+.eduvis-glass-surface .specular-sheen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle 320px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, calc(0.12 * var(--specular-intensity, 1))),
+        transparent 75%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.liquid-glass-card:hover .specular-sheen,
+.eduvis-glass-surface:hover .specular-sheen {
+    opacity: 1;
+}
+
+/* Apple HIG Material Thickness Tiers */
+.material-ultra-thin {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+.material-thin {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.material-regular {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(34px) saturate(200%);
+    -webkit-backdrop-filter: blur(34px) saturate(200%);
+}
+
+.material-thick {
+    background: rgba(22, 27, 44, 0.88);
+    backdrop-filter: blur(48px) saturate(220%);
+    -webkit-backdrop-filter: blur(48px) saturate(220%);
+}
+
+/* Micro-Interactions: Cursor Spotlight, Magnetic Pull, Ripple, Glow, Shimmer */
+.cursor-spotlight-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(
+        700px circle at var(--spotlight-x, 50vw) var(--spotlight-y, 50vh),
+        rgba(var(--accent-rgb, 10, 132, 255), 0.09),
+        rgba(175, 82, 222, 0.04) 40%,
+        transparent 80%
+    );
+    opacity: 0.85;
+    transition: opacity 0.4s ease;
+}
+
+.ripple-target {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: scale(0);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.1) 60%, transparent 100%);
+    animation: rippleSpread 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    z-index: 10;
+}
+
+@keyframes rippleSpread {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(3.5); opacity: 0; }
+}
+
+.magnetic-btn {
+    will-change: transform;
+    transform-style: preserve-3d;
+}
+
+.border-glow-card {
+    position: relative;
+}
+
+.border-glow-card::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: radial-gradient(
+        280px circle at var(--glow-x, 50%) var(--glow-y, 50%),
+        rgba(255, 255, 255, calc(0.6 * var(--specular-intensity, 1))),
+        rgba(var(--accent-rgb, 10, 132, 255), 0.35) 30%,
+        transparent 70%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 2;
+}
+
+.border-glow-card:hover::after {
+    opacity: 1;
+}
+
+.skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 50%, transparent 100%);
+    animation: shimmerSweep 1.6s infinite ease-in-out;
+    z-index: 5;
+}
+
+@keyframes shimmerSweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Eduvis-UI AI Primitives */
+.eduvis-ai-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: rgba(22, 26, 44, 0.75);
+    backdrop-filter: blur(var(--glass-blur, 28px)) saturate(var(--glass-saturate, 200%));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 28px)) saturate(var(--glass-saturate, 200%));
+    border: 1px solid rgba(175, 82, 222, 0.35);
+    border-radius: var(--eduvis-radius-capsule, 9999px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 10px 30px -5px rgba(175, 82, 222, 0.25);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.eduvis-ai-sparkle-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--eduvis-ai-copilot, #a855f7);
+}
+
+.eduvis-ai-streaming-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: var(--eduvis-radius-capsule, 9999px);
+    background: rgba(175, 82, 222, 0.15);
+    border: 1px solid rgba(175, 82, 222, 0.35);
+    color: #d8b4fe;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.eduvis-ai-pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--eduvis-ai-copilot, #a855f7);
+    box-shadow: 0 0 8px var(--eduvis-ai-copilot, #a855f7);
+}
+
+.eduvis-ai-token-chip {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px;
+    color: #94a3b8;
+    padding: 2px 7px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ripple-wave,
+    .skeleton-shimmer::after {
+        animation: none !important;
+    }
+    .liquid-glass-card,
+    .eduvis-glass-surface,
+    .magnetic-btn {
+        transition: none !important;
+    }
+}
+
+
+
+
+

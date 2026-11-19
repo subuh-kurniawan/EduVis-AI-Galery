@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#080c16">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="description" content="Portal orkestrasi asisten AI lokal Gemma 4 berstandar enterprise: inferensi on-device, privasi penuh, dan workspace spesialis.">
+    <link rel="icon" type="image/svg+xml" href="nano_asset/assets/eduvis-icon.svg">
+    <link rel="icon" type="image/png" href="nano_asset/assets/app_icon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <title>Gemma 4 Enterprise AI Platform · Local Intelligence Suite</title>
+    
+    <!-- Local Boxicons -->
+    <link rel="stylesheet" href="nano_asset/assets/css/boxicons.min.css">
+    <link rel="stylesheet" href="nano_asset/assets/css/ai-renderers.css">
+    <script src="nano_asset/assets/js/chat-font-size.js" defer></script>
+    <script src="nano_asset/assets/js/eduvis-liquid-engine.js" defer></script>
+    <script src="nano_asset/assets/js/liquid-glass-webgl.js" defer></script>
+
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            src: url('nano_asset/assets/fonts/inter-400.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Jakarta';
+            src: url('nano_asset/assets/fonts/jakarta-400.woff2') format('woff2');
+            font-weight: 400 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-base: #060911;
+            --bg-surface: #0a0f1d;
+            --bg-card: rgba(13, 20, 36, 0.72);
+            --bg-card-hover: rgba(18, 28, 49, 0.86);
+            --border-subtle: rgba(148, 163, 184, 0.12);
+            --border-medium: rgba(148, 163, 184, 0.22);
+            --border-focus: rgba(96, 165, 250, 0.5);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.35);
+            --accent-live: #ec4899;
+            --accent-live-glow: rgba(236, 72, 153, 0.3);
+            --corporate-blue: #2563eb;
+            --corporate-navy: #0f172a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 10px;
+            --shadow-card: 0 16px 40px -12px rgba(0, 0, 0, 0.56);
+            --shadow-glow: 0 0 35px -5px rgba(56, 189, 248, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            font-family: 'Jakarta', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(ellipse 90% 60% at 50% -15%, rgba(37, 99, 235, 0.18), transparent 70%),
+                radial-gradient(circle 600px at 85% 20%, rgba(56, 189, 248, 0.08), transparent 60%),
+                radial-gradient(circle 500px at 15% 65%, rgba(168, 85, 247, 0.07), transparent 60%),
+                linear-gradient(180deg, var(--bg-base) 0%, #080d19 40%, var(--bg-base) 100%);
+            background-attachment: fixed;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font: inherit;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .shell {
+            width: min(100% - 2.5rem, 1260px);
+            margin-inline: auto;
+        }
+
+        /* Topbar Header */
+        .topbar-wrap {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(8, 12, 22, 0.72);
+            backdrop-filter: blur(28px) saturate(200%);
+            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.14), 0 12px 32px rgba(0, 0, 0, 0.28);
+            transition: border-color 0.3s ease;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 74px;
+            gap: 1.25rem;
+        }
+
+        .brand-cluster {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .brand-logo {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 2.6rem;
+            height: 2.6rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.4), rgba(56, 189, 248, 0.2));
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+            color: #ffffff;
+            font-size: 1.35rem;
+            overflow: hidden;
+        }
+
+        .brand-logo::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            transform: translateX(-100%);
+            animation: brandShine 4s infinite ease-in-out;
+        }
+
+        @keyframes brandShine {
+            0%, 70% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #f8fafc;
+        }
+
+        .brand-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: var(--primary);
+        }
+
+        .brand-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: -0.01em;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .telemetry-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.48rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.28);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: #d1fae5;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pulse {
+            position: relative;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+        }
+
+        .status-pulse::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 1px solid var(--success);
+            animation: pulseWave 2s infinite ease-out;
+        }
+
+        @keyframes pulseWave {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.52rem 1.05rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.09);
+            border-color: var(--border-medium);
+            transform: translateY(-1px);
+        }
+
+        .nav-btn.primary {
+            background: linear-gradient(135deg, #2563eb, #0284c7);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #ffffff;
+            box-shadow: 0 4px 18px rgba(37, 99, 235, 0.32);
+        }
+
+        .nav-btn.primary:hover {
+            box-shadow: 0 6px 24px rgba(37, 99, 235, 0.48);
+            border-color: rgba(56, 189, 248, 0.8);
+        }
+
+        /* Hero Section */
+        .hero {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 3rem;
+            align-items: center;
+            padding: clamp(2.5rem, 5vw, 4.5rem) 0 clamp(2rem, 4vw, 3.5rem);
+            position: relative;
+        }
+
+        .eyebrow-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.42rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(96, 165, 250, 0.28);
+            color: #93c5fd;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            margin-bottom: 1.15rem;
+        }
+
+        .eyebrow-chip i {
+            font-size: 0.95rem;
+            color: var(--primary);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 4.2vw, 3.8rem);
+            line-height: 1.08;
+            letter-spacing: -0.04em;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, #ffffff 30%, #93c5fd 75%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-lead {
+            font-size: clamp(1rem, 1.4vw, 1.12rem);
+            line-height: 1.7;
+            color: var(--text-muted);
+            max-width: 580px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.2rem;
+        }
+
+        .btn-corporate-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.85rem 1.6rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            color: #ffffff;
+            font-size: 0.92rem;
+            font-weight: 700;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 10px 28px rgba(14, 165, 233, 0.3);
+            transition: all 0.25s ease;
+        }
+
+        .btn-corporate-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 34px rgba(14, 165, 233, 0.45);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-corporate-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.85rem 1.5rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.16), rgba(168, 85, 247, 0.18));
+            color: #fbcfe8;
+            font-size: 0.92rem;
+            font-weight: 700;
+            border: 1px solid rgba(236, 72, 153, 0.4);
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.18);
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-corporate-live:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.26), rgba(168, 85, 247, 0.28));
+            border-color: rgba(236, 72, 153, 0.7);
+            box-shadow: 0 12px 30px rgba(236, 72, 153, 0.32);
+            color: #ffffff;
+        }
+
+        .live-indicator-dot {
+            width: 0.55rem;
+            height: 0.55rem;
+            border-radius: 50%;
+            background: #f43f5e;
+            box-shadow: 0 0 10px #f43f5e;
+            animation: liveBlink 1.4s infinite ease-in-out;
+        }
+
+        @keyframes liveBlink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(0.8); }
+        }
+
+        .btn-corporate-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.4rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            font-size: 0.92rem;
+            font-weight: 600;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s ease;
+        }
+
+        .btn-corporate-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-medium);
+            transform: translateY(-1px);
+        }
+
+        .assurance-strip {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .assurance-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .assurance-item i {
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        /* Hero Right: Mission Control Glass Deck */
+        .telemetry-deck {
+            position: relative;
+            background: linear-gradient(175deg, rgba(17, 24, 39, 0.82) 0%, rgba(10, 15, 27, 0.88) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 24px;
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.24), inset 0 -1px 0 0 rgba(255, 255, 255, 0.05), var(--shadow-card), 0 0 45px rgba(37, 99, 235, 0.12);
+            overflow: hidden;
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
+        }
+
+        .deck-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem 1.2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .mac-dots {
+            display: flex;
+            gap: 0.42rem;
+        }
+
+        .mac-dot {
+            width: 0.68rem;
+            height: 0.68rem;
+            border-radius: 50%;
+        }
+        .mac-dot.close { background: #ef4444; opacity: 0.85; }
+        .mac-dot.min { background: #f59e0b; opacity: 0.85; }
+        .mac-dot.max { background: #10b981; opacity: 0.85; }
+
+        .deck-title {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .deck-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.15rem;
+        }
+
+        .terminal-block {
+            background: rgba(6, 10, 19, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .term-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .term-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.18rem 0.5rem;
+            border-radius: 6px;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .term-tag.user {
+            background: rgba(37, 99, 235, 0.25);
+            color: #93c5fd;
+            border: 1px solid rgba(37, 99, 235, 0.4);
+        }
+
+        .term-tag.gemma {
+            background: rgba(56, 189, 248, 0.2);
+            color: #7dd3fc;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+
+        .term-tag.live {
+            background: rgba(236, 72, 153, 0.22);
+            color: #f472b6;
+            border: 1px solid rgba(236, 72, 153, 0.45);
+        }
+
+        .term-content {
+            color: #e2e8f0;
+        }
+
+        .metrics-grid-compact {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .metric-mini-card {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 0.75rem 0.85rem;
+            text-align: left;
+        }
+
+        .metric-mini-card .val {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .metric-mini-card .lbl {
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 0.2rem;
+        }
+
+        /* Workspaces Section */
+        .workspaces-section {
+            padding: 3.5rem 0 2rem;
+            position: relative;
+        }
+
+        .section-header-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .section-headline h2 {
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            letter-spacing: -0.03em;
+            font-weight: 800;
+            color: #ffffff;
+            margin-top: 0.35rem;
+        }
+
+        .section-headline p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 580px;
+            margin-top: 0.35rem;
+        }
+
+        /* Filter Tabs & Search Bar */
+        .workspace-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.8rem;
+        }
+
+        .filter-tabs {
+            display: inline-flex;
+            background: rgba(13, 20, 36, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+            padding: 0.32rem;
+            gap: 0.25rem;
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        }
+
+        .filter-tab {
+            padding: 0.45rem 0.95rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .filter-tab:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-tab.active {
+            background: rgba(37, 99, 235, 0.26);
+            color: #bfdbfe;
+            border: 1px solid rgba(56, 189, 248, 0.38);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+        }
+
+        .search-box-wrap {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+            min-width: 200px;
+        }
+
+        .search-box-wrap i {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.52rem 0.9rem 0.52rem 2.35rem;
+            background: rgba(13, 20, 36, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+            color: #ffffff;
+            font-size: 0.82rem;
+            outline: none;
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            background: rgba(18, 28, 49, 0.95);
+        }
+
+        /* Workspace Grid - Premium Corporate Cards */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .ws-card {
+            display: flex;
+            flex-direction: column;
+            border-radius: 24px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.24), inset 0 -1px 0 0 rgba(255, 255, 255, 0.05), var(--shadow-card);
+            overflow: hidden;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                        border-color 0.25s ease, 
+                        box-shadow 0.25s ease;
+            position: relative;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .ws-card:hover,
+        .ws-card:focus-visible {
+            transform: translateY(-4px);
+            border-color: var(--border-focus);
+            box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.65), 0 0 30px rgba(56, 189, 248, 0.16);
+            background: var(--bg-card-hover);
+            outline: none;
+        }
+
+        /* Live Highlight Card Styling */
+        .ws-card.featured-live {
+            border-color: rgba(236, 72, 153, 0.38);
+            background: linear-gradient(180deg, rgba(23, 18, 38, 0.85) 0%, rgba(13, 16, 31, 0.9) 100%);
+            box-shadow: var(--shadow-card), 0 0 35px rgba(236, 72, 153, 0.12);
+        }
+
+        .ws-card.featured-live:hover {
+            border-color: rgba(244, 114, 182, 0.7);
+            box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.7), 0 0 45px rgba(236, 72, 153, 0.28);
+        }
+
+        .ws-card--liquid,
+        .ws-card--aurora {
+            --ws-accent: #38bdf8;
+            --ws-accent-soft: rgba(56, 189, 248, 0.16);
+            border-color: rgba(56, 189, 248, 0.3);
+            background: linear-gradient(155deg, rgba(10, 28, 48, 0.96), rgba(13, 20, 36, 0.92) 58%, rgba(25, 16, 49, 0.9));
+        }
+
+        .ws-card--aurora {
+            --ws-accent: #a78bfa;
+            --ws-accent-soft: rgba(167, 139, 250, 0.16);
+            border-color: rgba(167, 139, 250, 0.32);
+            background: linear-gradient(155deg, rgba(25, 20, 52, 0.96), rgba(13, 20, 36, 0.92) 58%, rgba(14, 37, 57, 0.9));
+        }
+
+        .ws-card--liquid:hover,
+        .ws-card--liquid:focus-visible,
+        .ws-card--aurora:hover,
+        .ws-card--aurora:focus-visible {
+            border-color: var(--ws-accent);
+            box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.7), 0 0 34px var(--ws-accent-soft);
+        }
+
+        .ws-preview-frame {
+            position: relative;
+            aspect-ratio: 16 / 9.4;
+            margin: 0.65rem 0.65rem 0;
+            border-radius: 16px;
+            background: #0d1322;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+        }
+
+        .ws-preview-chat {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 27% minmax(0, 1fr);
+            gap: 1px;
+            background: rgba(148, 163, 184, 0.16);
+            color: #e2e8f0;
+            font: 500 clamp(0.45rem, 0.8vw, 0.7rem)/1.4 'Inter', sans-serif;
+        }
+
+        .ws-preview-chat-side {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 8% 7%;
+            background: #131919;
+        }
+
+        .ws-preview-chat-side span {
+            height: 0.42rem;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.24);
+        }
+
+        .ws-preview-chat-side span:first-child {
+            width: 75%;
+            margin-bottom: 0.45rem;
+            background: rgba(67, 196, 186, 0.8);
+        }
+
+        .ws-preview-chat-main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 7%;
+            padding: 7% 9%;
+            background: #1b1e1e;
+        }
+
+        .ws-preview-chat-main span {
+            width: 73%;
+            padding: 2.5% 4%;
+            border-radius: 8px;
+            background: #2a2f2f;
+        }
+
+        .ws-preview-chat-main span:nth-child(2) {
+            width: 58%;
+            align-self: flex-end;
+            background: #0b7a75;
+        }
+
+        .ws-preview-chat-main span:last-child {
+            width: 84%;
+        }
+
+        .ws-preview-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            transition: transform 0.4s ease, filter 0.4s ease;
+            filter: brightness(0.92) contrast(1.04);
+        }
+
+        .ws-card:hover .ws-preview-frame img {
+            transform: scale(1.04);
+            filter: brightness(1) contrast(1.05);
+        }
+
+        .ws-preview-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(6, 9, 17, 0.1) 0%, rgba(10, 15, 27, 0.88) 100%);
+            pointer-events: none;
+        }
+
+        .ws-card--liquid .ws-preview-frame::before,
+        .ws-card--aurora .ws-preview-frame::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.28;
+            background:
+                linear-gradient(135deg, transparent 0 54%, var(--ws-accent-soft) 54.2%, transparent 54.7%),
+                repeating-linear-gradient(0deg, transparent 0 5px, rgba(255, 255, 255, 0.035) 6px, transparent 7px);
+            mix-blend-mode: screen;
+        }
+
+        .ws-card--liquid .ws-preview-frame::after,
+        .ws-card--aurora .ws-preview-frame::after {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            height: 2px;
+            z-index: 3;
+            background: linear-gradient(90deg, transparent, var(--ws-accent), #c4b5fd, transparent);
+            box-shadow: 0 0 16px var(--ws-accent);
+            pointer-events: none;
+        }
+
+        .ws-badge-top {
+            position: absolute;
+            top: 0.9rem;
+            left: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.32rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+            z-index: 2;
+        }
+
+        .ws-badge-top.default {
+            background: rgba(10, 15, 28, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #e2e8f0;
+        }
+
+        .ws-card--liquid .ws-badge-top.default,
+        .ws-card--aurora .ws-badge-top.default {
+            border-color: var(--ws-accent);
+            color: #f8fafc;
+            box-shadow: 0 0 18px var(--ws-accent-soft), inset 0 0 12px var(--ws-accent-soft);
+        }
+
+        .ws-badge-top.live-badge {
+            background: rgba(225, 29, 72, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(225, 29, 72, 0.6);
+        }
+
+        .ws-category-tag {
+            position: absolute;
+            bottom: 0.9rem;
+            left: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #93c5fd;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 0.3rem 0.65rem;
+            border-radius: 6px;
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            backdrop-filter: blur(8px);
+            z-index: 2;
+        }
+
+        .ws-card--liquid .ws-category-tag,
+        .ws-card--aurora .ws-category-tag {
+            color: #f8fafc;
+            border-color: var(--ws-accent);
+            box-shadow: 0 0 16px var(--ws-accent-soft);
+        }
+
+        .ws-content {
+            padding: 1.35rem 1.4rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .ws-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ws-title {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+
+        .ws-arrow {
+            display: grid;
+            place-items: center;
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .ws-card:hover .ws-arrow {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #041226;
+            transform: translateX(3px);
+        }
+
+        .ws-card--liquid:hover .ws-arrow,
+        .ws-card--liquid:focus-visible .ws-arrow,
+        .ws-card--aurora:hover .ws-arrow,
+        .ws-card--aurora:focus-visible .ws-arrow {
+            background: var(--ws-accent);
+            border-color: var(--ws-accent);
+            color: #07111f;
+        }
+
+        .ws-card.featured-live:hover .ws-arrow {
+            background: var(--accent-live);
+            border-color: var(--accent-live);
+            color: #ffffff;
+        }
+
+        .ws-desc {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 1.15rem;
+            flex: 1;
+        }
+
+        .ws-caps-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .cap-pill {
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 0.22rem 0.58rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            letter-spacing: 0.02em;
+        }
+
+        /* Pillars Section */
+        .pillars-section {
+            padding: 3.5rem 0 2rem;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 2rem;
+        }
+
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 1.35rem;
+            margin-top: 2rem;
+        }
+
+        .pillar-card {
+            background: rgba(13, 20, 36, 0.55);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.5rem 1.35rem;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .pillar-card:hover {
+            border-color: rgba(96, 165, 250, 0.35);
+            background: rgba(18, 28, 49, 0.7);
+        }
+
+        .pillar-icon-box {
+            display: grid;
+            place-items: center;
+            width: 2.85rem;
+            height: 2.85rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(56, 189, 248, 0.12));
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            font-size: 1.35rem;
+            color: var(--primary);
+            margin-bottom: 1.15rem;
+        }
+
+        .pillar-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.55rem;
+            letter-spacing: -0.02em;
+        }
+
+        .pillar-card p {
+            font-size: 0.84rem;
+            line-height: 1.65;
+            color: var(--text-muted);
+        }
+
+        /* Enterprise LAN Notice */
+        .enterprise-notice {
+            margin: 2.5rem 0 1rem;
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.08) 0%, rgba(13, 20, 36, 0.8) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.24);
+            border-left: 4px solid var(--warning);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .notice-icon {
+            font-size: 1.4rem;
+            color: var(--warning);
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+        }
+
+        .notice-content h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fef3c7;
+            margin-bottom: 0.35rem;
+        }
+
+        .notice-content p {
+            font-size: 0.83rem;
+            line-height: 1.65;
+            color: #e2e8f0;
+        }
+
+        .notice-content a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        /* Enterprise Stat Bar */
+        .stat-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+            margin: 2.5rem 0 1rem;
+            padding: 1.5rem;
+            background: rgba(13, 20, 36, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+        }
+
+        .stat-item {
+            text-align: left;
+            padding-left: 0.5rem;
+            border-left: 2px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .stat-item .num {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        .stat-item .desc {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 0.35rem;
+        }
+
+        /* Footer */
+        .footer-wrap {
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 4rem;
+            padding: 2.2rem 0 3rem;
+            background: rgba(6, 9, 17, 0.9);
+        }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            flex-wrap: wrap;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* Corporate Modals */
+        dialog {
+            border: none;
+            background: transparent;
+        }
+
+        dialog::backdrop {
+            background: rgba(4, 7, 15, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .modal-card {
+            background: linear-gradient(180deg, #0f172a 0%, #090d19 100%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 24px;
+            box-shadow: 0 32px 90px rgba(0, 0, 0, 0.75), 0 0 40px rgba(37, 99, 235, 0.15);
+            color: var(--text-main);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 1.1rem;
+            right: 1.1rem;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            display: grid;
+            place-items: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        /* Developer Modal */
+        .developer-modal {
+            width: min(100% - 2rem, 30rem);
+            margin: auto;
+        }
+
+        .developer-card-content {
+            padding: 2.5rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .developer-avatar-wrap {
+            position: relative;
+            width: 7.8rem;
+            height: 7.8rem;
+            margin: 0 auto 1.35rem;
+        }
+
+        .developer-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center 24%;
+            border: 3px solid rgba(56, 189, 248, 0.6);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.35);
+        }
+
+        .avatar-verified {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 1.8rem;
+            height: 1.8rem;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #ffffff;
+            display: grid;
+            place-items: center;
+            font-size: 1rem;
+            border: 2px solid #0f172a;
+        }
+
+        .dev-name {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+
+        .dev-role {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 0.25rem;
+        }
+
+        .dev-bio {
+            font-size: 0.86rem;
+            line-height: 1.65;
+            color: var(--text-muted);
+            margin: 1.15rem 0 1.5rem;
+        }
+
+        .dev-tags {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Guide Modal */
+        .guide-modal {
+            width: min(100% - 2rem, 48rem);
+            max-height: 88vh;
+            margin: auto;
+        }
+
+        .guide-container {
+            padding: 2.2rem 2.2rem 1.8rem;
+            max-height: 88vh;
+            overflow-y: auto;
+        }
+
+        .guide-steps-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.6rem 0;
+        }
+
+        .guide-step-card {
+            display: grid;
+            grid-template-columns: 2.5rem 1fr;
+            gap: 1.1rem;
+            padding: 1.1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            transition: border-color 0.2s ease;
+        }
+
+        .guide-step-card:hover {
+            border-color: rgba(56, 189, 248, 0.35);
+        }
+
+        .step-num-badge {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(56, 189, 248, 0.15));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #93c5fd;
+            font-weight: 800;
+            font-size: 1rem;
+            display: grid;
+            place-items: center;
+        }
+
+        .guide-step-content h4 {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.35rem;
+        }
+
+        .guide-step-content p {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .guide-step-content code {
+            padding: 0.15rem 0.4rem;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #93c5fd;
+            font-size: 0.8rem;
+        }
+
+        .guide-footer-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+            .telemetry-deck {
+                max-width: 600px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            .stat-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                min-height: 64px;
+            }
+            .telemetry-pill {
+                display: none;
+            }
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+            .stat-bar {
+                grid-template-columns: 1fr;
+            }
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-corporate-primary,
+            .btn-corporate-live,
+            .btn-corporate-secondary {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor-spotlight-layer" aria-hidden="true"></div>
+    <!-- Topbar Navigation -->
+    <header class="topbar-wrap">
+        <div class="shell topbar">
+            <a class="brand-cluster" href="index.html" aria-label="Gemma 4 Enterprise AI Platform Beranda">
+                <div class="brand-logo" aria-hidden="true">
+                    <img src="nano_asset/assets/app_icon.png" alt="EduVis AI Gallery" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                </div>
+                <div class="brand-info">
+                    <div class="brand-title">
+                        <span>Gemma 4</span>
+                        <span class="brand-badge">ENTERPRISE</span>
+                    </div>
+                    <span class="brand-sub"><span>EduVis AI Gallery</span> · Local Intelligence Platform</span>
+                </div>
+            </a>
+
+            <div class="topbar-right">
+                <div class="telemetry-pill" title="Koneksi lokal aktif, 0 byte egress">
+                    <span class="status-pulse" aria-hidden="true"></span>
+                    <span>100% On-Device Node</span>
+                </div>
+                <button class="nav-btn magnetic-btn ripple-target" id="guide-open" type="button" aria-haspopup="dialog" aria-controls="guide-modal">
+                    <i class='bx bx-book-open'></i>
+                    <span>Petunjuk</span>
+                </button>
+                <button class="nav-btn magnetic-btn ripple-target" id="developer-open" type="button" aria-haspopup="dialog" aria-controls="developer-modal">
+                    <i class='bx bx-user'></i>
+                    <span>Developer</span>
+                </button>
+                <a class="nav-btn primary magnetic-btn ripple-target" href="utama.html">
+                    <span>Mulai</span>
+                    <i class='bx bx-right-arrow-alt'></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="shell">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div>
+                <div class="eyebrow-chip">
+                    <i class='bx bx-shield-quarter'></i>
+                    <span>Enterprise Sovereign AI · Zero Data Egress</span>
+                </div>
+                <h1>
+                    Kecerdasan Buatan Korporat <span class="gradient-text">On-Device & Multi-Modal.</span>
+                </h1>
+                <p class="hero-lead">
+                    Portal terpadu model Gemma 4 dan Qwen dengan inferensi hardware-accelerated di browser Anda. Kedaulatan data 100% aman di lingkungan lokal dengan latensi ultra-rendah untuk alur kerja eksekutif, rekayasa kode, hingga interaksi suara & video real-time.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn-corporate-primary magnetic-btn ripple-target" href="utama.html">
+                        <i class='bx bx-grid-alt'></i>
+                        <span>Buka Workspace Utama</span>
+                    </a>
+                    <a class="btn-corporate-live magnetic-btn ripple-target" href="gemini_live.html">
+                        <span class="live-indicator-dot"></span>
+                        <i class='bx bx-podcast'></i>
+                        <span>Buka EduVis Live</span>
+                    </a>
+                    <button class="btn-corporate-secondary magnetic-btn ripple-target" id="guide-open-secondary" type="button">
+                        <i class='bx bx-help-circle'></i>
+                        <span>Panduan Setup</span>
+                    </button>
+                </div>
+
+                <div class="assurance-strip">
+                    <div class="assurance-item">
+                        <i class='bx bx-check-shield'></i>
+                        <span>Zero External API Leakage</span>
+                    </div>
+                    <div class="assurance-item">
+                        <i class='bx bx-chip'></i>
+                        <span>WebGPU & XNNPACK Engine</span>
+                    </div>
+                    <div class="assurance-item">
+                        <i class='bx bx-hdd'></i>
+                        <span>OPFS Multi-Tier Cache</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Corporate Mission Control Telemetry Deck -->
+            <div class="telemetry-deck liquid-glass-card border-glow-card" aria-label="Status Node & Telemetri Model">
+                <div class="deck-header">
+                    <div class="mac-dots">
+                        <span class="mac-dot close"></span>
+                        <span class="mac-dot min"></span>
+                        <span class="mac-dot max"></span>
+                    </div>
+                    <div class="deck-title">
+                        <i class='bx bx-pulse'></i>
+                        <span>Kernel Runtime Monitor</span>
+                    </div>
+                    <span style="font-size: 0.68rem; color: var(--success); font-weight: 700;">LIVE</span>
+                </div>
+
+                <div class="deck-body">
+                    <div class="terminal-block">
+                        <div class="term-row">
+                            <span class="term-tag user">Enterprise</span>
+                            <div class="term-content">Status orkestrasi inferensi lokal dan pipeline multimodal?</div>
+                        </div>
+                        <div class="term-row">
+                            <span class="term-tag gemma">Gemma 4</span>
+                            <div class="term-content">Runtime aktif. Akselerator WebGPU terkoneksi. Bobot model di-cache dalam OPFS. Mode multimodal siap eksekusi.</div>
+                        </div>
+                        <div class="term-row">
+                            <span class="term-tag live">EduVis Live</span>
+                            <div class="term-content">Audio duplex & visual stream siap digunakan via <code>gemini_live.html</code>.</div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-grid-compact">
+                        <div class="metric-mini-card">
+                            <div class="val">0 <span style="font-size: 0.75rem; color: var(--success);">ms</span></div>
+                            <div class="lbl">Cloud Egress</div>
+                        </div>
+                        <div class="metric-mini-card">
+                            <div class="val">8 <span style="font-size: 0.75rem; color: var(--primary);">Modules</span></div>
+                            <div class="lbl">Workspaces</div>
+                        </div>
+                        <div class="metric-mini-card">
+                            <div class="val">100%</div>
+                            <div class="lbl">Data Privacy</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workspaces Section -->
+        <section class="workspaces-section" id="workspaces" aria-labelledby="workspace-title">
+            <div class="section-header-row">
+                <div class="section-headline">
+                    <span class="eyebrow-chip">
+                        <i class='bx bx-layer'></i>
+                        <span>Dedicated Workspaces</span>
+                    </span>
+                    <h2 id="workspace-title">Spesialisasi Alur Kerja AI Korporat</h2>
+                    <p>Pilih antarmuka teroptimasi sesuai tugas Anda. Seluruh modul berbagi kernel memori dan runtime lokal yang sama.</p>
+                </div>
+            </div>
+
+            <!-- Filter Tabs & Real-time Search -->
+            <div class="workspace-controls">
+                <div class="filter-tabs" role="tablist">
+                    <button class="filter-tab active" data-filter="all" type="button">Semua (8)</button>
+                    <button class="filter-tab" data-filter="live" type="button">Multimodal & Live</button>
+                    <button class="filter-tab" data-filter="reasoning" type="button">Executive Core</button>
+                    <button class="filter-tab" data-filter="code" type="button">Engineering & IDE</button>
+                    <button class="filter-tab" data-filter="docs" type="button">Document RAG</button>
+                </div>
+
+                <div class="search-box-wrap">
+                    <i class='bx bx-search'></i>
+                    <input class="search-input" id="ws-search" type="search" placeholder="Cari modul atau kapabilitas..." aria-label="Cari workspace">
+                </div>
+            </div>
+
+            <!-- Workspace 8 Cards Grid -->
+            <div class="workspace-grid" id="workspace-grid">
+                
+                <!-- 1. NEW GEMINI LIVE CARD (FEATURED) -->
+                <a class="ws-card liquid-glass-card border-glow-card featured-live" data-category="live" data-search="eduvis live gemini live multimodal audio voice real-time suara kamera video" data-app-page="gemini_live.html" href="gemini_live.html">
+                    <div class="ws-preview-frame">
+                        <img src="nano_asset/assets/landing-live.jpg" alt="Pratinjau antarmuka EduVis Live Multimodal" loading="lazy" onerror="this.src='nano_asset/assets/landing-utama.jpg'">
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top live-badge">
+                            <span class="live-indicator-dot"></span>
+                            <span>BARU · MULTIMODAL REAL-TIME</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-podcast'></i>
+                            <span>Voice & Vision Stream</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">EduVis Live Multimodal</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Interaksi audio dua arah (full-duplex) dan streaming inspeksi visual kamera/layar secara instan tanpa latensi cloud. Dirancang untuk diskusi langsung, konsultasi interaktif, dan analisis multimodal.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill" style="border-color: rgba(236, 72, 153, 0.4); color: #fbcfe8;">Audio Real-time</span>
+                            <span class="cap-pill" style="border-color: rgba(236, 72, 153, 0.4); color: #fbcfe8;">Vision Multimodal</span>
+                            <span class="cap-pill">Low Latency</span>
+                            <span class="cap-pill">Duplex Dialog</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 2. UTAMA EXECUTIVE -->
+                <a class="ws-card liquid-glass-card border-glow-card" data-category="reasoning" data-search="utama executive chat gemma qwen litert-lm model manager pengaturan" data-app-page="utama.html" href="utama.html">
+                    <div class="ws-preview-frame">
+                        <img src="nano_asset/assets/landing-utama.jpg" alt="Pratinjau antarmuka Workspace Utama" loading="lazy">
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top default">
+                            <span>Pusat Kendali</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-brain'></i>
+                            <span>Executive Core</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">Utama Executive</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Ruang percakapan flagship dengan orkestrasi model on-device, manajemen memori LiteRT-LM, kendali bobot model lokal, dan parameter penalaran mendalam.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill">Model Manager</span>
+                            <span class="cap-pill">LiteRT-LM Engine</span>
+                            <span class="cap-pill">Deep Reasoning</span>
+                            <span class="cap-pill">Full Parameter Control</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 3. VS CODE STUDIO -->
+                <a class="ws-card liquid-glass-card border-glow-card" data-category="code" data-search="vs code coding ide programmer debug refactor syntax sandbox" data-app-page="VS.html" href="VS.html">
+                    <div class="ws-preview-frame">
+                        <img src="nano_asset/assets/landing-vs.jpg" alt="Pratinjau antarmuka Workspace VS" loading="lazy">
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top default">
+                            <span>Developer Grade</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-code-alt'></i>
+                            <span>IDE Studio</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">VS Code Studio</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Lingkungan kerja rekayasa kode dengan editor split-screen, pembuat boilerplate instan, inspeksi sintaks, isolasi sandbox, dan refactoring algoritma cerdas.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill">Syntax Sandbox</span>
+                            <span class="cap-pill">Multi-Language</span>
+                            <span class="cap-pill">Diff Inspection</span>
+                            <span class="cap-pill">Fast Iteration</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 4. CLAUDE EDITORIAL STUDIO -->
+                <a class="ws-card liquid-glass-card border-glow-card" data-category="reasoning" data-search="claude editorial naskah penulisan strategi analisis riset" data-app-page="claude.html" href="claude.html">
+                    <div class="ws-preview-frame">
+                        <img src="nano_asset/assets/landing-claude.jpg" alt="Pratinjau antarmuka Workspace Claude" loading="lazy">
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top default">
+                            <span>Deep Thought</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-edit-alt'></i>
+                            <span>Editorial & Strategy</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">Claude Editorial Studio</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Antarmuka minimalis elegan bertipografi tinggi untuk sintesis dokumen eksekutif, perumusan memo strategi korporat, dan penalaran bertahap tanpa distraksi.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill">Long-Form Synthesis</span>
+                            <span class="cap-pill">Strategic Memo</span>
+                            <span class="cap-pill">Distraction-Free</span>
+                            <span class="cap-pill">High Fidelity</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 5. TANYA AI STANDALONE -->
+                <a class="ws-card liquid-glass-card border-glow-card" data-category="reasoning" data-search="tanya ai standalone chat percakapan openai compatible endpoint file lampiran gambar teks dikte suara riwayat" data-app-page="tanya-ai-standalone.html" href="tanya-ai-standalone.html">
+                    <div class="ws-preview-frame">
+                        <div class="ws-preview-chat" aria-hidden="true">
+                            <div class="ws-preview-chat-side"><span></span><span></span><span></span><span></span></div>
+                            <div class="ws-preview-chat-main"><span>Tanya apa saja...</span><span>Jelaskan topik ini</span><span>Berikut penjelasannya dengan langkah yang mudah diikuti.</span></div>
+                        </div>
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top default">
+                            <span>ASISTEN CHAT</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-message-rounded-dots'></i>
+                            <span>Percakapan AI</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">Tanya AI Standalone</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Asisten percakapan mandiri dengan riwayat lokal, streaming jawaban, lampiran teks dan gambar, dikte suara, serta pengaturan endpoint AI yang kompatibel dengan OpenAI.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill">Chat Streaming</span>
+                            <span class="cap-pill">Lampiran & Vision</span>
+                            <span class="cap-pill">Riwayat Lokal</span>
+                            <span class="cap-pill">Endpoint Fleksibel</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 6. UTAMA V2 / LIQUID CHATBOT -->
+                <a class="ws-card liquid-glass-card border-glow-card" data-category="docs" data-search="liquid chatbot utamaV2 eduvis dokumen pdf excel word ppt visual chart knowledge graph diagram" data-app-page="utamaV2.html" href="utamaV2.html">
+                    <div class="ws-preview-frame">
+                        <img src="nano_asset/assets/landing-v2.jpg" alt="Pratinjau antarmuka Liquid Glass Utama V2" loading="lazy">
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top default">
+                            <span>Liquid Glass · Utama V2</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-file-blank'></i>
+                            <span>Liquid Chatbot & Knowledge</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">Utama V2 (Liquid Chatbot)</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Antarmuka Liquid Glass futuristik untuk dokumen multi-format (PDF, Word, Excel, PPT) dengan rendering KaTeX, diagram Mermaid, visualisasi Chart.js, serta pembuatan mindmap terstruktur.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill">Liquid Glass UI</span>
+                            <span class="cap-pill">Multi-Format RAG</span>
+                            <span class="cap-pill">Interactive Charts</span>
+                            <span class="cap-pill">KaTeX & Mermaid</span>
+                            <span class="cap-pill">Knowledge Graphs</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 6. LIQUID CHATBOT -->
+                <a class="ws-card liquid-glass-card border-glow-card ws-card--liquid" data-category="docs" data-search="liquid chatbot dokumen pdf word excel powerpoint rag mermaid chart mindmap" data-app-page="liquid_chatbot.html" href="liquid_chatbot.html">
+                    <div class="ws-preview-frame">
+                        <img src="nano_asset/assets/landing-v2.jpg" alt="Pratinjau antarmuka Liquid Chatbot" loading="lazy">
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top default">
+                            <span>NEURAL DOC ENGINE · 01</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-file-blank'></i>
+                            <span>Document AI & RAG</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">Liquid Chatbot</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Workspace percakapan Liquid Glass untuk memahami dokumen, mengelola knowledge base, dan menyajikan jawaban dengan visualisasi serta diagram.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill">Liquid Glass UI</span>
+                            <span class="cap-pill">Document RAG</span>
+                            <span class="cap-pill">Knowledge Base</span>
+                            <span class="cap-pill">Charts & Diagrams</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 7. AURORA WORKSPACE -->
+                <a class="ws-card liquid-glass-card border-glow-card ws-card--aurora" data-category="reasoning" data-search="aurora eduvis assistant percakapan ide menulis belajar gemma" data-app-page="aurora.html" href="aurora.html">
+                    <div class="ws-preview-frame">
+                        <img src="nano_asset/assets/landing-eduvis.jpg" alt="Pratinjau antarmuka Aurora Workspace" loading="lazy">
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top default">
+                            <span>AURORA NEURAL NODE · 02</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-brain'></i>
+                            <span>Thinking Companion</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">Aurora Workspace</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Ruang percakapan EduVis AI untuk menjernihkan ide, memahami topik, menulis, dan mengubah pemikiran menjadi langkah yang bisa dilakukan.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill">Idea Exploration</span>
+                            <span class="cap-pill">Learning Assistant</span>
+                            <span class="cap-pill">Writing Support</span>
+                            <span class="cap-pill">Gemma 4</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 8. ANALISIS KODE STUDIO -->
+                <a class="ws-card liquid-glass-card border-glow-card" data-category="code" data-search="analisis kode html editor split live preview sandbox console snippet library pyodide codemirror javascript python" data-app-page="analisis-kode.html" href="analisis-kode.html">
+                    <div class="ws-preview-frame">
+                        <img src="nano_asset/assets/landing-vs.jpg" alt="Pratinjau antarmuka Workspace Analisis Kode" loading="lazy">
+                        <div class="ws-preview-overlay"></div>
+                        <span class="ws-badge-top default">
+                            <span>Interactive Sandbox</span>
+                        </span>
+                        <span class="ws-category-tag">
+                            <i class='bx bx-code-curly'></i>
+                            <span>Code Analysis & Runner</span>
+                        </span>
+                    </div>
+                    <div class="ws-content">
+                        <div class="ws-title-row">
+                            <h3 class="ws-title">Analisis Kode</h3>
+                            <span class="ws-arrow" aria-hidden="true">→</span>
+                        </div>
+                        <p class="ws-desc">
+                            Studio live coding interaktif dengan editor split CodeMirror, live preview HTML/Tailwind terisolasi, eksekusi Python Pyodide offline, console runner, dan pustaka snippet terintegrasi.
+                        </p>
+                        <div class="ws-caps-row">
+                            <span class="cap-pill">Split Editor</span>
+                            <span class="cap-pill">Live Preview</span>
+                            <span class="cap-pill">Python Pyodide</span>
+                            <span class="cap-pill">Snippet Library</span>
+                            <span class="cap-pill">Console Runner</span>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Enterprise Stat Bar -->
+        <div class="stat-bar" aria-label="Statistik Platform Enterprise">
+            <div class="stat-item">
+                <div class="num">9</div>
+                <div class="desc">Sembilan antarmuka spesialis (<span>9 tampilan</span>)</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">100%</div>
+                <div class="desc">On-Device & Zero Egress</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">0 ms</div>
+                <div class="desc">External Cloud Latency</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">WebGPU</div>
+                <div class="desc">Akselerasi Silikon Lokal</div>
+            </div>
+        </div>
+
+        <!-- Corporate Architecture Pillars -->
+        <section class="pillars-section" aria-labelledby="pillars-title">
+            <div class="section-headline">
+                <span class="eyebrow-chip">
+                    <i class='bx bx-check-shield'></i>
+                    <span>Enterprise Architecture</span>
+                </span>
+                <h2 id="pillars-title">Fondasi Kedaulatan AI Korporat</h2>
+                <p>Arsitektur tangguh berfokus pada privasi, efisiensi komputasi, dan kepatuhan data ketat.</p>
+            </div>
+
+            <div class="pillars-grid">
+                <div class="pillar-card">
+                    <div class="pillar-icon-box">
+                        <i class='bx bx-lock-alt'></i>
+                    </div>
+                    <h3>Kedaulatan Data Mutlak</h3>
+                    <p>
+                        Data sensitif organisasi Anda tidak pernah dikirimkan ke server publik atau model pihak ketiga. Seluruh inferensi dan retensi sesi berlangsung terisolasi pada perangkat lokal.
+                    </p>
+                </div>
+
+                <div class="pillar-card">
+                    <div class="pillar-icon-box">
+                        <i class='bx bx-bolt-circle'></i>
+                    </div>
+                    <h3>Akselerasi Hardware Nyata</h3>
+                    <p>
+                        Optimalisasi komputasi tensor memanfaatkan akselerator GPU lokal melalui WebGPU dan XNNPACK untuk menghasilkan token per detik yang stabil tanpa biaya langganan API berulang.
+                    </p>
+                </div>
+
+                <div class="pillar-card">
+                    <div class="pillar-icon-box">
+                        <i class='bx bx-server'></i>
+                    </div>
+                    <h3>Multi-Tier OPFS Storage</h3>
+                    <p>
+                        Model berbobot gigabyte disimpan rapi di Origin Private File System browser. Inisialisasi sesi kedua dan seterusnya instan tanpa unduhan berulang.
+                    </p>
+                </div>
+
+                <div class="pillar-card">
+                    <div class="pillar-icon-box">
+                        <i class='bx bx-network-chart'></i>
+                    </div>
+                    <h3>Distribusi LAN Korporat</h3>
+                    <p>
+                        Host pada workstation internal kantor dan bagikan akses ke seluruh laptop tim di jaringan lokal dengan sertifikat TLS terpercaya tanpa konfigurasi internet luar.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- LAN Security Notice -->
+        <section class="enterprise-notice" aria-labelledby="lan-notice-title">
+            <div class="notice-icon">
+                <i class='bx bx-info-circle'></i>
+            </div>
+            <div class="notice-content">
+                <h4 id="lan-notice-title">Protokol Keamanan Akses Jaringan Lokal (LAN)</h4>
+                <p>
+                    Pastikan perangkat klien Anda berada dalam satu subnet jaringan lokal dengan workstation host. Bila browser menampilkan peringatan sertifikat keamanan, unduh <a href="/api/lan-ca">Sertifikat CA Lokal</a>, percayai sertifikat pada perangkat Anda, lalu akses kembali portal ini. Jangan membagikan tautan ini ke jaringan publik tanpa lapisan VPN korporat.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-wrap">
+        <div class="shell footer">
+            <div class="footer-left">
+                <div class="footer-logo-badge">
+                    <i class='bx bx-hive' style="color: var(--primary); font-size: 1.15rem;"></i>
+                    <span>Gemma 4 Enterprise AI Platform</span>
+                </div>
+                <span>·</span>
+                <span>Local-first AI Suite · Powered by LiteRT-LM & WebGPU</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="nav-btn" id="developer-open-footer" type="button" aria-haspopup="dialog" aria-controls="developer-modal">
+                    <i class='bx bx-user'></i>
+                    <span>Tentang Developer</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Developer Modal -->
+    <dialog class="modal-card developer-modal" id="developer-modal" aria-labelledby="developer-name">
+        <div class="developer-card-content">
+            <button class="modal-close-btn" id="developer-close" type="button" aria-label="Tutup modal developer">
+                <i class='bx bx-x'></i>
+            </button>
+            <div class="developer-avatar-wrap">
+                <img class="developer-avatar" src="nano_asset/assets/landing-developer.jpeg" alt="Foto Subuh Kurniawan">
+                <span class="avatar-verified" title="Verified Creator">
+                    <i class='bx bx-check'></i>
+                </span>
+            </div>
+            <p class="eyebrow-chip" style="margin-bottom: 0.5rem;">Developer</p>
+            <h2 id="developer-name">Subuh Kurniawan</h2>
+            <p class="developer-role">Developer — EduVis Project</p>
+            <p class="dev-bio">
+                Membangun pengalaman AI lokal yang praktis untuk pembelajaran, kerja, dan eksplorasi model di perangkat sendiri dengan kedaulatan data penuh.
+            </p>
+            <div class="dev-tags">
+                <span class="cap-pill">Local LLM</span>
+                <span class="cap-pill">LiteRT-LM</span>
+                <span class="cap-pill">WebGPU Runtime</span>
+                <span class="cap-pill">Multimodal AI</span>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- User Guide Modal -->
+    <dialog class="modal-card guide-modal" id="guide-modal" aria-labelledby="guide-title">
+        <div class="guide-container">
+            <button class="modal-close-btn" id="guide-close" type="button" aria-label="Tutup petunjuk">
+                <i class='bx bx-x'></i>
+            </button>
+            <div class="eyebrow-chip">
+                <i class='bx bx-compass'></i>
+                <span>Mulai di sini · Gemma4</span>
+            </div>
+            <h2 class="guide-heading" id="guide-title">Petunjuk penggunaan & pemuatan model</h2>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.6;">
+                Pilih workspace untuk mulai menggunakan asisten. Jika model belum tersedia, impor model LiteRT-LM terlebih dahulu dari pengaturan.
+            </p>
+
+            <ol class="guide-steps-list">
+                <li class="guide-step-card">
+                    <div class="step-num-badge">1</div>
+                    <div class="guide-step-content">
+                        <h4>Pilih workspace</h4>
+                        <p>Buka salah satu workspace di portal. Untuk mengelola model lokal, mulai dari <strong>Utama</strong>.</p>
+                    </div>
+                </li>
+                <li class="guide-step-card">
+                    <div class="step-num-badge">2</div>
+                    <div class="guide-step-content">
+                        <h4>Siapkan file model</h4>
+                        <p>Letakkan file model berformat <code>.litertlm</code> di folder proyek aplikasi pada komputer host sebelum mengimpornya.</p>
+                    </div>
+                </li>
+                <li class="guide-step-card">
+                    <div class="step-num-badge">3</div>
+                    <div class="guide-step-content">
+                        <h4>Impor ke LiteRT-LM</h4>
+                        <p>Di workspace Utama, buka <strong>Atur</strong> pada sidebar, pilih file di bagian <strong>Impor Model Lokal</strong>, lalu tekan <strong>Impor ke LiteRT-LM</strong>.</p>
+                    </div>
+                </li>
+                <li class="guide-step-card">
+                    <div class="step-num-badge">4</div>
+                    <div class="guide-step-content">
+                        <h4>Pilih dan gunakan model</h4>
+                        <p>Pilih model yang sudah diimpor pada pengaturan model. Setelah status model siap, kembali ke percakapan dan mulai chat.</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="guide-footer-actions">
+                <label style="display: inline-flex; align-items: center; gap: 0.55rem; font-size: 0.82rem; color: var(--text-muted); cursor: pointer;">
+                    <input id="guide-suppress" type="checkbox" style="accent-color: var(--primary);">
+                    <span>Jangan tampilkan otomatis lagi</span>
+                </label>
+                <button class="btn-corporate-primary" id="guide-done" type="button" style="padding: 0.65rem 1.35rem; font-size: 0.86rem;">
+                    <span>Mengerti, mulai</span>
+                    <i class='bx bx-check'></i>
+                </button>
+            </div>
+        </div>
+    </dialog>
+
+    <script>
+        // Forward query param `?model=` to all workspace card links
+        const modelId = new URLSearchParams(location.search).get('model');
+        if (modelId) {
+            document.querySelectorAll('[data-app-page]').forEach(link => {
+                try {
+                    const destination = new URL(link.href, location.origin);
+                    destination.searchParams.set('model', modelId);
+                    link.href = destination.href;
+                } catch (e) {
+                    console.error('Gagal memperbarui tautan model:', e);
+                }
+            });
+        }
+
+        // Developer Modal
+        const developerModal = document.getElementById('developer-modal');
+        const openDevBtns = [
+            document.getElementById('developer-open'),
+            document.getElementById('developer-open-footer')
+        ];
+        openDevBtns.forEach(btn => {
+            if (btn) btn.addEventListener('click', () => developerModal.showModal());
+        });
+        document.getElementById('developer-close').addEventListener('click', () => developerModal.close());
+        developerModal.addEventListener('click', (e) => {
+            if (e.target === developerModal) developerModal.close();
+        });
+
+        // User Guide Modal
+        const guideModal = document.getElementById('guide-modal');
+        const guideSuppress = document.getElementById('guide-suppress');
+        const guidePreferenceKey = 'eduvis-ai-gallery-guide-dismissed';
+
+        const closeGuide = () => {
+            if (guideSuppress.checked) {
+                try {
+                    localStorage.setItem(guidePreferenceKey, 'true');
+                } catch (error) {
+                    console.error('Preferensi petunjuk tidak dapat disimpan:', error);
+                }
+            }
+            guideModal.close();
+        };
+
+        const openGuideBtns = [
+            document.getElementById('guide-open'),
+            document.getElementById('guide-open-secondary')
+        ];
+        openGuideBtns.forEach(btn => {
+            if (btn) btn.addEventListener('click', () => guideModal.showModal());
+        });
+        document.getElementById('guide-close').addEventListener('click', closeGuide);
+        document.getElementById('guide-done').addEventListener('click', closeGuide);
+        guideModal.addEventListener('click', (e) => {
+            if (e.target === guideModal) closeGuide();
+        });
+
+        // Check if user previously dismissed automatic guide popup
+        let guideDismissed = false;
+        try {
+            guideDismissed = localStorage.getItem(guidePreferenceKey) === 'true';
+        } catch (error) {
+            console.error('Preferensi petunjuk tidak dapat dibaca:', error);
+        }
+        if (!guideDismissed) {
+            guideModal.showModal();
+        }
+
+        // Real-time Workspace Filter & Search
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const searchInput = document.getElementById('ws-search');
+        const cards = document.querySelectorAll('.ws-card');
+
+        let activeCategory = 'all';
+        let searchQuery = '';
+
+        function applyFilter() {
+            cards.forEach(card => {
+                const category = card.getAttribute('data-category');
+                const searchData = (card.getAttribute('data-search') || '').toLowerCase();
+                const titleText = (card.querySelector('.ws-title')?.textContent || '').toLowerCase();
+                const descText = (card.querySelector('.ws-desc')?.textContent || '').toLowerCase();
+                
+                const matchesCategory = (activeCategory === 'all') || (category === activeCategory);
+                const matchesSearch = !searchQuery || 
+                    searchData.includes(searchQuery) || 
+                    titleText.includes(searchQuery) || 
+                    descText.includes(searchQuery);
+
+                if (matchesCategory && matchesSearch) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                filterTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                activeCategory = tab.getAttribute('data-filter');
+                applyFilter();
+            });
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                applyFilter();
+            });
+        }
+    </script>
+</body>
+</html>

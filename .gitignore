@@ -1,0 +1,66 @@
+# OS & System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Large Model Weights (Local Storage / Downloaded via script/OPFS)
+*.litertlm
+*.task
+*.tflite
+*.safetensors
+*.bin
+!wasm/*.bin
+*.xnnpack_cache
+*.cache
+models/piper/
+
+# Runtime Caches & Binaries
+gemma-4-E2B-it.litertlm_*
+*_mldrift_*
+
+# Large Backup Archives & Installers
+Archive.zip
+*.dmg
+*.app/
+dist/
+
+# Downloadable Model Weights (use scripts/download_models.py)
+models/tts_indonesia/*.pth
+models/rvc/**/*.pth
+models/rvc/**/*.index
+nano_asset/models/multilingual-e5-small/
+nano_asset/models/all-MiniLM-L6-v2/
+nano_asset/models/tts/*.onnx
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.venv_tts/
+venv/
+env/
+
+# Swift & Xcode Build
+.build/
+DerivedData/
+
+# Audio Outputs & Heavy Weights
+*.wav
+*.pt
+TTS-Indonesia-Gratis/
+
+# Node & Package Managers
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# SSL Certificates & Local Keys
+*.pem
+*.key
+*.crt

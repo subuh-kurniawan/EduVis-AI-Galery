@@ -1,0 +1,911 @@
+/* ==========================================================================
+   PURE APPLE HIG NATIVE MAC CHAT UI (Opsi 3: AppKit Unified Toolbar + Apple Messages Canvas)
+   Hanya berlaku di aplikasi macOS native: <html class="macos-native"> disuntikkan
+   oleh gemma_webview.swift. Browser/klien web TIDAK memiliki class itu, sehingga
+   tampilannya tidak berubah. Seluruh selector WAJIB diawali `html.macos-native`
+   (dijaga oleh tes di tests/native-mac-css.test.js).
+   ========================================================================== */
+
+html.macos-native body {
+    --mac-window-bg: #1e1e1e;
+    --cmm-bg-deep: #160934;
+    --cmm-bg-mid: #241154;
+    --cmm-bg-gradient: radial-gradient(circle at 78% 26%, rgba(236, 72, 153, 0.18) 0%, transparent 48%), radial-gradient(circle at 22% 82%, rgba(139, 92, 246, 0.24) 0%, transparent 55%), linear-gradient(135deg, #160934 0%, #241154 52%, #120729 100%);
+    --cmm-accent-gradient: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+    --mac-window-fg: #f8f5ff;
+    --mac-surface: rgba(54, 29, 108, 0.86);
+    --mac-surface-subtle: rgba(42, 21, 86, 0.78);
+    --mac-border: rgba(236, 72, 153, 0.22);
+    --nm-canvas: var(--cmm-bg-deep);
+    --nm-sidebar-bg: rgba(38, 19, 82, 0.76);
+    --nm-accent: #ec4899;
+    --nm-accent-text: #ffffff;
+    --nm-radius-bubble: 18px;
+    --nm-radius-field: 24px;
+    --nm-text: #f8f5ff;
+    --nm-text-secondary: #cbbbe9;
+    --nm-hairline: rgba(167, 139, 250, 0.20);
+    --nm-glass: rgba(48, 25, 98, 0.84);
+    --nm-code-bg: #120729;
+    --nm-code-header: #1e0d45;
+    --nm-chip-bg: rgba(168, 85, 247, 0.20);
+    --nm-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --lg-blur: blur(var(--glass-blur, 30px)) saturate(var(--glass-saturate, 200%));
+    --lg-surface-glass: rgba(48, 25, 98, 0.72);
+    --lg-surface-elevated: rgba(62, 33, 122, 0.74);
+    --lg-surface-pill: rgba(168, 85, 247, 0.16);
+    --lg-specular-border: rgba(236, 72, 153, calc(0.28 * var(--specular-intensity, 1)));
+    --lg-specular-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 0 rgba(236, 72, 153, 0.10);
+    --lg-ambient-shadow: 0 14px 36px -8px rgba(10, 4, 28, 0.55), 0 2px 10px rgba(236, 72, 153, 0.14);
+    --lg-radius-outer: 24px;
+    --lg-radius-card: 16px;
+    --lg-radius-inner: 12px;
+    --lg-radius-pill: 9999px;
+    background: var(--cmm-bg-gradient) !important;
+    color: var(--nm-text) !important;
+}
+
+html.macos-native body.light-theme,
+html.macos-native[data-theme="light"] body {
+    --mac-window-bg: #f8f7ff;
+    --mac-window-fg: #1e1b4b;
+    --mac-surface: rgba(255, 255, 255, 0.94);
+    --mac-surface-subtle: rgba(242, 239, 255, 0.90);
+    --mac-border: rgba(124, 58, 237, 0.16);
+    --nm-canvas: #f8f7ff;
+    --nm-sidebar-bg: #efeafd;
+    --nm-accent: #db2777;
+    --cmm-accent-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+    --nm-text: #1e1b4b;
+    --nm-text-secondary: #5b547a;
+    --nm-hairline: rgba(124, 58, 237, 0.16);
+    --nm-glass: rgba(245, 241, 255, 0.88);
+    --nm-code-bg: #f2eefc;
+    --nm-code-header: #e6e0f8;
+    --nm-chip-bg: rgba(124, 58, 237, 0.10);
+    --lg-surface-glass: rgba(242, 238, 255, 0.86);
+    --lg-surface-elevated: rgba(255, 255, 255, 0.92);
+    --lg-surface-pill: rgba(124, 58, 237, 0.08);
+    --lg-specular-border: rgba(124, 58, 237, 0.22);
+    --lg-specular-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.92), inset 0 -1px 0 0 rgba(124, 58, 237, 0.08);
+    --lg-ambient-shadow: 0 12px 30px -8px rgba(46, 16, 101, 0.12), 0 2px 10px rgba(46, 16, 101, 0.06);
+    --bg: #f8f7ff !important;
+    --bg-side: #f0ecfe !important;
+    --bg-elev: #ffffff !important;
+    --fg: #1e1b4b !important;
+    --fg-mute: #5b547a !important;
+    --line: rgba(124, 58, 237, 0.16) !important;
+    --accent: #db2777 !important;
+    --accent-fg: #ffffff !important;
+    --code-bg: #f2eefc !important;
+    background: linear-gradient(135deg, #faf8ff 0%, #f3efff 55%, #f9f5ff 100%) !important;
+    color: var(--nm-text) !important;
+}
+
+/* --- 1. Single Unified Toolbar: Sembunyikan Header Web Ganda & Widget Apung --- */
+html.macos-native #chat-area > header,
+html.macos-native body > div.flex-1 > header,
+html.macos-native .chat-main > header,
+html.macos-native .main > header.topbar,
+html.macos-native .shell > header.topbar,
+html.macos-native main.live-shell > header,
+html.macos-native app-navigation {
+    display: none !important;
+}
+
+/* --- 2. Kanvas & Sidebar Seragam CleanMyMac X di Semua 13 Ruang Kerja --- */
+html.macos-native body,
+html.macos-native body:not(.light-theme),
+html.macos-native body.light-theme,
+html.macos-native .app,
+html.macos-native .app-shell {
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    border: none !important;
+}
+
+html.macos-native body > aside.sidebar,
+html.macos-native body:not(.light-theme) > aside.sidebar,
+html.macos-native body.light-theme > aside.sidebar,
+html.macos-native .app-shell > .sidebar {
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+}
+
+html.macos-native body > .sidebar + div.flex-1.flex.flex-row,
+html.macos-native body:not(.light-theme) > .sidebar + div.flex-1.flex.flex-row,
+html.macos-native body.light-theme > .sidebar + div.flex-1.flex.flex-row {
+    height: 100dvh !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Kanvas utama CleanMyMac Cosmic Violet (tanpa garis/kotak warna ganda pada #messages) */
+html.macos-native body:not(.light-theme) #chat-area,
+html.macos-native body:not(.light-theme) .main,
+html.macos-native body:not(.light-theme) .workspace,
+html.macos-native body:not(.light-theme) > div.flex-1.flex.flex-col {
+    background: var(--cmm-bg-gradient) !important;
+    color: var(--nm-text) !important;
+    border-radius: 0 !important;
+}
+
+html.macos-native body:not(.light-theme) #messages,
+html.macos-native body:not(.light-theme) #chatArea,
+html.macos-native body:not(.light-theme) .thread,
+html.macos-native body:not(.light-theme) #chat-area footer,
+html.macos-native body:not(.light-theme) .composer-wrap,
+html.macos-native body:not(.light-theme):not(.oled-theme):not(.hacker-theme) #chat-area footer {
+    background: transparent !important;
+    border-top-color: transparent !important;
+    box-shadow: none !important;
+}
+
+html.macos-native body.light-theme #chat-area,
+html.macos-native[data-theme="light"] body .main,
+html.macos-native body.light-theme .workspace,
+html.macos-native body.light-theme > div.flex-1.flex.flex-col {
+    background: linear-gradient(135deg, #faf8ff 0%, #f3efff 55%, #f9f5ff 100%) !important;
+    color: var(--nm-text) !important;
+    border-radius: 0 !important;
+}
+
+html.macos-native body.light-theme #messages,
+html.macos-native body.light-theme #chatArea,
+html.macos-native[data-theme="light"] body .thread,
+html.macos-native body.light-theme #chat-area footer,
+html.macos-native[data-theme="light"] body .composer-wrap {
+    background: transparent !important;
+    border-top-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Override spesifisitas tinggi sidebar EduVis, Liquid Chatbot, Utama V2, Utama, Tanya AI, VS, Claude */
+html.macos-native body aside.sidebar,
+html.macos-native body .sidebar,
+html.macos-native body:not(.light-theme) aside.sidebar,
+html.macos-native body:not(.light-theme) .sidebar,
+html.macos-native body:not(.light-theme):not(.oled-theme):not(.hacker-theme) .app-shell > .sidebar,
+html.macos-native body.light-theme aside.sidebar,
+html.macos-native body.light-theme .sidebar,
+html.macos-native body.light-theme .app-shell > .sidebar,
+html.macos-native[data-theme="light"] body .sidebar {
+    background: var(--lg-surface-glass) !important;
+    backdrop-filter: var(--lg-blur) !important;
+    -webkit-backdrop-filter: var(--lg-blur) !important;
+    border-right: 1px solid var(--nm-hairline) !important;
+    box-shadow: var(--lg-specular-shadow) !important;
+    color: var(--nm-text) !important;
+    padding-bottom: 58px !important;
+}
+
+html.macos-native .sidebar .side-inner {
+    padding-bottom: 58px !important;
+}
+
+html.macos-native body:not(.light-theme) .sidebar .card-bg,
+html.macos-native body:not(.light-theme) .sidebar #model-badge,
+html.macos-native body:not(.light-theme) .sidebar .bg-black\/20,
+html.macos-native body:not(.light-theme) .sidebar .bg-black\/35,
+html.macos-native body:not(.light-theme) .sidebar .bg-slate-900,
+html.macos-native body:not(.light-theme) .sidebar .bg-white\/5,
+html.macos-native body:not(.light-theme) .sidebar button.shared-chats,
+html.macos-native body:not(.light-theme) .sidebar button.new-chat,
+html.macos-native body:not(.light-theme) .sidebar #projectSelect,
+html.macos-native body:not(.light-theme) .sidebar #historySearch {
+    background: rgba(68, 36, 132, 0.44) !important;
+    border-color: rgba(236, 72, 153, 0.24) !important;
+    color: var(--nm-text) !important;
+}
+
+html.macos-native body:not(.light-theme) .sidebar .text-slate-200,
+html.macos-native body:not(.light-theme) .sidebar .text-slate-300,
+html.macos-native body:not(.light-theme) .sidebar .text-slate-400,
+html.macos-native body:not(.light-theme) .sidebar .text-white\/80,
+html.macos-native body:not(.light-theme) .sidebar .text-white\/75,
+html.macos-native body:not(.light-theme) .sidebar .text-white\/65 {
+    color: var(--nm-text-secondary) !important;
+}
+
+html.macos-native body:not(.light-theme):not(.oled-theme):not(.hacker-theme) .app-shell > .sidebar .nav-item,
+html.macos-native body:not(.light-theme):not(.oled-theme):not(.hacker-theme) .app-shell > .sidebar .history-item,
+html.macos-native body:not(.light-theme):not(.oled-theme):not(.hacker-theme) .app-shell > .sidebar #newChat {
+    color: var(--nm-text) !important;
+}
+
+html.macos-native body:not(.light-theme):not(.oled-theme):not(.hacker-theme) .app-shell > .sidebar .glass-soft.text-white {
+    color: var(--nm-text) !important;
+    background: var(--lg-surface-pill) !important;
+    border-color: var(--lg-specular-border) !important;
+}
+
+/* Tanya AI (tanya-ai-standalone.html) variabel & kartu CleanMyMac di Dark Mode */
+html.macos-native:not([data-theme="light"]) body {
+    --bg: #180b38 !important;
+    --bg-side: rgba(44, 22, 92, 0.78) !important;
+    --bg-elev: rgba(62, 33, 122, 0.72) !important;
+    --fg: #f8f5ff !important;
+    --fg-mute: #cbbbe9 !important;
+    --line: rgba(236, 72, 153, 0.26) !important;
+    --accent: #ec4899 !important;
+    --accent-fg: #ffffff !important;
+    --code-bg: #120729 !important;
+}
+
+html.macos-native .main .empty h1,
+html.macos-native .main .chip b,
+html.macos-native .main .bubble,
+html.macos-native .main .prose {
+    color: var(--nm-text) !important;
+}
+
+html.macos-native .main .chip span,
+html.macos-native .main .fine,
+html.macos-native .main .char-counter {
+    color: var(--nm-text-secondary) !important;
+}
+
+html.macos-native .main .chip {
+    background: var(--lg-surface-elevated) !important;
+    border: 1px solid var(--lg-specular-border) !important;
+    backdrop-filter: var(--lg-blur) !important;
+    -webkit-backdrop-filter: var(--lg-blur) !important;
+    box-shadow: var(--lg-specular-shadow) !important;
+}
+
+html.macos-native .main .composer,
+html.macos-native body:not(.light-theme):not(.oled-theme):not(.hacker-theme) #drop-zone {
+    background: var(--lg-surface-elevated) !important;
+    border: 1px solid var(--lg-specular-border) !important;
+    backdrop-filter: var(--lg-blur) !important;
+    -webkit-backdrop-filter: var(--lg-blur) !important;
+    box-shadow: var(--lg-specular-shadow), var(--lg-ambient-shadow) !important;
+    color: var(--nm-text) !important;
+}
+
+html.macos-native .main .composer textarea {
+    color: var(--nm-text) !important;
+}
+
+html.macos-native .main .composer textarea::placeholder {
+    color: var(--nm-text-secondary) !important;
+    opacity: 0.9 !important;
+}
+
+html.macos-native .main .send {
+    background: var(--nm-accent) !important;
+    background-image: var(--cmm-accent-gradient) !important;
+    color: #ffffff !important;
+}
+
+html.macos-native .macos-inspector-pane {
+    background: var(--lg-surface-glass) !important;
+    backdrop-filter: var(--lg-blur) !important;
+    -webkit-backdrop-filter: var(--lg-blur) !important;
+    border-left: 1px solid var(--lg-specular-border) !important;
+    box-shadow: var(--lg-specular-shadow) !important;
+    color: var(--nm-text) !important;
+}
+
+/* Kontras teks sidebar di Light Mode (Liquid Chatbot / Utama V2 / EduVis) */
+html.macos-native body.light-theme .sidebar .history-item,
+html.macos-native body.light-theme .sidebar .text-white,
+html.macos-native body.light-theme .sidebar .text-white\/85,
+html.macos-native body.light-theme .sidebar .text-white\/80,
+html.macos-native body.light-theme .sidebar .text-white\/75,
+html.macos-native body.light-theme .sidebar #newChat,
+html.macos-native body.light-theme .sidebar .glass-soft,
+html.macos-native body.light-theme .sidebar .glass-soft div {
+    color: var(--nm-text) !important;
+}
+
+html.macos-native body.light-theme .sidebar .text-white\/65,
+html.macos-native body.light-theme .sidebar .text-white\/60,
+html.macos-native body.light-theme .sidebar .glass-soft p {
+    color: var(--nm-text-secondary) !important;
+}
+
+html.macos-native .sidebar .history-item,
+html.macos-native .sidebar .nav-item {
+    border-radius: var(--lg-radius-inner) !important;
+    transition: background-color 0.18s var(--nm-ease), box-shadow 0.18s var(--nm-ease) !important;
+}
+
+html.macos-native .sidebar .history-item:hover,
+html.macos-native .sidebar .nav-item:hover {
+    background: var(--lg-surface-pill) !important;
+    box-shadow: inset 0 0 0 1px var(--lg-specular-border) !important;
+}
+
+html.macos-native .sidebar .nav-item.active,
+html.macos-native .sidebar .history-item.active {
+    background: var(--lg-surface-elevated) !important;
+    box-shadow: inset 3px 0 0 var(--nm-accent), var(--lg-specular-shadow) !important;
+    color: var(--nm-text) !important;
+}
+
+html.macos-native body .sidebar .glass-soft {
+    background: var(--lg-surface-pill) !important;
+    border: 1px solid var(--lg-specular-border) !important;
+    border-radius: var(--lg-radius-card) !important;
+    backdrop-filter: var(--lg-blur) !important;
+    -webkit-backdrop-filter: var(--lg-blur) !important;
+    box-shadow: var(--lg-specular-shadow) !important;
+}
+
+/* --- 3. Tipografi Sistem (SF Pro Text & SF Mono) --- */
+html.macos-native body,
+html.macos-native button,
+html.macos-native input,
+html.macos-native textarea,
+html.macos-native select {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+html.macos-native #messages .prose {
+    font-size: var(--chat-font-size, 14.5px) !important;
+    line-height: 1.6 !important;
+    letter-spacing: -0.003em;
+}
+
+/* Warna teks jawaban mengikuti tema; judul/tebal selalu kontras tinggi */
+html.macos-native #messages .prose,
+html.macos-native .chat-bubble-ai,
+html.macos-native .chat-bubble-ai .prose,
+html.macos-native #messages .v2-chat-reply {
+    --tw-prose-body: var(--nm-text) !important;
+    --tw-prose-headings: var(--nm-text) !important;
+    --tw-prose-bold: var(--nm-text) !important;
+    --tw-prose-links: var(--nm-accent) !important;
+    --tw-prose-counters: var(--nm-text-secondary) !important;
+    --tw-prose-bullets: var(--nm-text-secondary) !important;
+    --tw-prose-quotes: var(--nm-text) !important;
+    --tw-prose-code: var(--nm-text) !important;
+    color: var(--nm-text) !important;
+}
+
+html.macos-native .chat-bubble-ai :is(p, li, td, th, strong, b, em, h1, h2, h3, h4, h5, h6, blockquote),
+html.macos-native #messages .v2-chat-reply :is(p, li, td, th, strong, b, em, h1, h2, h3, h4, h5, h6, blockquote) {
+    color: var(--nm-text) !important;
+}
+
+html.macos-native #messages code,
+html.macos-native #messages pre {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
+}
+
+/* Kolom baca ideal di tengah kanvas (760px ala ChatGPT macOS / Apple Notes) */
+html.macos-native #messages > div:not(#initial-placeholder) {
+    max-width: 760px !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* --- 4. Pesan Pengguna Murni Apple Messages (Kapsul Biru, Tanpa Avatar "U") --- */
+/* Sembunyikan bulatan avatar "U" di sebelah kanan bubble pengguna */
+html.macos-native #messages .chat-bubble-user + div,
+html.macos-native #messages > div:has(.chat-bubble-user) > div.rounded-full {
+    display: none !important;
+}
+
+/* Pembungkus luar di claude.html harus tetap transparan */
+html.macos-native body .chat-bubble-user:has(.claude-user-bubble),
+html.macos-native body:not(.light-theme) .chat-bubble-user:has(.claude-user-bubble),
+html.macos-native body.light-theme .chat-bubble-user:has(.claude-user-bubble) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Kapsul pesan pengguna (Apple Messages Pill) */
+html.macos-native body .claude-user-bubble,
+html.macos-native body:not(.light-theme) .claude-user-bubble,
+html.macos-native body.light-theme .claude-user-bubble,
+html.macos-native body .chat-bubble-user:not(:has(.claude-user-bubble)),
+html.macos-native body:not(.light-theme) .chat-bubble-user:not(:has(.claude-user-bubble)),
+html.macos-native body.light-theme .chat-bubble-user:not(:has(.claude-user-bubble)),
+html.macos-native body #messages .v2-chat-user,
+html.macos-native body #initial-placeholder > .message:first-child .message-bubble {
+    background: var(--nm-accent) !important;
+    background-image: var(--cmm-accent-gradient) !important;
+    color: var(--nm-accent-text) !important;
+    border: 1px solid rgba(255, 255, 255, 0.24) !important;
+    border-radius: 18px 18px 4px 18px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 6px 20px rgba(236, 72, 153, 0.34) !important;
+    padding: 9px 15px !important;
+    width: fit-content !important;
+    max-width: min(72%, 520px) !important;
+    margin-left: auto !important;
+    font-size: var(--chat-font-size, 14.5px) !important;
+    line-height: 1.48 !important;
+}
+
+html.macos-native #initial-placeholder > .message:first-child > div:last-child {
+    display: none !important;
+}
+
+html.macos-native .chat-bubble-user:not(:has(.claude-user-bubble)) .prose {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+html.macos-native .claude-user-bubble,
+html.macos-native .claude-user-bubble *,
+html.macos-native .chat-bubble-user:not(:has(.claude-user-bubble)),
+html.macos-native .chat-bubble-user:not(:has(.claude-user-bubble)) .prose,
+html.macos-native .chat-bubble-user:not(:has(.claude-user-bubble)) .prose *,
+html.macos-native #initial-placeholder > .message:first-child .message-bubble,
+html.macos-native #initial-placeholder > .message:first-child .message-bubble * {
+    color: var(--nm-accent-text) !important;
+}
+
+/* Sembunyikan ruang kosong action bar di dalam bubble pengguna sampai di-hover */
+html.macos-native .chat-bubble-user .user-action-bar {
+    display: none !important;
+}
+
+/* --- 5. Jawaban AI Murni Apple Intelligence (Aliran Dokumen Bersih) --- */
+html.macos-native body .chat-bubble-ai,
+html.macos-native body:not(.light-theme) .chat-bubble-ai,
+html.macos-native body.light-theme .chat-bubble-ai,
+html.macos-native body #messages .v2-chat-reply,
+html.macos-native body #initial-placeholder > .message:nth-child(2) .message-bubble {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 2px 0 !important;
+    max-width: 100% !important;
+    color: var(--nm-text) !important;
+}
+
+/* Perkecil & tenangkan ikon AI di samping jawaban (HANYA untuk baris pesan AI yang memiliki .chat-bubble-ai) */
+html.macos-native #messages > div:has(.chat-bubble-ai) > div:first-child:not(.chat-bubble-ai) {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+/* Indikator "sedang menulis": cahaya halus Apple Intelligence */
+html.macos-native body .chat-bubble-ai.ai-loading-glow {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+/* Blok kode gaya Xcode + Liquid Glass Concentric Surface */
+html.macos-native #messages .code-container {
+    background: var(--nm-code-bg) !important;
+    border: 1px solid var(--lg-specular-border) !important;
+    border-radius: var(--lg-radius-card) !important;
+    box-shadow: var(--lg-specular-shadow), 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+    overflow: hidden;
+}
+
+html.macos-native #messages .code-container > div:first-child {
+    background: var(--nm-code-header) !important;
+    border-bottom: 1px solid var(--nm-hairline) !important;
+    color: var(--nm-text-secondary) !important;
+}
+
+html.macos-native #initial-placeholder .suggestion-card,
+html.macos-native #messages .ai-think-block {
+    background: var(--lg-surface-glass) !important;
+    border: 1px solid var(--lg-specular-border) !important;
+    border-radius: var(--lg-radius-card) !important;
+    backdrop-filter: blur(22px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+    box-shadow: var(--lg-specular-shadow), 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* --- 5.1. Tabel Responsif & Stabil Gaya macOS Native (Scroll Horizontal Lancar) --- */
+html.macos-native #messages > div,
+html.macos-native .chat-bubble-ai,
+html.macos-native #messages .prose,
+html.macos-native #messages .v2-chat-reply,
+html.macos-native .table-wrapper,
+html.macos-native .table-wrap,
+html.macos-native .table-container {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+html.macos-native .table-wrapper,
+html.macos-native .table-wrap,
+html.macos-native .table-container,
+html.macos-native #messages .table-wrapper,
+html.macos-native #messages .table-wrap,
+html.macos-native #messages .table-container {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    margin: 14px 0 !important;
+    border: 1px solid var(--nm-hairline) !important;
+    border-radius: 10px !important;
+    background: var(--nm-code-bg) !important;
+    box-shadow: none !important;
+}
+
+/* Scrollbar horizontal halus khas macOS untuk tabel */
+html.macos-native .table-wrapper::-webkit-scrollbar,
+html.macos-native .table-wrap::-webkit-scrollbar,
+html.macos-native .table-container::-webkit-scrollbar {
+    height: 7px !important;
+    width: 7px !important;
+}
+
+html.macos-native .table-wrapper::-webkit-scrollbar-track,
+html.macos-native .table-wrap::-webkit-scrollbar-track,
+html.macos-native .table-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.15) !important;
+    border-radius: 4px !important;
+}
+
+html.macos-native body.light-theme .table-wrapper::-webkit-scrollbar-track,
+html.macos-native body.light-theme .table-wrap::-webkit-scrollbar-track,
+html.macos-native body.light-theme .table-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+html.macos-native .table-wrapper::-webkit-scrollbar-thumb,
+html.macos-native .table-wrap::-webkit-scrollbar-thumb,
+html.macos-native .table-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-radius: 4px !important;
+}
+
+html.macos-native body.light-theme .table-wrapper::-webkit-scrollbar-thumb,
+html.macos-native body.light-theme .table-wrap::-webkit-scrollbar-thumb,
+html.macos-native body.light-theme .table-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.22) !important;
+}
+
+html.macos-native .table-wrapper::-webkit-scrollbar-thumb:hover,
+html.macos-native .table-wrap::-webkit-scrollbar-thumb:hover,
+html.macos-native .table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+}
+
+html.macos-native body.light-theme .table-wrapper::-webkit-scrollbar-thumb:hover,
+html.macos-native body.light-theme .table-wrap::-webkit-scrollbar-thumb:hover,
+html.macos-native body.light-theme .table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Tabel di dalam wrapper: layout stabil, tidak terhimpit kerdil, teks terbaca */
+html.macos-native #messages table {
+    display: table !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    font-size: calc(var(--chat-font-size, 14.5px) * 0.93) !important;
+    line-height: 1.5 !important;
+    box-shadow: none !important;
+}
+
+/* Jika tabel memiliki konten banyak/kolom banyak, biarkan melebar secara wajar sehingga memicu scroll horizontal mulus */
+html.macos-native #messages .table-wrapper > table,
+html.macos-native #messages .table-wrap > table,
+html.macos-native #messages .table-container > table {
+    width: max-content !important;
+    min-width: 100% !important;
+}
+
+/* Fallback untuk tabel polos tanpa wrapper */
+html.macos-native #messages :not(.table-wrapper):not(.table-wrap):not(.table-container) > table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    border: 1px solid var(--nm-hairline) !important;
+    border-radius: 10px !important;
+    background: var(--nm-code-bg) !important;
+}
+
+html.macos-native #messages table thead {
+    border-bottom: 1px solid var(--nm-hairline) !important;
+}
+
+html.macos-native #messages table thead tr {
+    background: var(--nm-code-header) !important;
+}
+
+html.macos-native #messages table th {
+    padding: 9px 14px !important;
+    font-weight: 600 !important;
+    color: var(--nm-text) !important;
+    border-bottom: 1px solid var(--nm-hairline) !important;
+    border-right: 1px solid var(--nm-hairline) !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+    min-width: 80px !important;
+    background: var(--nm-code-header) !important;
+}
+
+html.macos-native #messages table td {
+    padding: 8px 14px !important;
+    color: var(--nm-text) !important;
+    border-bottom: 1px solid var(--nm-hairline) !important;
+    border-right: 1px solid var(--nm-hairline) !important;
+    vertical-align: top !important;
+    min-width: 80px !important;
+}
+
+html.macos-native #messages table td::before {
+    display: none !important;
+}
+
+html.macos-native #messages table th:last-child,
+html.macos-native #messages table td:last-child {
+    border-right: none !important;
+}
+
+html.macos-native #messages table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+html.macos-native #messages table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+html.macos-native body.light-theme #messages table tbody tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02) !important;
+}
+
+html.macos-native .ai-table-export-toolbar {
+    position: sticky !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    z-index: 2 !important;
+    background: var(--nm-code-header) !important;
+    border-bottom: 1px solid var(--nm-hairline) !important;
+}
+
+/* Aksi per pesan: tersembunyi sampai pointer berada di atas pesan */
+html.macos-native .chat-bubble-ai .opacity-65,
+html.macos-native .chat-bubble-ai .claude-action-bar {
+    opacity: 0 !important;
+    transition: opacity 0.18s var(--nm-ease);
+}
+
+html.macos-native .chat-bubble-ai:hover .opacity-65,
+html.macos-native .chat-bubble-ai:focus-within .opacity-65,
+html.macos-native .chat-bubble-ai:hover .claude-action-bar,
+html.macos-native .chat-bubble-ai:focus-within .claude-action-bar {
+    opacity: 1 !important;
+}
+
+/* --- 6. Kapsul Input Gaya Spotlight / Apple Messages & Quick Chips Netral --- */
+html.macos-native body .input-panel {
+    background: linear-gradient(to top, var(--nm-canvas) 65%, transparent) !important;
+    backdrop-filter: none !important;
+    padding-top: 6px !important;
+}
+
+html.macos-native body .input-panel > div {
+    max-width: 760px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Seragamkan chip pintasan di atas kotak input menjadi kapsul Liquid Glass macOS */
+html.macos-native .input-panel .quick-chip,
+html.macos-native .quick-prompt,
+html.macos-native #quick-actions-bar button,
+html.macos-native .followup-chip {
+    background: var(--lg-surface-pill) !important;
+    color: var(--nm-text-secondary) !important;
+    border: 1px solid var(--lg-specular-border) !important;
+    border-radius: var(--lg-radius-pill) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    padding: 4px 11px !important;
+}
+
+html.macos-native .input-panel .quick-chip:hover,
+html.macos-native .quick-prompt:hover,
+html.macos-native #quick-actions-bar button:hover,
+html.macos-native .followup-chip:hover {
+    color: var(--nm-text) !important;
+    border-color: var(--nm-accent) !important;
+}
+
+html.macos-native body #drop-zone,
+html.macos-native body .input-panel #drop-zone,
+html.macos-native body:not(.light-theme) #drop-zone,
+html.macos-native body:not(.light-theme) .input-panel #drop-zone,
+html.macos-native body.light-theme #drop-zone,
+html.macos-native body.light-theme .input-panel #drop-zone,
+html.macos-native body.light-theme .app-shell #drop-zone {
+    max-width: 760px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    border-radius: var(--nm-radius-field) !important;
+    background: var(--lg-surface-elevated) !important;
+    backdrop-filter: var(--lg-blur) !important;
+    -webkit-backdrop-filter: var(--lg-blur) !important;
+    border: 1px solid var(--lg-specular-border) !important;
+    box-shadow: var(--lg-specular-shadow), var(--lg-ambient-shadow) !important;
+    transition: border-color 0.2s var(--nm-ease), box-shadow 0.2s var(--nm-ease);
+}
+
+html.macos-native body #drop-zone:focus-within,
+html.macos-native body .input-panel #drop-zone:focus-within,
+html.macos-native body:not(.light-theme) #drop-zone:focus-within,
+html.macos-native body:not(.light-theme) .input-panel #drop-zone:focus-within,
+html.macos-native body.light-theme #drop-zone:focus-within,
+html.macos-native body.light-theme .input-panel #drop-zone:focus-within,
+html.macos-native body.light-theme .app-shell #drop-zone:focus-within {
+    border-color: color-mix(in oklab, var(--nm-accent) 65%, transparent) !important;
+    box-shadow: var(--lg-specular-shadow),
+                0 0 0 3px color-mix(in oklab, var(--nm-accent) 25%, transparent),
+                var(--lg-ambient-shadow) !important;
+}
+
+html.macos-native body #prompt {
+    color: var(--nm-text) !important;
+}
+
+html.macos-native body.light-theme #prompt,
+html.macos-native[data-theme="light"] body .composer #prompt {
+    color: #1e1b4b !important;
+    caret-color: var(--nm-accent) !important;
+}
+
+html.macos-native body.light-theme #prompt::placeholder,
+html.macos-native[data-theme="light"] body .composer #prompt::placeholder {
+    color: #5b547a !important;
+    opacity: 1 !important;
+}
+
+html.macos-native body.light-theme .brand-label,
+html.macos-native[data-theme="light"] body .brand-label,
+html.macos-native body.light-theme .suggestion strong,
+html.macos-native[data-theme="light"] body .suggestion strong,
+html.macos-native body.light-theme .rail-user-name,
+html.macos-native[data-theme="light"] body .rail-user-name {
+    color: #1e1b4b !important;
+}
+
+html.macos-native #send-btn,
+html.macos-native #send-button,
+html.macos-native body:not(.light-theme):not(.oled-theme):not(.hacker-theme) #send-btn {
+    background: var(--nm-accent) !important;
+    background-image: var(--cmm-accent-gradient) !important;
+    color: var(--nm-accent-text) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.42) !important;
+}
+
+/* --- 6.5. Widget Floating Ukuran Font Chat (Aa − 19px + ↺) Liquid Glass --- */
+html.macos-native .gemma-font-widget {
+    display: block !important;
+    position: fixed !important;
+    left: var(--chat-font-widget-left, 14px) !important;
+    bottom: var(--chat-font-widget-bottom, 12px) !important;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+}
+
+html.macos-native .gemma-font-widget .gfc-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    background: var(--lg-surface-elevated) !important;
+    backdrop-filter: var(--lg-blur) !important;
+    -webkit-backdrop-filter: var(--lg-blur) !important;
+    border: 1px solid var(--lg-specular-border) !important;
+    box-shadow: var(--lg-specular-shadow), var(--lg-ambient-shadow) !important;
+}
+
+html.macos-native .gemma-font-widget .gfc-controls {
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+html.macos-native .gemma-font-widget .gfc-btn,
+html.macos-native .gemma-font-widget .gfc-value,
+html.macos-native .gemma-font-widget .gfc-preset-item {
+    cursor: pointer !important;
+}
+
+/* --- 7. Seleksi Teks, Aksesibilitas & Gerak Sistem --- */
+html.macos-native .sidebar,
+html.macos-native button {
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+html.macos-native #messages {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 14px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 14px), transparent 100%);
+}
+
+html.macos-native #messages a {
+    cursor: pointer;
+}
+
+html.macos-native :focus-visible {
+    outline: 2px solid var(--nm-accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+html.macos-native body :is(button, [role="button"], a) {
+    transition:
+        background-color 0.18s var(--nm-ease),
+        border-color 0.18s var(--nm-ease),
+        box-shadow 0.18s var(--nm-ease),
+        color 0.18s var(--nm-ease),
+        opacity 0.18s var(--nm-ease);
+}
+
+html.macos-native body :is(button, [role="button"]):not(:disabled):active {
+    transform: scale(0.985);
+}
+
+html.macos-native body button:disabled,
+html.macos-native body [role="button"][aria-disabled="true"] {
+    cursor: not-allowed !important;
+    opacity: 0.58 !important;
+}
+
+html.macos-native *::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+html.macos-native *::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: var(--nm-hairline);
+    background-clip: padding-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.macos-native *,
+    html.macos-native *::before,
+    html.macos-native *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

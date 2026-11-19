@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Siri Live Sphere — Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Inter"', 'system-ui', 'sans-serif'],
+            mono: ['"SF Mono"', '"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #0b0e14;
+      color: #f3f4f6;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 50% 18%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 50% 45% at 85% 85%, rgba(59, 130, 246, 0.07), transparent 70%);
+    }
+
+    /* Main Stage Card matching reference screenshot (#11151d) */
+    .siri-stage-frame {
+      background: radial-gradient(circle at 50% 50%, #15212b 0%, #11151d 55%, #0d1017 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 28px 60px -15px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .studio-panel {
+      background: rgba(17, 21, 29, 0.86);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 18px 40px -15px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(20px);
+    }
+
+    .size-pill-active {
+      background: rgba(139, 92, 246, 0.14);
+      border-color: #a855f7 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.35), inset 0 0 8px rgba(168, 85, 247, 0.2);
+    }
+
+    .control-pill-active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(56, 189, 248, 0.16));
+      border-color: rgba(52, 211, 153, 0.55) !important;
+      color: #ffffff !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    /* Precision Range Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #34d399;
+      border: 2px solid #0b0e14;
+      margin-top: -5.5px;
+      box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* 4-Bar Siri Equalizer inside Bottom Status Pill */
+    @keyframes eqPulse {
+      0%, 100% { transform: scaleY(0.35); opacity: 0.65; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+    .eq-bar {
+      transform-origin: center;
+      animation: eqPulse var(--eq-dur, 1.1s) ease-in-out infinite;
+      animation-delay: var(--eq-delay, 0s);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+
+  <!-- Hidden File Input for Direct Portrait Upload -->
+  <input type="file" id="portrait-file-input" accept="image/*" class="hidden" />
+
+  <!-- Floating Toast Feedback -->
+  <div id="toast-banner" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-300">
+    <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#151a24]/95 border border-emerald-400/35 text-xs font-medium text-white shadow-2xl backdrop-blur-xl">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+      <span id="toast-text">Siap</span>
+    </div>
+  </div>
+
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
+
+    <!-- MAIN STAGE CONTAINER (Exact Match to Screenshot 2026-11-19 at 10.31.58) -->
+    <section class="siri-stage-frame rounded-3xl overflow-hidden flex flex-col">
+
+      <!-- Stage Top Header Bar -->
+      <div class="px-5 sm:px-7 py-4 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-3 bg-[#0f131b]/75">
+        <!-- Left: Glowing Emerald Dot + Title + Status Pill -->
+        <div class="flex items-center gap-3">
+          <span id="stage-dot" class="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_12px_#34d399] transition-colors duration-300"></span>
+          <h1 class="text-base sm:text-[17px] font-semibold tracking-tight text-white">
+            Siri Live Sphere
+          </h1>
+          <span id="stage-status-badge" class="px-3 py-0.5 rounded-full text-xs font-medium bg-sky-500/12 text-sky-300 border border-sky-400/25 transition-colors duration-300">
+            Siri · Idle
+          </span>
+          <span id="stage-persona-badge" class="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/[0.05] text-slate-300 border border-white/[0.08]">
+            Eksekutif Pria
+          </span>
+        </div>
+
+        <!-- Right: Segmented Size Selector Pill (64px | 160px | 320px) -->
+        <div class="flex items-center gap-1 bg-[#0a0d13] p-1 rounded-full border border-white/[0.08]">
+          <button type="button" data-size="64" class="size-btn px-3.5 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-white border border-transparent transition">
+            64px
+          </button>
+          <button type="button" data-size="160" class="size-btn px-3.5 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-white border border-transparent transition">
+            160px
+          </button>
+          <button type="button" data-size="320" class="size-btn active size-pill-active px-4 py-1 rounded-full text-xs font-semibold text-white border border-transparent transition">
+            320px
+          </button>
+        </div>
+      </div>
+
+      <!-- Centerpiece Interactive Orb Stage -->
+      <div id="stage-dropzone" class="relative min-h-[430px] sm:min-h-[470px] flex flex-col items-center justify-between py-8 px-4 select-none overflow-hidden">
+
+        <!-- Ambient Radial Glow Behind Sphere -->
+        <div id="stage-ambient-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] rounded-full blur-3xl opacity-30 pointer-events-none transition-all duration-700" style="background: radial-gradient(circle, rgba(16,185,129,0.55) 0%, rgba(14,165,233,0.3) 48%, transparent 72%);"></div>
+
+        <!-- Drag & Drop Overlay -->
+        <div id="stage-drop-overlay" class="hidden absolute inset-5 z-30 rounded-2xl border-2 border-dashed border-emerald-400 bg-[#0d1118]/92 backdrop-blur-xl flex flex-col items-center justify-center text-center p-6 pointer-events-none">
+          <div class="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-400/40 flex items-center justify-center mb-3 text-emerald-300">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </div>
+          <p class="text-sm font-semibold text-white">Lepaskan Foto Potret di Sini</p>
+          <p id="drop-persona-hint" class="text-xs text-slate-400 mt-1">Foto akan langsung dibingkai untuk Eksekutif Pria</p>
+        </div>
+
+        <!-- Top Quick Action Helper inside Stage -->
+        <div class="relative z-10 flex items-center gap-2">
+          <button id="btn-stage-upload" type="button" class="px-3.5 py-1.5 rounded-full bg-white/[0.05] hover:bg-emerald-500/15 text-slate-200 hover:text-emerald-200 border border-white/[0.09] hover:border-emerald-400/35 text-xs font-medium transition flex items-center gap-1.5 backdrop-blur-md">
+            <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="3" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="m21 15-5-5L5 21" />
+            </svg>
+            <span id="stage-upload-label">Pasang Foto Asli · Eksekutif Pria</span>
+          </button>
+        </div>
+
+        <!-- Center SVG Sphere Mount -->
+        <div class="relative z-10 my-auto flex items-center justify-center min-h-[320px]">
+          <div id="main-orb-mount" title="Klik Orb untuk mengganti status Siri (Idle / Listening / Thinking / Speaking)" class="cursor-pointer transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center"></div>
+        </div>
+
+        <!-- Bottom Status Pill (Exact Match to Screenshot: 4 Equalizer Bars + Description) -->
+        <div class="relative z-10 flex items-center gap-3 px-5 py-2 rounded-full bg-[#181d27]/90 border border-white/[0.1] shadow-xl backdrop-blur-xl">
+          <div class="flex items-center gap-1 h-4">
+            <span class="eq-bar w-1 h-2.5 rounded-full bg-sky-400" style="--eq-dur: 1.25s; --eq-delay: 0.0s;"></span>
+            <span class="eq-bar w-1 h-3 rounded-full bg-indigo-400" style="--eq-dur: 1.05s; --eq-delay: 0.15s;"></span>
+            <span class="eq-bar w-1 h-3.5 rounded-full bg-pink-400" style="--eq-dur: 0.95s; --eq-delay: 0.3s;"></span>
+            <span class="eq-bar w-1 h-4 rounded-full bg-amber-400" style="--eq-dur: 1.15s; --eq-delay: 0.2s;"></span>
+          </div>
+          <span id="bottom-status-text" class="text-xs sm:text-[13px] font-medium text-slate-200 tracking-tight">
+            Orbital Gyro · Pita plasma Siri mengalir tenang
+          </span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CHARACTER SWITCHER (4 PERSONAS) & PORTRAIT CONTROLS -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left 7 Cols: 4 Persona Cards + Portrait Alignment -->
+      <div class="lg:col-span-7 studio-panel rounded-3xl p-5 sm:p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-sm font-semibold text-white">Pilih Karakter Avatar (4 Persona)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Klik kartu karakter untuk menampilkan di panggung utama, atau unggah foto potongan masing-masing.</p>
+          </div>
+          <span class="text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            Drag &amp; Drop Supported
+          </span>
+        </div>
+
+        <!-- 4 Persona Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="persona-grid">
+
+          <!-- Card 1: Eksekutif Pria -->
+          <div data-persona-card="execMale" class="persona-card control-pill-active cursor-pointer rounded-2xl p-3.5 border border-white/[0.08] bg-white/[0.02] hover:border-emerald-400/45 transition flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div id="mini-preview-execMale" class="w-12 h-12 rounded-full shrink-0 overflow-hidden border border-emerald-400/40 bg-[#05080f] flex items-center justify-center"></div>
+              <div class="min-w-0">
+                <div class="text-xs font-semibold text-white truncate">Eksekutif Pria</div>
+                <div id="sub-execMale" class="text-[11px] text-slate-400 truncate">Jas Navy · Kacamata · Janggut</div>
+              </div>
+            </div>
+            <button type="button" data-upload-persona="execMale" class="shrink-0 px-2.5 py-1.5 rounded-xl bg-white/[0.07] hover:bg-emerald-500/20 text-slate-200 hover:text-emerald-200 border border-white/10 text-[11px] font-medium transition">
+              Upload Foto
+            </button>
+          </div>
+
+          <!-- Card 2: Eksekutif Wanita -->
+          <div data-persona-card="execFemale" class="persona-card cursor-pointer rounded-2xl p-3.5 border border-white/[0.08] bg-white/[0.02] hover:border-emerald-400/45 transition flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div id="mini-preview-execFemale" class="w-12 h-12 rounded-full shrink-0 overflow-hidden border border-amber-400/40 bg-[#05080f] flex items-center justify-center"></div>
+              <div class="min-w-0">
+                <div class="text-xs font-semibold text-white truncate">Eksekutif Wanita</div>
+                <div id="sub-execFemale" class="text-[11px] text-slate-400 truncate">Hijab Hitam · Blazer Krem</div>
+              </div>
+            </div>
+            <button type="button" data-upload-persona="execFemale" class="shrink-0 px-2.5 py-1.5 rounded-xl bg-white/[0.07] hover:bg-emerald-500/20 text-slate-200 hover:text-emerald-200 border border-white/10 text-[11px] font-medium transition">
+              Upload Foto
+            </button>
+          </div>
+
+          <!-- Card 3: Arsi -->
+          <div data-persona-card="arsi" class="persona-card cursor-pointer rounded-2xl p-3.5 border border-white/[0.08] bg-white/[0.02] hover:border-emerald-400/45 transition flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div id="mini-preview-arsi" class="w-12 h-12 rounded-full shrink-0 overflow-hidden border border-pink-400/40 bg-[#05080f] flex items-center justify-center"></div>
+              <div class="min-w-0">
+                <div class="text-xs font-semibold text-white truncate">Arsi</div>
+                <div id="sub-arsi" class="text-[11px] text-slate-400 truncate">Rambut Panjang · Kaos Putih</div>
+              </div>
+            </div>
+            <button type="button" data-upload-persona="arsi" class="shrink-0 px-2.5 py-1.5 rounded-xl bg-white/[0.07] hover:bg-emerald-500/20 text-slate-200 hover:text-emerald-200 border border-white/10 text-[11px] font-medium transition">
+              Upload Foto
+            </button>
+          </div>
+
+          <!-- Card 4: Narendra -->
+          <div data-persona-card="narendra" class="persona-card cursor-pointer rounded-2xl p-3.5 border border-white/[0.08] bg-white/[0.02] hover:border-emerald-400/45 transition flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div id="mini-preview-narendra" class="w-12 h-12 rounded-full shrink-0 overflow-hidden border border-sky-400/40 bg-[#05080f] flex items-center justify-center"></div>
+              <div class="min-w-0">
+                <div class="text-xs font-semibold text-white truncate">Narendra</div>
+                <div id="sub-narendra" class="text-[11px] text-slate-400 truncate">Rambut Cepak · Kaos Gelap</div>
+              </div>
+            </div>
+            <button type="button" data-upload-persona="narendra" class="shrink-0 px-2.5 py-1.5 rounded-xl bg-white/[0.07] hover:bg-emerald-500/20 text-slate-200 hover:text-emerald-200 border border-white/10 text-[11px] font-medium transition">
+              Upload Foto
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Portrait Mode Toggle & Alignment Sliders for Active Persona -->
+        <div class="pt-4 border-t border-white/[0.08] space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-semibold text-white" id="active-portrait-title">Tampilan Potret · Eksekutif Pria</span>
+              <p class="text-[11px] text-slate-400">Beralih antara foto asli Anda atau ilustrasi vektor bawaan.</p>
+            </div>
+
+            <div class="flex items-center gap-1 bg-[#0a0d13] p-1 rounded-full border border-white/[0.08]">
+              <button type="button" data-render-mode="photo" class="render-mode-btn px-3 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-white border border-transparent transition">
+                Mode Foto Potret
+              </button>
+              <button type="button" data-render-mode="vector" class="render-mode-btn active control-pill-active px-3 py-1 rounded-full text-xs font-semibold text-white border border-transparent transition">
+                Mode Vektor Ilustrasi
+              </button>
+            </div>
+          </div>
+
+          <!-- Zoom & Vertical Offset Sliders -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <div class="flex justify-between text-xs mb-1.5">
+                <span class="text-slate-300">Zoom Foto</span>
+                <span id="zoom-readout" class="font-mono text-emerald-300">100%</span>
+              </div>
+              <input type="range" id="slider-photo-zoom" min="80" max="160" step="2" value="100" class="w-full" />
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-1.5">
+                <span class="text-slate-300">Posisi Vertikal</span>
+                <span id="offset-readout" class="font-mono text-emerald-300">0px</span>
+              </div>
+              <input type="range" id="slider-photo-offset" min="-40" max="40" step="1" value="0" class="w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right 5 Cols: Siri States, Gyro Styles, Spectrum & Export -->
+      <div class="lg:col-span-5 studio-panel rounded-3xl p-5 sm:p-6 space-y-5">
+
+        <!-- Status Siri -->
+        <div>
+          <label class="block text-xs font-semibold text-white mb-2">Status Siri</label>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" data-siri-state="idle" class="siri-state-btn active control-pill-active py-2 px-2 rounded-xl border border-white/[0.08] text-xs font-semibold text-white transition">
+              Idle
+            </button>
+            <button type="button" data-siri-state="listening" class="siri-state-btn py-2 px-2 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition">
+              Listening
+            </button>
+            <button type="button" data-siri-state="thinking" class="siri-state-btn py-2 px-2 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition">
+              Thinking
+            </button>
+            <button type="button" data-siri-state="speaking" class="siri-state-btn py-2 px-2 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition">
+              Speaking
+            </button>
+          </div>
+        </div>
+
+        <!-- Gaya Cincin -->
+        <div>
+          <label class="block text-xs font-semibold text-white mb-2">Gaya Cincin</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" data-ring-style="gyro" class="ring-style-btn active control-pill-active py-2 px-3 rounded-xl border border-white/[0.08] text-xs font-semibold text-white transition text-left">
+              Orbital Gyro
+            </button>
+            <button type="button" data-ring-style="plasma" class="ring-style-btn py-2 px-3 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition text-left">
+              Siri Plasma
+            </button>
+            <button type="button" data-ring-style="aura" class="ring-style-btn py-2 px-3 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition text-left">
+              Emerald Aura
+            </button>
+            <button type="button" data-ring-style="ripple" class="ring-style-btn py-2 px-3 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition text-left">
+              Acoustic Ripple
+            </button>
+          </div>
+        </div>
+
+        <!-- Spektrum Warna -->
+        <div>
+          <label class="block text-xs font-semibold text-white mb-2">Spektrum Warna</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" data-spectrum="emeraldGyro" class="spectrum-btn active control-pill-active flex items-center gap-2 py-2 px-3 rounded-xl border border-white/[0.08] text-xs font-semibold text-white transition">
+              <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background: linear-gradient(135deg, #34d399, #22d3ee, #3b82f6);"></span>
+              <span>Emerald Gyro</span>
+            </button>
+            <button type="button" data-spectrum="appleIntel" class="spectrum-btn flex items-center gap-2 py-2 px-3 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition">
+              <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background: linear-gradient(135deg, #38bdf8, #a855f7, #fb7185);"></span>
+              <span>Apple Intelligence</span>
+            </button>
+            <button type="button" data-spectrum="siriClassic" class="spectrum-btn flex items-center gap-2 py-2 px-3 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition">
+              <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background: linear-gradient(135deg, #06b6d4, #ec4899, #6366f1);"></span>
+              <span>Siri Classic</span>
+            </button>
+            <button type="button" data-spectrum="champagneRose" class="spectrum-btn flex items-center gap-2 py-2 px-3 rounded-xl border border-white/[0.08] bg-white/[0.02] text-xs font-medium text-slate-300 hover:text-white transition">
+              <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background: linear-gradient(135deg, #fbbf24, #fb7185, #c084fc);"></span>
+              <span>Champagne Rose</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="pt-3 border-t border-white/[0.08] space-y-2">
+          <div class="grid grid-cols-3 gap-2">
+            <button id="btn-copy-svg" type="button" class="py-2.5 px-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition shadow-lg shadow-emerald-500/20">
+              Copy SVG Code
+            </button>
+            <button id="btn-download-svg" type="button" class="py-2.5 px-2.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white font-medium text-xs border border-white/10 transition">
+              Download .SVG
+            </button>
+            <button id="btn-download-png" type="button" class="py-2.5 px-2.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white font-medium text-xs border border-white/10 transition">
+              Download .PNG
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 text-center">Ekspor PNG beresolusi 640×640px transparan dengan foto tertanam.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Collapsible / Clean Live SVG Code Inspector -->
+    <section class="studio-panel rounded-3xl p-5 sm:p-6">
+      <div class="flex items-center justify-between gap-3 mb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-white">Kode SVG Mandiri</span>
+          <span id="code-persona-tag" class="text-[11px] font-mono px-2 py-0.5 rounded bg-white/[0.06] text-emerald-300">Eksekutif Pria · 320px</span>
+        </div>
+        <button id="btn-copy-svg-secondary" type="button" class="text-xs text-emerald-300 hover:text-emerald-200 font-medium transition">
+          Salin Kode
+        </button>
+      </div>
+      <textarea id="svg-code-output" readonly rows="5" class="w-full rounded-2xl bg-[#080a0f] border border-white/[0.08] p-3.5 font-mono text-[11px] leading-relaxed text-emerald-200/90 focus:outline-none focus:border-emerald-400/50 resize-y"></textarea>
+    </section>
+
+  </main>
+
+  <script>
+    // 1. Spectrum Palettes (Emerald Gyro matches Screenshot 2026-11-19 at 10.31.58)
+    const SPECTRUMS = {
+      emeraldGyro: {
+        emerald: '#10b981',
+        mint: '#34d399',
+        cyan: '#22d3ee',
+        blue: '#3b82f6',
+        satTopLeft: '#a7f3d0',
+        satBottomRight: '#38bdf8',
+        rimInner: '#10b981',
+        rimOuter: '#34d399',
+        bgCore: '#02060c'
+      },
+      appleIntel: {
+        emerald: '#38bdf8',
+        mint: '#c084fc',
+        cyan: '#a855f7',
+        blue: '#fb7185',
+        satTopLeft: '#bae6fd',
+        satBottomRight: '#f472b6',
+        rimInner: '#a855f7',
+        rimOuter: '#38bdf8',
+        bgCore: '#05040d'
+      },
+      siriClassic: {
+        emerald: '#06b6d4',
+        mint: '#67e8f9',
+        cyan: '#ec4899',
+        blue: '#6366f1',
+        satTopLeft: '#a5f3fc',
+        satBottomRight: '#f472b6',
+        rimInner: '#06b6d4',
+        rimOuter: '#ec4899',
+        bgCore: '#030611'
+      },
+      champagneRose: {
+        emerald: '#f59e0b',
+        mint: '#fde68a',
+        cyan: '#fb7185',
+        blue: '#a855f7',
+        satTopLeft: '#fef3c7',
+        satBottomRight: '#fda4af',
+        rimInner: '#f59e0b',
+        rimOuter: '#fb7185',
+        bgCore: '#09050b'
+      }
+    };
+
+    // 2. Application State
+    const PERSONA_KEYS = ['execMale', 'execFemale', 'arsi', 'narendra'];
+
+    const state = {
+      activePersona: 'execMale',
+      orbSize: 320,            // 64 | 160 | 320
+      siriState: 'idle',       // 'idle' | 'listening' | 'thinking' | 'speaking'
+      ringStyle: 'gyro',       // 'gyro' | 'plasma' | 'aura' | 'ripple'
+      spectrum: 'emeraldGyro', // 'emeraldGyro' | 'appleIntel' | 'siriClassic' | 'champagneRose'
+      personas: {
+        execMale: {
+          name: 'Eksekutif Pria',
+          renderMode: 'vector',
+          photoDataUrl: null,
+          zoom: 100,
+          offsetY: 0
+        },
+        execFemale: {
+          name: 'Eksekutif Wanita',
+          renderMode: 'vector',
+          photoDataUrl: null,
+          zoom: 100,
+          offsetY: 0
+        },
+        arsi: {
+          name: 'Arsi',
+          renderMode: 'vector',
+          photoDataUrl: null,
+          zoom: 100,
+          offsetY: 0
+        },
+        narendra: {
+          name: 'Narendra',
+          renderMode: 'vector',
+          photoDataUrl: null,
+          zoom: 100,
+          offsetY: 0
+        }
+      }
+    };
+
+    // 3. Toast Helper
+    let toastTimer = null;
+    function showToast(msg) {
+      const banner = document.getElementById('toast-banner');
+      document.getElementById('toast-text').textContent = msg;
+      banner.classList.remove('opacity-0', 'translate-y-2');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        banner.classList.add('opacity-0', 'translate-y-2');
+      }, 2600);
+    }
+
+    // 4. High-Detail Vector Portraits (Realistic Shading & Crisp Attire)
+    function getVectorPortraitMarkup(personaKey) {
+      if (personaKey === 'execMale') {
+        // Bearded Executive in navy suit, white open-collar shirt, white pocket square, rectangular half-rim glasses, short buzzed hair
+        return `
+      <!-- Navy Suit Jacket Shoulders -->
+      <path d="M56 276 Q72 192 134 184 L186 184 Q248 192 264 276 Z" fill="url(#navySuit)"/>
+      <!-- White Dress Shirt Center -->
+      <polygon points="138,184 182,184 169,274 151,274" fill="#f8fafc"/>
+      <!-- Shirt Collar Flaps -->
+      <polygon points="137,182 156,197 147,213 132,193" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
+      <polygon points="183,182 164,197 173,213 188,193" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
+      <!-- Notched Navy Lapels -->
+      <path d="M134 185 L113 214 L128 223 L119 233 L154 276 L160 276 L140 185 Z" fill="#172554" stroke="#3b82f6" stroke-width="0.7" stroke-opacity="0.35"/>
+      <path d="M186 185 L207 214 L192 223 L201 233 L166 276 L160 276 L180 185 Z" fill="#172554" stroke="#3b82f6" stroke-width="0.7" stroke-opacity="0.35"/>
+      <!-- White Pocket Square -->
+      <polygon points="192,226 221,221 222,226 193,231" fill="#ffffff"/>
+      <!-- Neck -->
+      <path d="M142 162 L142 188 Q160 203 178 188 L178 162 Z" fill="url(#skinTone)"/>
+      <path d="M142 166 Q160 179 178 166 L178 175 Q160 187 142 175 Z" fill="#9a6b52" opacity="0.35"/>
+      <!-- Ears -->
+      <ellipse cx="121" cy="129" rx="6.5" ry="12.5" fill="url(#skinTone)"/>
+      <ellipse cx="199" cy="129" rx="6.5" ry="12.5" fill="url(#skinTone)"/>
+      <!-- Head / Face -->
+      <ellipse cx="160" cy="126" rx="36" ry="46" fill="url(#skinTone)"/>
+      <!-- Very Short Buzzed Hair -->
+      <path d="M123 118 Q121 73 160 71 Q199 73 197 118 Q193 90 160 88 Q127 90 123 118 Z" fill="#272220" opacity="0.88"/>
+      <!-- Eyebrows -->
+      <path d="M135 113 Q145 110 154 113" fill="none" stroke="#1f1a18" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M166 113 Q175 110 185 113" fill="none" stroke="#1f1a18" stroke-width="2.8" stroke-linecap="round"/>
+      <!-- Eyes -->
+      <ellipse cx="145" cy="121" rx="4.5" ry="3" fill="#ffffff"/>
+      <ellipse cx="175" cy="121" rx="4.5" ry="3" fill="#ffffff"/>
+      <circle cx="145" cy="121" r="2.4" fill="#1c1917"/>
+      <circle cx="175" cy="121" r="2.4" fill="#1c1917"/>
+      <circle cx="144.2" cy="120.2" r="0.8" fill="#ffffff"/>
+      <circle cx="174.2" cy="120.2" r="0.8" fill="#ffffff"/>
+      <!-- Rectangular Half-Rim Glasses -->
+      <g stroke="#334155" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M131 115 L157 115" stroke-width="2.6"/>
+        <path d="M163 115 L189 115" stroke-width="2.6"/>
+        <path d="M157 116 Q160 114.5 163 116" fill="none" stroke-width="2"/>
+        <line x1="122" y1="118" x2="131" y2="115" stroke-width="2.2"/>
+        <line x1="198" y1="118" x2="189" y2="115" stroke-width="2.2"/>
+        <rect x="132" y="115" width="24" height="13.5" rx="3" fill="#ffffff" fill-opacity="0.12" stroke="#94a3b8" stroke-width="0.9"/>
+        <rect x="164" y="115" width="24" height="13.5" rx="3" fill="#ffffff" fill-opacity="0.12" stroke="#94a3b8" stroke-width="0.9"/>
+      </g>
+      <!-- Nose & Lips -->
+      <path d="M160 121 L157.5 135 L162.5 136" fill="none" stroke="#9a6b52" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M150 146 Q160 149 170 146" fill="none" stroke="#884a39" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Neat Mustache & Chin Beard -->
+      <path d="M148 143 Q160 139 172 143" fill="none" stroke="#26211f" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M133 148 Q141 173 160 175 Q179 173 187 148 Q176 163 160 163 Q144 163 133 148 Z" fill="#26211f"/>
+      <line x1="160" y1="150" x2="160" y2="163" stroke="#26211f" stroke-width="2.4" stroke-linecap="round"/>`;
+      }
+
+      if (personaKey === 'execFemale') {
+        // Hijabi Executive in black hijab, dark espresso inner blouse, cream/ivory blazer
+        return `
+      <!-- Cream / Ivory Tailored Blazer -->
+      <path d="M58 276 Q76 192 136 184 L184 184 Q244 192 262 276 Z" fill="#f5efe6"/>
+      <!-- Dark Espresso Brown Inner Blouse -->
+      <polygon points="140,186 180,186 171,274 149,274" fill="#3b261d"/>
+      <line x1="160" y1="196" x2="160" y2="274" stroke="#23150f" stroke-width="1.2"/>
+      <!-- Blazer Notched Lapels -->
+      <path d="M135 185 L115 214 L130 223 L120 233 L152 276 L158 276 L142 186 Z" fill="#ebe2d5" stroke="#cbbba6" stroke-width="0.9"/>
+      <path d="M185 185 L205 214 L190 223 L200 233 L168 276 L162 276 L178 186 Z" fill="#ebe2d5" stroke="#cbbba6" stroke-width="0.9"/>
+      <!-- Sleek Black Hijab Outer Hood & Neck Wrap -->
+      <path d="M112 126 Q112 66 160 65 Q208 66 208 126 Q208 162 217 187 Q189 203 160 203 Q131 203 103 187 Q112 162 112 126 Z" fill="#12141b"/>
+      <path d="M111 174 Q160 192 209 174" fill="none" stroke="#ffffff" stroke-width="1" stroke-opacity="0.16"/>
+      <path d="M107 184 Q160 200 213 184" fill="none" stroke="#ffffff" stroke-width="1" stroke-opacity="0.12"/>
+      <!-- Face Oval inside Hijab -->
+      <ellipse cx="160" cy="126" rx="32" ry="41" fill="url(#skinTone)"/>
+      <!-- Inner Hijab Shadow at Forehead -->
+      <path d="M130 112 Q160 86 190 112 Q185 84 160 83 Q135 84 130 112 Z" fill="#090a0e"/>
+      <!-- Eyebrows, Eyes & Warm Smile -->
+      <path d="M138 114 Q146 110 153 113" fill="none" stroke="#231c18" stroke-width="2.3" stroke-linecap="round"/>
+      <path d="M167 113 Q174 110 182 114" fill="none" stroke="#231c18" stroke-width="2.3" stroke-linecap="round"/>
+      <ellipse cx="146" cy="121" rx="4.4" ry="3" fill="#ffffff"/>
+      <ellipse cx="174" cy="121" rx="4.4" ry="3" fill="#ffffff"/>
+      <circle cx="146" cy="121" r="2.4" fill="#1c1917"/>
+      <circle cx="174" cy="121" r="2.4" fill="#1c1917"/>
+      <circle cx="145.2" cy="120.2" r="0.8" fill="#ffffff"/>
+      <circle cx="173.2" cy="120.2" r="0.8" fill="#ffffff"/>
+      <path d="M160 121 L158.5 134 L161.5 135" fill="none" stroke="#9a6b52" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M149 144 Q160 151 171 144" fill="none" stroke="#b45349" stroke-width="2.4" stroke-linecap="round"/>`;
+      }
+
+      if (personaKey === 'arsi') {
+        // Arsi: Long straight center-parted dark brown hair and white crewneck tee
+        return `
+      <!-- Back Long Straight Brown Hair -->
+      <path d="M96 134 Q94 64 160 62 Q226 64 224 134 L240 276 L80 276 Z" fill="#2c221e"/>
+      <!-- White Crewneck T-Shirt -->
+      <path d="M78 276 Q90 194 142 187 L178 187 Q230 194 242 276 Z" fill="#f8fafc"/>
+      <path d="M138 187 Q160 211 182 187" fill="none" stroke="#cbd5e1" stroke-width="2.8"/>
+      <!-- Neck -->
+      <path d="M143 164 L143 190 Q160 205 177 190 L177 164 Z" fill="url(#skinTone)"/>
+      <!-- Face -->
+      <ellipse cx="160" cy="129" rx="34.5" ry="43.5" fill="url(#skinTone)"/>
+      <!-- Eyebrows, Eyes & Smile -->
+      <path d="M140 119 Q147 116 153 118" fill="none" stroke="#3b2f2a" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M167 118 Q173 116 180 119" fill="none" stroke="#3b2f2a" stroke-width="2.2" stroke-linecap="round"/>
+      <ellipse cx="147" cy="126" rx="4.4" ry="3" fill="#ffffff"/>
+      <ellipse cx="173" cy="126" rx="4.4" ry="3" fill="#ffffff"/>
+      <circle cx="147" cy="126" r="2.5" fill="#1c1917"/>
+      <circle cx="173" cy="126" r="2.5" fill="#1c1917"/>
+      <circle cx="146.2" cy="125.2" r="0.8" fill="#ffffff"/>
+      <circle cx="172.2" cy="125.2" r="0.8" fill="#ffffff"/>
+      <path d="M150 146 Q160 152 170 146" fill="none" stroke="#be6a6c" stroke-width="2.3" stroke-linecap="round"/>
+      <!-- Front Center-Parted Straight Brown Hair -->
+      <path d="M160 68 Q120 73 109 148 L94 276 L121 276 Q124 163 160 78 Z" fill="#3f312b"/>
+      <path d="M160 68 Q200 73 211 148 L226 276 L199 276 Q196 163 160 78 Z" fill="#3f312b"/>`;
+      }
+
+      // Narendra: Short tapered dark hair, expressive eyebrows, dark crewneck tee
+      return `
+      <!-- Dark Charcoal Crewneck T-Shirt -->
+      <path d="M80 276 Q92 193 142 186 L178 186 Q228 193 240 276 Z" fill="#333740"/>
+      <path d="M138 186 Q160 209 182 186" fill="none" stroke="#1f232a" stroke-width="3"/>
+      <!-- Neck -->
+      <path d="M142 164 L142 190 Q160 205 178 190 L178 164 Z" fill="url(#skinTone)"/>
+      <!-- Ears -->
+      <ellipse cx="121" cy="132" rx="7.5" ry="13" fill="url(#skinTone)"/>
+      <ellipse cx="199" cy="132" rx="7.5" ry="13" fill="url(#skinTone)"/>
+      <!-- Face -->
+      <ellipse cx="160" cy="128" rx="36.5" ry="44.5" fill="url(#skinTone)"/>
+      <!-- Short Tapered Hair -->
+      <path d="M122 120 Q118 72 160 70 Q202 72 198 120 Q190 92 160 91 Q130 92 122 120 Z" fill="#231d1a"/>
+      <!-- Eyebrows, Bright Eyes & Smile -->
+      <path d="M138 116 Q146 112 154 115" fill="none" stroke="#231d1a" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M166 115 Q174 112 182 116" fill="none" stroke="#231d1a" stroke-width="2.8" stroke-linecap="round"/>
+      <ellipse cx="147" cy="125" rx="4.8" ry="3.5" fill="#ffffff"/>
+      <ellipse cx="173" cy="125" rx="4.8" ry="3.5" fill="#ffffff"/>
+      <circle cx="147" cy="125" r="2.8" fill="#1c1917"/>
+      <circle cx="173" cy="125" r="2.8" fill="#1c1917"/>
+      <circle cx="146" cy="124" r="0.9" fill="#ffffff"/>
+      <circle cx="172" cy="124" r="0.9" fill="#ffffff"/>
+      <path d="M152 147 Q160 152 168 147" fill="none" stroke="#a65a52" stroke-width="2.3" stroke-linecap="round"/>`;
+    }
+
+    // 5. Build Standalone SVG Sphere (Matching Reference Screenshot 2026-11-19 at 10.31.58)
+    function buildSphereSVG(personaKey, sizePx) {
+      const p = state.personas[personaKey];
+      const pal = SPECTRUMS[state.spectrum] || SPECTRUMS.emeraldGyro;
+
+      // Animation speed & energy scaling by Siri status
+      let speedMult = 1;
+      let innerRimOpacity = 0.85;
+      let stateExtraSVG = '';
+
+      if (state.siriState === 'listening') {
+        speedMult = 0.55;
+        innerRimOpacity = 0.98;
+        stateExtraSVG = `
+  <circle cx="160" cy="160" r="118" fill="none" stroke="${pal.mint}" stroke-width="2" opacity="0.75">
+    <animate attributeName="r" values="116;148;116" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.75;0;0.75" dur="1.8s" repeatCount="indefinite"/>
+  </circle>`;
+      } else if (state.siriState === 'thinking') {
+        speedMult = 0.28;
+        innerRimOpacity = 1;
+        stateExtraSVG = `
+  <circle cx="160" cy="160" r="147" fill="none" stroke="url(#gyroGradMain)" stroke-width="1.5" stroke-dasharray="40 25 12 25" opacity="0.8">
+    <animateTransform attributeName="transform" type="rotate" from="0 160 160" to="360 160 160" dur="3.5s" repeatCount="indefinite"/>
+  </circle>`;
+      } else if (state.siriState === 'speaking') {
+        speedMult = 0.48;
+        innerRimOpacity = 0.96;
+        stateExtraSVG = `
+  <circle cx="160" cy="160" r="115" fill="none" stroke="${pal.cyan}" stroke-width="2.5" opacity="0.6">
+    <animate attributeName="r" values="113;121;114;120;113" dur="1.1s" repeatCount="indefinite"/>
+  </circle>`;
+      }
+
+      const d1 = (16 * speedMult).toFixed(1);
+      const d2 = (12 * speedMult).toFixed(1);
+      const d3 = (20 * speedMult).toFixed(1);
+      const dSat = (14 * speedMult).toFixed(1);
+
+      // Outer Ring Choreography
+      let outerRingsMarkup = '';
+      if (state.ringStyle === 'gyro') {
+        // Exact Multi-Ring Orbital Gyro + 2 Glowing Satellite Dots from Screenshot
+        outerRingsMarkup = `
+  <!-- Outer Concentric Segmented Rings (Orbital Gyro) -->
+  <g>
+    <!-- Ring 1 (Innermost crisp emerald/cyan ring) -->
+    <circle cx="160" cy="160" r="122" fill="none" stroke="url(#gyroGradMain)" stroke-width="1.8" stroke-dasharray="145 28 75 28" stroke-linecap="round">
+      <animateTransform attributeName="transform" type="rotate" from="0 160 160" to="360 160 160" dur="${d1}s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Ring 2 (Counter-rotating emerald & blue arcs) -->
+    <circle cx="160" cy="160" r="131" fill="none" stroke="url(#gyroGradAlt)" stroke-width="1.7" stroke-dasharray="110 38 55 24 85 38" stroke-linecap="round" opacity="0.92">
+      <animateTransform attributeName="transform" type="rotate" from="360 160 160" to="0 160 160" dur="${d2}s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Ring 3 (Outer wide orbital dashes) -->
+    <circle cx="160" cy="160" r="140" fill="none" stroke="url(#gyroGradMain)" stroke-width="1.5" stroke-dasharray="68 42 28 32 95 42" stroke-linecap="round" opacity="0.82">
+      <animateTransform attributeName="transform" type="rotate" from="0 160 160" to="360 160 160" dur="${d3}s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Orbiting Glowing Satellite Dots (Mint Top-Left & Electric Blue Bottom-Right) -->
+    <g>
+      <circle cx="67" cy="67" r="4.2" fill="${pal.satTopLeft}" filter="url(#satGlow)"/>
+      <circle cx="253" cy="253" r="3.8" fill="${pal.satBottomRight}" filter="url(#satGlow)"/>
+      <animateTransform attributeName="transform" type="rotate" from="0 160 160" to="360 160 160" dur="${dSat}s" repeatCount="indefinite"/>
+    </g>
+  </g>`;
+      } else if (state.ringStyle === 'plasma') {
+        outerRingsMarkup = `
+  <g>
+    <ellipse cx="160" cy="160" rx="134" ry="122" fill="none" stroke="${pal.mint}" stroke-width="2.4" opacity="0.78" filter="url(#satGlow)">
+      <animateTransform attributeName="transform" type="rotate" from="0 160 160" to="360 160 160" dur="${d2}s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="160" cy="160" rx="122" ry="135" fill="none" stroke="${pal.blue}" stroke-width="2.2" opacity="0.75">
+      <animateTransform attributeName="transform" type="rotate" from="360 160 160" to="0 160 160" dur="${d1}s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>`;
+      } else if (state.ringStyle === 'aura') {
+        outerRingsMarkup = `
+  <g>
+    <circle cx="160" cy="160" r="127" fill="none" stroke="url(#gyroGradMain)" stroke-width="3" opacity="0.7" filter="url(#satGlow)">
+      <animate attributeName="r" values="122;134;122" dur="${(3.2 * speedMult).toFixed(1)}s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="160" cy="160" r="137" fill="none" stroke="${pal.cyan}" stroke-width="1.3" stroke-dasharray="18 14" opacity="0.6">
+      <animateTransform attributeName="transform" type="rotate" from="0 160 160" to="360 160 160" dur="${d3}s" repeatCount="indefinite"/>
+    </circle>
+  </g>`;
+      } else {
+        // Acoustic Ripple
+        outerRingsMarkup = `
+  <g>
+    <circle cx="160" cy="160" r="118" fill="none" stroke="${pal.mint}" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="116;152" dur="${(2.2 * speedMult).toFixed(1)}s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.85;0" dur="${(2.2 * speedMult).toFixed(1)}s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="160" cy="160" r="118" fill="none" stroke="${pal.blue}" stroke-width="1.8" opacity="0">
+      <animate attributeName="r" values="116;152" dur="${(2.2 * speedMult).toFixed(1)}s" begin="${(1.1 * speedMult).toFixed(2)}s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.75;0" dur="${(2.2 * speedMult).toFixed(1)}s" begin="${(1.1 * speedMult).toFixed(2)}s" repeatCount="indefinite"/>
+    </circle>
+  </g>`;
+      }
+
+      // Subject Inside Sphere (Uploaded Photo OR Crisp Vector Portrait)
+      const usePhoto = Boolean(p.photoDataUrl && p.renderMode === 'photo');
+      let subjectMarkup = '';
+      if (usePhoto) {
+        const scale = p.zoom / 100;
+        const imgW = 224 * scale;
+        const imgH = 224 * scale;
+        const imgX = 160 - imgW / 2;
+        const imgY = 160 - imgH / 2 + p.offsetY;
+        subjectMarkup = `
+      <image href="${p.photoDataUrl}" x="${imgX.toFixed(1)}" y="${imgY.toFixed(1)}" width="${imgW.toFixed(1)}" height="${imgH.toFixed(1)}" preserveAspectRatio="xMidYMid slice"/>`;
+      } else {
+        const scale = p.zoom / 100;
+        const tx = 160 * (1 - scale);
+        const ty = 160 * (1 - scale) + p.offsetY;
+        subjectMarkup = `
+      <g transform="translate(${tx.toFixed(1)}, ${ty.toFixed(1)}) scale(${scale.toFixed(2)})">
+${getVectorPortraitMarkup(personaKey)}
+      </g>`;
+      }
+
+      return `<svg viewBox="0 0 320 320" width="${sizePx}" height="${sizePx}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Deep Obsidian Core Background -->
+    <radialGradient id="coreBg" cx="50%" cy="48%" r="52%">
+      <stop offset="0%" stop-color="#0a1219"/>
+      <stop offset="72%" stop-color="${pal.bgCore}"/>
+      <stop offset="100%" stop-color="#010307"/>
+    </radialGradient>
+
+    <!-- Vivid Inner Emerald-Cyan Rim Vignette (Matching Screenshot) -->
+    <radialGradient id="emeraldInnerRim" cx="50%" cy="50%" r="50%">
+      <stop offset="68%" stop-color="${pal.rimInner}" stop-opacity="0"/>
+      <stop offset="86%" stop-color="${pal.rimInner}" stop-opacity="0.32"/>
+      <stop offset="96%" stop-color="${pal.rimOuter}" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="${pal.mint}" stop-opacity="0.95"/>
+    </radialGradient>
+
+    <!-- Orbital Gyro Gradients -->
+    <linearGradient id="gyroGradMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${pal.mint}"/>
+      <stop offset="50%" stop-color="${pal.cyan}"/>
+      <stop offset="100%" stop-color="${pal.blue}"/>
+    </linearGradient>
+
+    <linearGradient id="gyroGradAlt" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="${pal.blue}"/>
+      <stop offset="50%" stop-color="${pal.emerald}"/>
+      <stop offset="100%" stop-color="${pal.cyan}"/>
+    </linearGradient>
+
+    <!-- Upper Glass Specular Crescent -->
+    <linearGradient id="upperSpecular" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="65%" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Natural Skin & Navy Suit Gradients for Vector Fallback -->
+    <linearGradient id="skinTone" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f2c6a9"/>
+      <stop offset="100%" stop-color="#d49b79"/>
+    </linearGradient>
+    <linearGradient id="navySuit" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <filter id="satGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <clipPath id="sphereClip">
+      <circle cx="160" cy="160" r="113"/>
+    </clipPath>
+  </defs>
+${outerRingsMarkup}
+${stateExtraSVG}
+  <!-- Main Spherical Core -->
+  <circle cx="160" cy="160" r="114" fill="url(#coreBg)" stroke="url(#gyroGradMain)" stroke-width="2"/>
+
+  <!-- Clipped Portrait + Emerald Rim Vignette + Glass Specular -->
+  <g clip-path="url(#sphereClip)">
+${subjectMarkup}
+    <!-- Luminous Inner Emerald-Cyan Rim Glow Around Portrait Edges -->
+    <circle cx="160" cy="160" r="113" fill="url(#emeraldInnerRim)" opacity="${innerRimOpacity}" pointer-events="none"/>
+
+    <!-- Top Glass Dome Specular Crescent -->
+    <ellipse cx="160" cy="94" rx="76" ry="34" fill="url(#upperSpecular)" pointer-events="none"/>
+
+    <!-- Bottom Subtle Caustic Rim Arc -->
+    <path d="M68 214 A108 108 0 0 0 252 214 A114 96 0 0 1 68 214 Z" fill="${pal.mint}" opacity="0.25" pointer-events="none"/>
+  </g>
+
+  <!-- Crisp Inner Glass Bezel Ring -->
+  <circle cx="160" cy="160" r="113" fill="none" stroke="${pal.mint}" stroke-opacity="0.55" stroke-width="1.2"/>
+</svg>`;
+    }
+
+    // 6. Render & Synchronize UI
+    function renderStudio() {
+      const p = state.personas[state.activePersona];
+      const pal = SPECTRUMS[state.spectrum];
+
+      // Render Centerpiece SVG at Selected Size (64px / 160px / 320px)
+      const svgMarkup = buildSphereSVG(state.activePersona, state.orbSize);
+      document.getElementById('main-orb-mount').innerHTML = svgMarkup;
+
+      // Update Top Bar Badges
+      const stateTitleMap = {
+        idle: 'Siri · Idle',
+        listening: 'Siri · Listening',
+        thinking: 'Siri · Thinking',
+        speaking: 'Siri · Speaking'
+      };
+      document.getElementById('stage-status-badge').textContent = stateTitleMap[state.siriState];
+      document.getElementById('stage-persona-badge').textContent = p.name;
+      document.getElementById('stage-dot').style.backgroundColor = pal.mint;
+      document.getElementById('stage-dot').style.boxShadow = `0 0 12px ${pal.mint}`;
+
+      // Update Ambient Glow
+      document.getElementById('stage-ambient-glow').style.background = `radial-gradient(circle, ${pal.emerald}77 0%, ${pal.blue}44 48%, transparent 72%)`;
+
+      // Update Upload Label & Drop Hint
+      document.getElementById('stage-upload-label').textContent = p.photoDataUrl
+        ? `Ganti Foto Asli · ${p.name}`
+        : `Pasang Foto Asli · ${p.name}`;
+      document.getElementById('drop-persona-hint').textContent = `Foto akan langsung dibingkai untuk ${p.name}`;
+      document.getElementById('active-portrait-title').textContent = `Tampilan Potret · ${p.name}`;
+
+      // Update Bottom Status Pill Text & Equalizer Speed
+      const ringNameMap = {
+        gyro: 'Orbital Gyro',
+        plasma: 'Siri Plasma',
+        aura: 'Emerald Aura',
+        ripple: 'Acoustic Ripple'
+      };
+      const stateDescMap = {
+        idle: 'Pita plasma Siri mengalir tenang',
+        listening: 'Mendengarkan perintah suara Anda...',
+        thinking: 'Memproses konteks kecerdasan AI...',
+        speaking: 'Merespons dengan gelombang suara'
+      };
+      document.getElementById('bottom-status-text').textContent = `${ringNameMap[state.ringStyle]} · ${stateDescMap[state.siriState]}`;
+
+      const eqSpeed = state.siriState === 'speaking' ? 0.48 : state.siriState === 'thinking' ? 0.65 : state.siriState === 'listening' ? 0.78 : 1.15;
+      document.querySelectorAll('.eq-bar').forEach((bar, i) => {
+        bar.style.setProperty('--eq-dur', `${(eqSpeed + i * 0.08).toFixed(2)}s`);
+      });
+
+      // Render Mini Thumbnails for All 4 Persona Cards
+      PERSONA_KEYS.forEach((key) => {
+        const item = state.personas[key];
+        const previewEl = document.getElementById(`mini-preview-${key}`);
+        if (item.photoDataUrl) {
+          previewEl.innerHTML = `<img src="${item.photoDataUrl}" alt="${item.name}" class="w-full h-full object-cover" />`;
+          document.getElementById(`sub-${key}`).textContent = 'Foto Asli Terpasang ✓';
+        } else {
+          previewEl.innerHTML = buildSphereSVG(key, 48);
+        }
+      });
+
+      // Sync Render Mode Pills & Sliders
+      document.querySelectorAll('.render-mode-btn').forEach((btn) => {
+        const isActive = btn.dataset.renderMode === p.renderMode;
+        btn.classList.toggle('active', isActive);
+        btn.classList.toggle('control-pill-active', isActive);
+        btn.classList.toggle('font-semibold', isActive);
+        btn.classList.toggle('text-white', isActive);
+        btn.classList.toggle('text-slate-400', !isActive);
+      });
+
+      document.getElementById('slider-photo-zoom').value = p.zoom;
+      document.getElementById('zoom-readout').textContent = `${p.zoom}%`;
+      document.getElementById('slider-photo-offset').value = p.offsetY;
+      document.getElementById('offset-readout').textContent = `${p.offsetY}px`;
+
+      // Update SVG Code Inspector
+      document.getElementById('code-persona-tag').textContent = `${p.name} · ${state.orbSize}px`;
+      document.getElementById('svg-code-output').value = svgMarkup;
+    }
+
+    // 7. Event Bindings
+
+    // Size Selector (64px | 160px | 320px)
+    document.querySelectorAll('.size-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.orbSize = parseInt(btn.dataset.size, 10);
+        document.querySelectorAll('.size-btn').forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle('active', active);
+          b.classList.toggle('size-pill-active', active);
+          b.classList.toggle('font-semibold', active);
+          b.classList.toggle('text-white', active);
+          b.classList.toggle('text-slate-400', !active);
+        });
+        renderStudio();
+        showToast(`Ukuran Orb: ${state.orbSize}px`);
+      });
+    });
+
+    // Click Main Orb to Cycle Siri States
+    document.getElementById('main-orb-mount').addEventListener('click', () => {
+      const order = ['idle', 'listening', 'thinking', 'speaking'];
+      const next = order[(order.indexOf(state.siriState) + 1) % order.length];
+      setSiriState(next);
+    });
+
+    function setSiriState(newState) {
+      state.siriState = newState;
+      document.querySelectorAll('.siri-state-btn').forEach((b) => {
+        const active = b.dataset.siriState === newState;
+        b.classList.toggle('active', active);
+        b.classList.toggle('control-pill-active', active);
+        b.classList.toggle('font-semibold', active);
+        b.classList.toggle('text-white', active);
+        b.classList.toggle('bg-white/[0.02]', !active);
+      });
+      renderStudio();
+    }
+
+    document.querySelectorAll('.siri-state-btn').forEach((btn) => {
+      btn.addEventListener('click', () => setSiriState(btn.dataset.siriState));
+    });
+
+    // Ring Style Selector
+    document.querySelectorAll('.ring-style-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.ringStyle = btn.dataset.ringStyle;
+        document.querySelectorAll('.ring-style-btn').forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle('active', active);
+          b.classList.toggle('control-pill-active', active);
+          b.classList.toggle('font-semibold', active);
+          b.classList.toggle('text-white', active);
+          b.classList.toggle('bg-white/[0.02]', !active);
+        });
+        renderStudio();
+      });
+    });
+
+    // Spectrum Selector
+    document.querySelectorAll('.spectrum-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.spectrum = btn.dataset.spectrum;
+        document.querySelectorAll('.spectrum-btn').forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle('active', active);
+          b.classList.toggle('control-pill-active', active);
+          b.classList.toggle('font-semibold', active);
+          b.classList.toggle('text-white', active);
+          b.classList.toggle('bg-white/[0.02]', !active);
+        });
+        renderStudio();
+      });
+    });
+
+    // Persona Selection Cards
+    function selectPersona(key) {
+      state.activePersona = key;
+      document.querySelectorAll('.persona-card').forEach((card) => {
+        const active = card.dataset.personaCard === key;
+        card.classList.toggle('control-pill-active', active);
+        card.classList.toggle('bg-white/[0.02]', !active);
+      });
+      renderStudio();
+    }
+
+    document.querySelectorAll('.persona-card').forEach((card) => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        selectPersona(card.dataset.personaCard);
+      });
+    });
+
+    // Photo Upload & Drag-and-Drop Handling
+    let uploadTargetPersona = 'execMale';
+    const fileInput = document.getElementById('portrait-file-input');
+
+    function handleImageFile(file, targetKey) {
+      if (!file || !file.type.startsWith('image/')) {
+        showToast('Silakan unggah file gambar (JPG, PNG, WebP).');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        const img = new Image();
+        img.onload = function () {
+          // Normalize image to clean 480px square-friendly canvas while preserving transparency if PNG
+          const maxDim = 512;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          state.personas[targetKey].photoDataUrl = canvas.toDataURL('image/png');
+          state.personas[targetKey].renderMode = 'photo';
+          selectPersona(targetKey);
+          showToast(`Foto ${state.personas[targetKey].name} berhasil dipasang!`);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById('btn-stage-upload').addEventListener('click', () => {
+      uploadTargetPersona = state.activePersona;
+      fileInput.value = '';
+      fileInput.click();
+    });
+
+    document.querySelectorAll('[data-upload-persona]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        uploadTargetPersona = btn.dataset.uploadPersona;
+        selectPersona(uploadTargetPersona);
+        fileInput.value = '';
+        fileInput.click();
+      });
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        handleImageFile(e.target.files[0], uploadTargetPersona);
+      }
+    });
+
+    // Stage Drag & Drop
+    const stageDrop = document.getElementById('stage-dropzone');
+    const stageOverlay = document.getElementById('stage-drop-overlay');
+
+    stageDrop.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      stageOverlay.classList.remove('hidden');
+    });
+    stageDrop.addEventListener('dragleave', (e) => {
+      if (!stageDrop.contains(e.relatedTarget)) {
+        stageOverlay.classList.add('hidden');
+      }
+    });
+    stageDrop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      stageOverlay.classList.add('hidden');
+      if (e.dataTransfer.files[0]) {
+        handleImageFile(e.dataTransfer.files[0], state.activePersona);
+      }
+    });
+
+    // Render Mode Toggle (Photo vs Vector)
+    document.querySelectorAll('.render-mode-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.renderMode;
+        const p = state.personas[state.activePersona];
+        if (mode === 'photo' && !p.photoDataUrl) {
+          uploadTargetPersona = state.activePersona;
+          fileInput.value = '';
+          fileInput.click();
+          return;
+        }
+        p.renderMode = mode;
+        renderStudio();
+      });
+    });
+
+    // Zoom & Vertical Offset Sliders
+    document.getElementById('slider-photo-zoom').addEventListener('input', (e) => {
+      state.personas[state.activePersona].zoom = parseInt(e.target.value, 10);
+      renderStudio();
+    });
+
+    document.getElementById('slider-photo-offset').addEventListener('input', (e) => {
+      state.personas[state.activePersona].offsetY = parseInt(e.target.value, 10);
+      renderStudio();
+    });
+
+    // Export Buttons
+    function copySVGCode() {
+      const textarea = document.getElementById('svg-code-output');
+      textarea.select();
+      textarea.setSelectionRange(0, 999999);
+      try {
+        document.execCommand('copy');
+        showToast('Kode SVG disalin ke clipboard');
+      } catch (err) {
+        showToast('Gagal menyalin kode SVG');
+      }
+      window.getSelection().removeAllRanges();
+    }
+
+    document.getElementById('btn-copy-svg').addEventListener('click', copySVGCode);
+    document.getElementById('btn-copy-svg-secondary').addEventListener('click', copySVGCode);
+
+    document.getElementById('btn-download-svg').addEventListener('click', () => {
+      const svgContent = buildSphereSVG(state.activePersona, state.orbSize);
+      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `siri-live-sphere-${state.activePersona}-${state.orbSize}px.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Mengunduh siri-live-sphere-${state.activePersona}.svg`);
+    });
+
+    document.getElementById('btn-download-png').addEventListener('click', () => {
+      const exportSize = 640;
+      const svgStr = buildSphereSVG(state.activePersona, exportSize);
+      const encoded = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = exportSize;
+        canvas.height = exportSize;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, exportSize, exportSize);
+        ctx.drawImage(img, 0, 0, exportSize, exportSize);
+        try {
+          const pngUrl = canvas.toDataURL('image/png');
+          const a = document.createElement('a');
+          a.href = pngUrl;
+          a.download = `siri-live-sphere-${state.activePersona}-640px.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast('Mengunduh PNG transparan 640×640px');
+        } catch (err) {
+          showToast('Gagal mengekspor PNG');
+        }
+      };
+      img.src = encoded;
+    });
+
+    // Initial Render
+    window.addEventListener('DOMContentLoaded', renderStudio);
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "EduVis AI Gallery",
+  "short_name": "Tanya AI",
+  "description": "Platform Asisten AI Cerdas Berbahasa Indonesia dengan Inferensi Lokal dan Visualisasi Interaktif",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080c16",
+  "theme_color": "#080c16",
+  "icons": [
+    {
+      "src": "nano_asset/assets/app_icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

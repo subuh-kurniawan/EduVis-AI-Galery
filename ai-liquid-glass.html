@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="./nano_asset/assets/js/image-modal.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="stylesheet" href="./nano_asset/assets/css/ai-renderers.css">
+  <meta name="theme-color" content="#dbeafe">
+  <title>EduVis AI — Liquid Glass Chat</title>
+  <script src="./nano_asset/assets/js/tailwindcss.js"></script>
+    <script src="./nano_asset/assets/js/chat-font-size.js" defer></script>
+  <script src="./nano_asset/assets/js/lucide.min.js"></script>
+  <style>
+    @font-face { font-family: 'Inter'; src: url('./nano_asset/assets/fonts/inter-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: #172554;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(ellipse at 12% 18%, rgba(87,151,255,.8), transparent 34%),
+        radial-gradient(ellipse at 85% 12%, rgba(255,191,214,.78), transparent 32%),
+        radial-gradient(ellipse at 78% 85%, rgba(145,105,255,.72), transparent 34%),
+        radial-gradient(ellipse at 22% 90%, rgba(117,191,255,.72), transparent 35%),
+        linear-gradient(135deg, #dbeafe, #f5e8ff 48%, #d9e9ff);
+      background-attachment: fixed;
+      overflow: hidden;
+    }
+    body::before, body::after {
+      content:""; position:fixed; pointer-events:none; border-radius:50%; filter:blur(2px);
+      opacity:.7; z-index:0;
+    }
+    body::before { width:340px;height:340px;left:-110px;bottom:-100px;background:linear-gradient(135deg,#6aa8ff,#b79bff); }
+    body::after { width:420px;height:420px;right:-180px;top:32%;background:linear-gradient(135deg,#fbcfe8,#7dd3fc); }
+    .glass {
+      background: rgba(255,255,255,.43);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: 0 24px 80px rgba(55,87,160,.2), inset 0 1px 0 rgba(255,255,255,.8);
+      backdrop-filter: blur(30px) saturate(165%);
+      -webkit-backdrop-filter: blur(30px) saturate(165%);
+    }
+    .glass-soft {
+      background: rgba(255,255,255,.29);
+      border: 1px solid rgba(255,255,255,.62);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 24px rgba(65,92,155,.08);
+      backdrop-filter: blur(22px) saturate(155%);
+      -webkit-backdrop-filter: blur(22px) saturate(155%);
+    }
+    .nav-item { transition: .2s ease; color:rgba(255,255,255,.92); }
+    .nav-item:hover, .nav-item.active { background:rgba(255,255,255,.24); border-color:rgba(255,255,255,.52); box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+    .gradient-text { background:linear-gradient(110deg,#2563eb,#7c3aed,#db2777); -webkit-background-clip:text;background-clip:text;color:transparent; }
+    .ai-orb { background:linear-gradient(140deg,#38bdf8,#4f46e5 55%,#c084fc); box-shadow:0 8px 22px rgba(79,70,229,.3), inset 0 1px 2px rgba(255,255,255,.7); }
+    .send-btn { background:linear-gradient(145deg,#4f8cff,#7c3aed 72%,#a855f7); box-shadow:0 8px 20px rgba(99,102,241,.3),inset 0 1px 1px rgba(255,255,255,.55); transition:transform .2s ease; }
+    .send-btn:hover { transform:translateY(-2px) scale(1.03); }
+    .chat-scroll { scrollbar-width:thin; scrollbar-color:rgba(100,116,139,.3) transparent; }
+    .message { animation:rise .28s ease both; }
+    @keyframes rise { from {opacity:0;transform:translateY(8px)} to {opacity:1;transform:translateY(0)} }
+    .typing-dot { animation:bounce 1s infinite ease-in-out; }
+    .typing-dot:nth-child(2){animation-delay:.15s}.typing-dot:nth-child(3){animation-delay:.3s}
+    @keyframes bounce {0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
+    @media(max-width:760px) {
+      body { overflow:auto; }
+      .app-shell { height:calc(100dvh - 20px)!important; min-height:560px; margin:10px!important; border-radius:26px!important; }
+      .sidebar { position:absolute; z-index:10; inset:0 auto 0 0; width:260px!important; transform:translateX(-105%); transition:transform .25s ease; border-radius:26px 0 0 26px; }
+      .sidebar.open { transform:translateX(0); }
+      .chat-main { min-width:0; }
+      .chat-content { padding:18px 14px!important; }
+      .message-bubble { max-width:88%!important; }
+      .chat-input { padding:10px 12px!important; }
+      .desktop-label { display:none; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 md:p-6">
+  <main class="app-shell glass relative z-10 flex w-full max-w-[1440px] h-[min(900px,calc(100dvh-48px))] overflow-hidden rounded-[34px]">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar relative flex w-[270px] shrink-0 flex-col border-r border-white/35 bg-gradient-to-b from-blue-500/55 via-indigo-500/35 to-violet-500/45 p-5 text-white">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3 px-1 py-3">
+          <div class="ai-orb flex h-12 w-12 items-center justify-center rounded-2xl">
+            <i data-lucide="infinity" class="h-8 w-8"></i>
+          </div>
+          <div>
+            <div class="text-xl font-semibold tracking-tight">EduVis AI</div>
+            <div class="text-sm text-white/80">AI Assistant</div>
+          </div>
+        </div>
+        <button id="closeSidebar" class="rounded-xl p-2 hover:bg-white/15 md:hidden" aria-label="Tutup menu"><i data-lucide="x"></i></button>
+      </div>
+
+      <button id="newChat" class="mt-5 flex items-center justify-center gap-2 rounded-2xl border border-white/50 bg-white/25 px-4 py-3 font-medium shadow-sm transition hover:bg-white/35">
+        <i data-lucide="plus" class="h-5 w-5"></i> Percakapan Baru
+      </button>
+
+      <div class="mt-7 space-y-2">
+        <p class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-[.18em] text-white/65">Workspace</p>
+        <button class="nav-item active flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left" data-nav="Chat">
+          <i data-lucide="message-circle" class="h-5 w-5"></i><span>Chat</span>
+        </button>
+        <button class="nav-item flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left" data-nav="Knowledge">
+          <i data-lucide="library" class="h-5 w-5"></i><span>Knowledge</span>
+        </button>
+        <button class="nav-item flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left" data-nav="Tools">
+          <i data-lucide="blocks" class="h-5 w-5"></i><span>Tools</span>
+        </button>
+        <button class="nav-item flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left" data-nav="Settings">
+          <i data-lucide="settings-2" class="h-5 w-5"></i><span>Settings</span>
+        </button>
+      </div>
+
+      <div class="mt-8">
+        <p class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[.18em] text-white/65">Riwayat</p>
+        <button class="history-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/85 hover:bg-white/15"><i data-lucide="message-square" class="h-4 w-4"></i><span class="truncate">RPP pembelajaran berdiferensiasi</span></button>
+        <button class="history-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/85 hover:bg-white/15"><i data-lucide="message-square" class="h-4 w-4"></i><span class="truncate">Analisis data kelas</span></button>
+      </div>
+
+      <div class="mt-auto">
+        <div class="mb-4 h-px bg-white/30"></div>
+        <div class="flex items-center gap-3 px-2 py-2">
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl border border-white/45 bg-white/20"><i data-lucide="cpu" class="h-5 w-5"></i></div>
+          <div class="min-w-0">
+            <div class="text-sm font-medium">Model AI</div>
+            <div id="modelName" class="truncate text-xs text-white/80">Qwen2.5-Coder:3B</div>
+          </div>
+          <span class="ml-auto h-2.5 w-2.5 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,.9)]" title="Online"></span>
+        </div>
+        <div class="glass-soft mt-3 rounded-2xl p-4 text-white">
+          <div class="flex items-center gap-2 font-medium"><i data-lucide="sparkles" class="h-5 w-5"></i> Integrasi Data 360</div>
+          <p class="mt-1 text-xs leading-relaxed text-white/80">Guru · Siswa · Sekolah</p>
+        </div>
+        <div class="px-2 pt-4 text-[11px] text-white/60">EduVis E‑ERP Apps · v1.0</div>
+      </div>
+    </aside>
+
+    <!-- Main chat -->
+    <section class="chat-main flex min-w-0 flex-1 flex-col">
+      <header class="flex h-[82px] shrink-0 items-center justify-between border-b border-white/50 px-5 md:px-8">
+        <div class="flex min-w-0 items-center gap-3">
+          <button id="openSidebar" class="rounded-xl p-2 hover:bg-white/35 md:hidden" aria-label="Buka menu"><i data-lucide="menu" class="h-5 w-5"></i></button>
+          <div class="ai-orb flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white"><i data-lucide="sparkles" class="h-6 w-6"></i></div>
+          <div class="min-w-0">
+            <h1 class="truncate text-lg font-semibold tracking-tight">EduVis AI</h1>
+            <p class="flex items-center gap-2 text-xs text-slate-600"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span><span id="statusText">Siap membantu Anda</span></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="themeButton" class="glass-soft rounded-full p-3 transition hover:bg-white/55" title="Ubah tampilan" aria-label="Ubah tampilan"><i data-lucide="sun" class="h-5 w-5"></i></button>
+          <button id="clearButton" class="glass-soft rounded-full p-3 transition hover:bg-white/55" title="Bersihkan chat" aria-label="Bersihkan chat"><i data-lucide="trash-2" class="h-5 w-5"></i></button>
+        </div>
+      </header>
+
+      <div id="chatArea" class="chat-scroll flex-1 overflow-y-auto">
+        <div id="messages" class="chat-content mx-auto flex w-full max-w-4xl flex-col gap-7 px-6 py-8 md:px-10">
+          <div class="message flex items-start justify-end gap-3">
+            <div class="message-bubble max-w-[75%] rounded-[25px] rounded-tr-md border border-white/35 bg-gradient-to-br from-blue-500/90 to-indigo-500/90 px-5 py-4 text-white shadow-lg shadow-indigo-500/15">
+              <p>Bagaimana cara membuat RPP menggunakan AI di EduVis?</p>
+              <div class="mt-2 flex items-center justify-end gap-2 text-[11px] text-white/75">10:24 <i data-lucide="check-check" class="h-4 w-4"></i></div>
+            </div>
+            <div class="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/60 text-indigo-600"><i data-lucide="user-round" class="h-5 w-5"></i></div>
+          </div>
+
+          <div class="message flex items-start gap-3">
+            <div class="ai-orb mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-white"><i data-lucide="infinity" class="h-6 w-6"></i></div>
+            <div class="message-bubble max-w-[88%] rounded-[26px] rounded-tl-md border border-white/75 bg-white/55 px-5 py-5 shadow-[0_12px_35px_rgba(75,95,160,.09)] md:px-7">
+              <p class="leading-relaxed">Untuk membuat RPP menggunakan AI di EduVis, Anda dapat mengikuti langkah-langkah berikut:</p>
+              <div class="mt-5 space-y-4">
+                <div class="flex items-start gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-semibold text-white shadow">1</span><p class="pt-0.5 leading-relaxed">Masuk ke menu <strong>AI Planner</strong> pada dashboard EduVis.</p></div>
+                <div class="flex items-start gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-semibold text-white shadow">2</span><p class="pt-0.5 leading-relaxed">Pilih mata pelajaran, kelas, dan topik pembelajaran.</p></div>
+                <div class="flex items-start gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-semibold text-white shadow">3</span><p class="pt-0.5 leading-relaxed">Klik <strong>Generate RPP</strong> dan isi parameter yang diperlukan, seperti tujuan, metode, dan penilaian.</p></div>
+                <div class="flex items-start gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-semibold text-white shadow">4</span><p class="pt-0.5 leading-relaxed">AI akan menghasilkan draf RPP yang dapat Anda edit dan sesuaikan.</p></div>
+              </div>
+              <p class="mt-5 leading-relaxed">Jika Anda ingin, saya bisa membantu membuat contoh RPP. Berikan mata pelajaran, kelas, dan topik yang diinginkan.</p>
+              <div class="mt-5 flex flex-wrap gap-2 border-t border-white/60 pt-4">
+                <button class="suggestion glass-soft flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition hover:bg-white/65" data-prompt="Buatkan contoh RPP Informatika kelas X"><i data-lucide="file-text" class="h-4 w-4 text-indigo-600"></i> Contoh RPP <i data-lucide="chevron-right" class="h-4 w-4"></i></button>
+                <button class="suggestion glass-soft flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition hover:bg-white/65" data-prompt="Jelaskan panduan lengkap menggunakan AI Planner EduVis"><i data-lucide="book-open" class="h-4 w-4 text-indigo-600"></i> Panduan Lengkap <i data-lucide="chevron-right" class="h-4 w-4"></i></button>
+              </div>
+              <div class="mt-3 text-[11px] text-slate-500">EduVis AI · 10:24</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="shrink-0 px-4 pb-4 pt-2 md:px-8 md:pb-7">
+        <div class="mx-auto max-w-4xl">
+          <div class="mb-3 flex flex-wrap gap-2">
+            <button class="quick-prompt glass-soft rounded-full px-3.5 py-2 text-xs text-slate-700 transition hover:bg-white/65" data-prompt="Bantu saya membuat modul ajar">✦ Buat modul ajar</button>
+            <button class="quick-prompt glass-soft rounded-full px-3.5 py-2 text-xs text-slate-700 transition hover:bg-white/65" data-prompt="Bantu analisis hasil belajar siswa">⌁ Analisis kelas</button>
+            <button class="quick-prompt glass-soft rounded-full px-3.5 py-2 text-xs text-slate-700 transition hover:bg-white/65" data-prompt="Buatkan 10 soal pilihan ganda beserta kunci jawaban">✎ Buat soal</button>
+          </div>
+          <form id="chatForm" class="glass-soft chat-input flex items-end gap-3 rounded-[26px] p-3 pl-4">
+            <button type="button" id="attachButton" class="mb-1 rounded-xl p-2 text-slate-500 transition hover:bg-white/60 hover:text-indigo-600" title="Lampirkan file" aria-label="Lampirkan file"><i data-lucide="paperclip" class="h-5 w-5"></i></button>
+            <input id="fileInput" type="file" class="hidden" accept=".txt,.md,.pdf,.doc,.docx,.csv,.json">
+            <textarea id="messageInput" rows="1" placeholder="Tulis pesan Anda..." class="max-h-36 min-h-[42px] flex-1 resize-none bg-transparent py-2.5 text-[15px] text-slate-800 outline-none placeholder:text-slate-500" aria-label="Tulis pesan"></textarea>
+            <button type="submit" class="send-btn mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white" aria-label="Kirim pesan"><i data-lucide="send" class="h-5 w-5"></i></button>
+          </form>
+          <p class="mt-3 text-center text-[11px] text-slate-500">EduVis AI dapat membuat kesalahan. Periksa kembali informasi penting.</p>
+        </div>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    const messages = document.getElementById('messages');
+    const chatArea = document.getElementById('chatArea');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('messageInput');
+    const statusText = document.getElementById('statusText');
+    const sidebar = document.getElementById('sidebar');
+
+    // Demo mode: replace this function with your backend/API call.
+    // Expected API response: { "reply": "Jawaban AI..." }
+    async function getAIReply(prompt) {
+      // Example integration:
+      // const response = await fetch('/api/chat.php', {
+      //   method: 'POST',
+      //   headers: {'Content-Type': 'application/json'},
+      //   body: JSON.stringify({message: prompt})
+      // });
+      // if (!response.ok) throw new Error('API tidak merespons');
+      // const data = await response.json();
+      // return data.reply;
+      await new Promise(resolve => setTimeout(resolve, 650));
+      return `Saya menerima pertanyaan Anda: “${prompt}”\n\nUI EduVis AI sudah siap. Untuk mendapatkan jawaban AI sungguhan, hubungkan fungsi getAIReply() di file ini ke endpoint PHP Anda, lalu teruskan permintaan ke Ollama, LiteRT-LM, atau API model yang digunakan.`;
+    }
+
+    function timeNow() {
+      return new Intl.DateTimeFormat('id-ID', {hour:'2-digit', minute:'2-digit'}).format(new Date());
+    }
+
+    function addMessage(text, role) {
+      const wrap = document.createElement('div');
+      wrap.className = 'message flex items-start gap-3 ' + (role === 'user' ? 'justify-end' : '');
+      if (role === 'assistant') {
+        const orb = document.createElement('div');
+        orb.className = 'ai-orb mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-white';
+        orb.innerHTML = '<i data-lucide="infinity" class="h-6 w-6"></i>';
+        wrap.appendChild(orb);
+      }
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble max-w-[85%] whitespace-pre-wrap rounded-[25px] border px-5 py-4 shadow-sm ' +
+        (role === 'user'
+          ? 'rounded-tr-md border-white/30 bg-gradient-to-br from-blue-500/90 to-indigo-500/90 text-white'
+          : 'rounded-tl-md border-white/75 bg-white/60 text-slate-800');
+      const content = document.createElement('p');
+      content.className = 'leading-relaxed';
+      content.textContent = text;
+      bubble.appendChild(content);
+      const stamp = document.createElement('div');
+      stamp.className = 'mt-2 text-right text-[11px] ' + (role === 'user' ? 'text-white/75' : 'text-slate-500');
+      stamp.textContent = timeNow();
+      bubble.appendChild(stamp);
+      wrap.appendChild(bubble);
+      if (role === 'user') {
+        const user = document.createElement('div');
+        user.className = 'mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/60 text-indigo-600';
+        user.innerHTML = '<i data-lucide="user-round" class="h-5 w-5"></i>';
+        wrap.appendChild(user);
+      }
+      messages.appendChild(wrap);
+      lucide.createIcons();
+      chatArea.scrollTo({top: chatArea.scrollHeight, behavior:'smooth'});
+      return wrap;
+    }
+
+    function addTyping() {
+      const el = document.createElement('div');
+      el.className = 'message flex items-start gap-3';
+      el.innerHTML = '<div class="ai-orb mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-white"><i data-lucide="infinity" class="h-6 w-6"></i></div><div class="rounded-[22px] border border-white/70 bg-white/55 px-5 py-4"><div class="flex gap-1.5"><span class="typing-dot h-2 w-2 rounded-full bg-indigo-500"></span><span class="typing-dot h-2 w-2 rounded-full bg-indigo-500"></span><span class="typing-dot h-2 w-2 rounded-full bg-indigo-500"></span></div></div>';
+      messages.appendChild(el);
+      lucide.createIcons();
+      chatArea.scrollTo({top: chatArea.scrollHeight, behavior:'smooth'});
+      return el;
+    }
+
+    async function sendMessage(text) {
+      const prompt = text.trim();
+      if (!prompt) return;
+      addMessage(prompt, 'user');
+      input.value = '';
+      input.style.height = 'auto';
+      statusText.textContent = 'Sedang berpikir…';
+      const typing = addTyping();
+      try {
+        const reply = await getAIReply(prompt);
+        typing.remove();
+        addMessage(reply, 'assistant');
+      } catch (error) {
+        typing.remove();
+        addMessage('Maaf, terjadi kendala saat menghubungi AI. Periksa koneksi server atau endpoint API Anda.', 'assistant');
+      } finally {
+        statusText.textContent = 'Siap membantu Anda';
+        input.focus();
+      }
+    }
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      sendMessage(input.value);
+    });
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 144) + 'px';
+    });
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+    document.querySelectorAll('[data-prompt]').forEach(button => {
+      button.addEventListener('click', () => sendMessage(button.dataset.prompt));
+    });
+    document.getElementById('newChat').addEventListener('click', () => {
+      messages.replaceChildren();
+      addMessage('Percakapan baru dimulai. Apa yang ingin Anda kerjakan hari ini?', 'assistant');
+      sidebar.classList.remove('open');
+      input.focus();
+    });
+    document.getElementById('clearButton').addEventListener('click', () => {
+      messages.replaceChildren();
+      addMessage('Percakapan dibersihkan. Silakan tulis pertanyaan baru.', 'assistant');
+    });
+    document.getElementById('openSidebar').addEventListener('click', () => sidebar.classList.add('open'));
+    document.getElementById('closeSidebar').addEventListener('click', () => sidebar.classList.remove('open'));
+    document.querySelectorAll('[data-nav]').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-nav]').forEach(item => item.classList.remove('active'));
+        button.classList.add('active');
+        if (button.dataset.nav !== 'Chat') {
+          addMessage(`Menu ${button.dataset.nav} dipilih. Hubungkan navigasi ini ke modul ${button.dataset.nav} pada aplikasi EduVis Anda.`, 'assistant');
+        }
+        sidebar.classList.remove('open');
+      });
+    });
+    document.getElementById('attachButton').addEventListener('click', () => document.getElementById('fileInput').click());
+    document.getElementById('fileInput').addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (file) {
+        addMessage(`File dipilih: ${file.name}. Pemrosesan file perlu dihubungkan ke backend.`, 'assistant');
+      }
+    });
+    document.getElementById('themeButton').addEventListener('click', () => {
+      document.body.classList.toggle('alternate-theme');
+      const alternate = document.body.classList.contains('alternate-theme');
+      document.body.style.background = alternate
+        ? 'radial-gradient(ellipse at 15% 15%, rgba(49,46,129,.9), transparent 38%), radial-gradient(ellipse at 80% 85%, rgba(126,34,206,.75), transparent 40%), linear-gradient(135deg,#0f172a,#312e81 55%,#581c87)'
+        : '';
+      document.querySelector('.chat-main').style.color = alternate ? '#f8fafc' : '';
+      document.querySelectorAll('#messages p').forEach(p => p.style.color = alternate ? '#f8fafc' : '');
+      document.querySelectorAll('.glass-soft').forEach(el => {
+        if (alternate) {
+          el.style.backgroundColor = 'rgba(255,255,255,.12)';
+          el.style.color = '#f8fafc';
+        } else {
+          el.style.backgroundColor = '';
+          el.style.color = '';
+        }
+      });
+      document.querySelector('#themeButton').innerHTML = `<i data-lucide="${alternate ? 'moon' : 'sun'}" class="h-5 w-5"></i>`;
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

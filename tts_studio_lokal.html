@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduVis TTS Studio — Generator Narasi & Vokal AI Lokal</title>
+    <script src="nano_asset/assets/js/tailwindcss.js"></script>
+    <script src="nano_asset/assets/js/chat-font-size.js" defer></script>
+    <link rel="stylesheet" href="nano_asset/assets/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --h: 212;
+            --s: 90%;
+            --l: 54%;
+            --color-accent: hsl(var(--h), var(--s), var(--l));
+            --color-accent-hover: hsl(var(--h), var(--s), calc(var(--l) - 8%));
+            --color-accent-soft: hsla(var(--h), var(--s), var(--l), 0.12);
+            --color-accent-glow: hsla(var(--h), var(--s), var(--l), 0.25);
+            --color-bg-dynamic: #070d1e;
+            --color-sidebar: #0b152d;
+            --color-card: rgba(13, 27, 56, 0.75);
+            --color-text-main: #edf5ff;
+            --color-text-sec: #8ea5c6;
+            --color-border: rgba(64, 140, 255, 0.2);
+            --color-danger: #ff453a;
+            --color-success: #30d158;
+            --color-warning: #ffd60a;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--color-bg-dynamic);
+            color: var(--color-text-main);
+            overflow-x: hidden;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism card */
+        .glass-card {
+            background: linear-gradient(145deg, rgba(16, 33, 68, 0.75), rgba(8, 18, 42, 0.8));
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(92, 177, 255, 0.38);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(180deg, rgba(10, 23, 49, 0.95), rgba(6, 15, 33, 0.98));
+            border-right: 1px solid var(--color-border);
+            backdrop-filter: blur(24px);
+        }
+
+        /* Segmented Buttons */
+        .segmented-btn {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 3px;
+            display: flex;
+            gap: 2px;
+        }
+
+        .segmented-item {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--color-text-sec);
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            text-align: center;
+        }
+
+        .segmented-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .segmented-item.active {
+            color: #fff;
+            background: linear-gradient(135deg, #09bce9, #387aff);
+            box-shadow: 0 2px 10px rgba(56, 122, 255, 0.4);
+        }
+
+        /* Button styles */
+        .btn-macos {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .btn-macos:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-macos:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 18px rgba(6, 182, 212, 0.35);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 24px rgba(6, 182, 212, 0.5);
+        }
+
+        /* Inputs & Selects */
+        .form-select, .form-input {
+            background: rgba(14, 29, 61, 0.8);
+            border: 1px solid var(--color-border);
+            color: white;
+            border-radius: 11px;
+            padding: 8px 12px;
+            font-size: 12.5px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-select:focus, .form-input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(92, 177, 255, 0.22);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(92, 177, 255, 0.4);
+        }
+
+        /* Pulse glow animation */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+
+        /* Range slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen lg:h-screen flex flex-col lg:flex-row overflow-x-hidden">
+
+    <!-- MOBILE HEADER -->
+    <header class="lg:hidden flex items-center justify-between p-4 bg-slate-900/90 backdrop-blur-md border-b border-cyan-500/20 sticky top-0 z-40">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-400 to-indigo-600 grid place-items-center text-white font-bold text-sm shadow-[0_0_12px_rgba(56,189,248,0.4)]">✦</div>
+            <div>
+                <h1 class="text-sm font-bold text-white leading-tight">TTS Studio Lokal</h1>
+                <p class="text-[9px] font-semibold text-cyan-400 uppercase tracking-widest">VITS • Piper • macOS Native</p>
+            </div>
+        </div>
+        <button id="menuBtn" class="p-2 bg-white/10 text-white rounded-lg btn-macos">
+            <i class="bx bx-menu text-xl"></i>
+        </button>
+    </header>
+
+    <!-- SIDEBAR OVERLAY (MOBILE) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR PENGATURAN VOKAL & GAYA -->
+    <aside id="sidebarMenu" class="sidebar fixed lg:static inset-y-0 left-0 w-80 flex flex-col h-full flex-shrink-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        
+        <!-- Sidebar Header (Desktop) -->
+        <div class="p-6 border-b border-white/10 hidden lg:flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-400 via-indigo-500 to-purple-600 grid place-items-center text-white text-base shadow-[0_0_15px_rgba(56,189,248,0.4)]">✦</div>
+                <div>
+                    <h1 class="text-base font-bold text-white tracking-tight">TTS Studio AI</h1>
+                    <p class="text-[9.5px] font-bold text-cyan-400 uppercase tracking-widest">100% Offline Lokal</p>
+                </div>
+            </div>
+            <a href="gemini_live.html" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white transition" title="Kembali ke EduVis Live">
+                <i class="bx bx-arrow-back text-lg"></i>
+            </a>
+        </div>
+
+        <!-- Mobile Sidebar Close -->
+        <div class="lg:hidden flex items-center justify-between p-4 border-b border-white/10">
+            <span class="font-bold text-sm text-white flex items-center gap-2"><i class="bx bx-slider-alt text-cyan-400"></i> Pengaturan Suara</span>
+            <button onclick="toggleSidebar()" class="p-1.5 text-stone-400 hover:text-white rounded-lg"><i class="bx bx-x text-2xl"></i></button>
+        </div>
+
+        <!-- Scrollable Sidebar Controls -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
+            
+            <!-- Karakter Vokal -->
+            <section class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Karakter Vokal AI</label>
+                    <span id="ttsEngineBadge" class="text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">● macOS Native</span>
+                </div>
+                <div class="flex gap-2">
+                    <select id="voiceSelect" class="form-select flex-1 font-medium"></select>
+                    <button onclick="openVoiceLibrary()" class="p-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 rounded-xl btn-macos" title="Katalog Visual Vokal">
+                        <i class="bx bx-grid-alt text-base"></i>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-stone-400 pt-0.5">
+                    <span id="voiceDescPreview" class="truncate">Gadis — Suara Perempuan Merdu</span>
+                    <button onclick="playVoiceSample()" id="sampleBtn" class="text-cyan-400 hover:underline flex items-center gap-0.5"><i class="bx bx-play"></i> Sampel</button>
+                </div>
+            </section>
+
+            <!-- Gaya Bicara & Dialek -->
+            <section class="space-y-1.5">
+                <label class="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Gaya Narasi & Dialek</label>
+                <div class="relative">
+                    <input type="text" id="styleSearch" placeholder="Cari gaya (misal: Jawa, Guru, Santai)..." class="form-input w-full pl-8 py-1.5 text-xs">
+                    <i class="bx bx-search absolute left-2.5 top-2.5 text-stone-400"></i>
+                </div>
+                <select id="styleSelect" class="form-select w-full"></select>
+                <p id="stylePromptPreview" class="text-[10px] text-stone-400 italic line-clamp-2 px-1"></p>
+            </section>
+
+            <!-- Energi Vokal -->
+            <section class="space-y-1.5">
+                <label class="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Energi Vokal</label>
+                <div class="segmented-btn" id="energySelector">
+                    <div data-val="Bisik" class="segmented-item flex-1">Bisik</div>
+                    <div data-val="Normal" class="segmented-item flex-1 active">Normal</div>
+                    <div data-val="Energi" class="segmented-item flex-1">Energi</div>
+                </div>
+            </section>
+
+            <!-- Tempo Bicara -->
+            <section class="space-y-1.5">
+                <div class="flex justify-between items-center text-[10px] font-bold">
+                    <label class="text-cyan-400 uppercase tracking-wider">Tempo Bicara</label>
+                    <span id="speedVal" class="text-white font-mono">1.0x (Normal)</span>
+                </div>
+                <input type="range" id="speedRange" min="0" max="4" step="1" value="2">
+                <div class="flex justify-between text-[9px] text-stone-500 font-mono px-0.5">
+                    <span>0.8x</span>
+                    <span>0.9x</span>
+                    <span>1.0x</span>
+                    <span>1.1x</span>
+                    <span>1.25x</span>
+                </div>
+            </section>
+
+            <!-- Status Server Backend Lokal -->
+            <section class="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2 text-[11px]">
+                <span class="text-[9.5px] font-bold text-stone-400 uppercase tracking-wider block">Status Layanan Lokal</span>
+                <div class="flex items-center justify-between font-mono">
+                    <span class="text-stone-300">LiteRT-LM (Gemma):</span>
+                    <span id="litertStatusTag" class="text-amber-400">Memeriksa...</span>
+                </div>
+                <div class="flex items-center justify-between font-mono">
+                    <span class="text-stone-300">macOS Native TTS:</span>
+                    <span id="ttsServerStatusTag" class="text-amber-400">Memeriksa...</span>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Sidebar Footer Action -->
+        <div class="p-4 border-t border-white/10 space-y-2 bg-black/20">
+            <button id="mergeBtn" disabled class="w-full py-3 rounded-xl font-bold text-xs btn-macos bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-900/30 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-1.5">
+                <i class="bx bx-merge text-sm"></i> GABUNGKAN SEMUA .WAV
+            </button>
+            <div class="text-[10px] text-center text-stone-500">
+                Dikembangkan oleh <span class="text-stone-300 font-semibold">Subuh Kurniawan</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN STUDIO WORKSPACE -->
+    <main class="flex-1 flex flex-col min-w-0 p-4 sm:p-6 lg:p-7 h-full lg:overflow-hidden overflow-visible space-y-4">
+        
+        <!-- Header Mode & Status -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+                <p id="configLabel" class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 inline-block animate-pulse"></span>
+                    KONFIGURASI: AUTENTIK • GADIS (MERDU)
+                </p>
+                <h2 class="text-lg font-bold text-white tracking-tight mt-0.5">Studio Produksi Audio & Narasi</h2>
+            </div>
+            <div class="segmented-btn self-end sm:self-auto" id="modeSelector">
+                <div data-val="Autentik" class="segmented-item active px-3.5" title="Membagi naskah asli tanpa mengubah kata">Mode Autentik</div>
+                <div data-val="Cerdas" class="segmented-item px-3.5" title="Model lokal Gemma menyusun narasi kreatif">Mode Cerdas (AI)</div>
+            </div>
+        </header>
+
+        <!-- Editor Naskah Card -->
+        <div class="glass-card flex-1 flex flex-col rounded-2xl overflow-hidden min-h-[300px]">
+            
+            <!-- Editor Action Toolbar -->
+            <div class="p-2.5 bg-black/30 border-b border-white/10 flex flex-wrap items-center gap-2">
+                <button onclick="generateNarrationPrompt()" class="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold rounded-lg btn-macos flex items-center gap-1">
+                    <i class="bx bx-wand text-sm"></i> BUAT NARASI AI
+                </button>
+                <button onclick="processAI('refine')" class="px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold rounded-lg btn-macos flex items-center gap-1">
+                    <i class="bx bx-sparkles text-sm"></i> OPTIMASI AI
+                </button>
+                <div class="relative group">
+                    <button class="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-stone-300 text-xs font-semibold rounded-lg btn-macos flex items-center gap-1">
+                        <i class="bx bx-globe text-sm"></i> TERJEMAH <i class="bx bx-chevron-down text-xs"></i>
+                    </button>
+                    <div class="absolute hidden group-hover:block bg-stone-900 border border-white/15 shadow-2xl rounded-xl z-30 w-36 py-1 mt-1 text-xs backdrop-blur-xl">
+                        <button onclick="processAI('translate', 'Bahasa Indonesia')" class="w-full text-left px-3.5 py-1.5 hover:bg-cyan-500/20 text-stone-200">Bahasa Indonesia</button>
+                        <button onclick="processAI('translate', 'Bahasa Jawa')" class="w-full text-left px-3.5 py-1.5 hover:bg-cyan-500/20 text-stone-200">Bahasa Jawa</button>
+                        <button onclick="processAI('translate', 'Bahasa Sunda')" class="w-full text-left px-3.5 py-1.5 hover:bg-cyan-500/20 text-stone-200">Bahasa Sunda</button>
+                        <button onclick="processAI('translate', 'Bahasa Inggris')" class="w-full text-left px-3.5 py-1.5 hover:bg-cyan-500/20 text-stone-200">Bahasa Inggris</button>
+                        <button onclick="processAI('translate', 'Bahasa Arab')" class="w-full text-left px-3.5 py-1.5 hover:bg-cyan-500/20 text-stone-200">Bahasa Arab</button>
+                    </div>
+                </div>
+                <div class="flex-1"></div>
+                <button onclick="clearText()" class="px-3 py-1.5 bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/30 text-stone-400 hover:text-rose-300 text-xs font-semibold rounded-lg btn-macos flex items-center gap-1">
+                    <i class="bx bx-trash text-sm"></i> BERSIHKAN
+                </button>
+            </div>
+
+            <!-- Mode Cerdas / Autentik Notice -->
+            <div id="modeNotice" class="hidden px-4 py-2 bg-cyan-950/40 border-b border-cyan-500/20 text-xs text-cyan-200 flex items-center gap-2">
+                <i class="bx bx-bulb text-cyan-400 text-sm"></i>
+                <span><b>Mode Cerdas Aktif:</b> Ketik topik / materi di bawah, lalu klik <b>BUAT NARASI AI</b> atau langsung <b>GENERATE & PRODUKSI</b> agar AI lokal Gemma menyusun naskah lengkap.</span>
+            </div>
+
+            <!-- Textarea -->
+            <textarea id="mainInput" class="flex-1 p-5 text-base bg-transparent text-white outline-none resize-none placeholder-stone-500 leading-relaxed custom-scrollbar font-normal" placeholder="Tuliskan naskah narasi, instruksi video, atau topik materi sekolah yang ingin dibuatkan suaranya di sini... Contoh: 'Selamat pagi siswa-siswi semuanya, hari ini kita akan menjelajahi keindahan tata surya dan planet-planet di galaksi Bima Sakti.'"></textarea>
+
+            <!-- Counter Bar -->
+            <div class="px-5 py-2.5 bg-black/40 border-t border-white/10 flex justify-between items-center text-xs font-mono text-stone-400">
+                <span id="estDuration">Estimasi Durasi: 0s</span>
+                <div class="flex items-center gap-3">
+                    <span id="wordCount">0 Kata</span>
+                    <span id="charCount">0 Karakter</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Master Box (Hasil Gabungan Final) -->
+        <div id="masterBox" class="hidden glass-card rounded-2xl p-5 border-cyan-500/40 bg-gradient-to-br from-indigo-950/60 to-slate-950/80 animate-fade-in space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    HASIL GABUNGAN AUDIO FINAL (.WAV)
+                </h3>
+                <span id="mergedDurationBadge" class="text-xs font-mono text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">Durasi: 0s</span>
+            </div>
+            <div class="bg-black/40 rounded-xl p-3 border border-white/10">
+                <p id="mergedTextPreview" class="text-xs text-stone-300 italic line-clamp-2 leading-relaxed">Pratinjau naskah gabungan...</p>
+            </div>
+            <div class="flex flex-wrap gap-2.5 pt-1">
+                <button id="playMergedBtn" class="flex-1 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs btn-macos flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-500/20">
+                    <i class="bx bx-play text-base"></i> PUTAR FINAL
+                </button>
+                <button id="copyMergedBtn" class="flex-1 py-2.5 bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 text-purple-200 font-bold rounded-xl text-xs btn-macos flex items-center justify-center gap-1.5">
+                    <i class="bx bx-copy text-base"></i> SALIN NASKAH
+                </button>
+                <button id="saveMergedBtn" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs btn-macos flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20">
+                    <i class="bx bx-download text-base"></i> UNDUH .WAV FINAL
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Control & Progress Bar -->
+        <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            <button id="startBtn" class="px-8 py-3.5 btn-primary rounded-xl font-bold text-xs btn-macos flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/30 shrink-0">
+                <i class="bx bx-play-circle text-lg"></i> MULAI PROSES NARASI
+            </button>
+            <button id="stopBtn" class="px-5 py-3.5 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 rounded-xl font-bold text-xs btn-macos shrink-0 flex items-center justify-center gap-1">
+                <i class="bx bx-stop text-base"></i> STOP
+            </button>
+            <label class="inline-flex items-center gap-2 text-[11px] text-stone-300 whitespace-nowrap cursor-pointer">
+                <input id="playAsReady" type="checkbox" class="accent-cyan-400">
+                Putar saat segmen siap
+            </label>
+            <div class="flex-1 glass-card px-4 py-2.5 rounded-xl flex flex-col justify-center">
+                <div class="flex justify-between items-center mb-1 text-[11px] font-mono">
+                    <span id="progressStatus" class="font-bold text-stone-300 uppercase">SISTEM SIAP</span>
+                    <span id="progressPercent" class="font-bold text-cyan-400">0%</span>
+                </div>
+                <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 transition-all duration-300 w-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results List Segmen -->
+        <div id="resultsList" class="flex-1 overflow-y-auto custom-scrollbar space-y-3 pb-6">
+            <div id="emptyState" class="p-8 text-center text-stone-500 text-xs border border-dashed border-white/10 rounded-2xl">
+                <i class="bx bx-music text-3xl mb-1 text-stone-600 block"></i>
+                Belum ada audio yang diproses.<br>Ketik naskah di atas lalu klik <b>Mulai Proses Narasi</b> untuk menghasilkan suara segmen per segmen.
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Overlay AI Thinking Modal -->
+    <div id="aiOverlay" class="fixed inset-0 bg-black/75 backdrop-blur-md hidden z-50 flex flex-col items-center justify-center gap-3">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-400 to-indigo-600 grid place-items-center text-white text-2xl animate-spin shadow-[0_0_30px_rgba(56,189,248,0.5)]">✦</div>
+        <p id="aiOverlayText" class="text-sm font-bold text-cyan-300 animate-pulse font-mono tracking-wide">Model Lokal Gemma sedang merancang narasi...</p>
+        <span class="text-xs text-stone-400 font-mono">Memanfaatkan komputasi LiteRT-LM GPU lokal</span>
+    </div>
+
+    <!-- Voice Library Modal -->
+    <div id="voiceLibraryModal" class="fixed inset-0 z-[70] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeVoiceLibrary()"></div>
+        <div class="relative w-full max-w-4xl max-h-[85vh] glass-card rounded-3xl border border-white/20 flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="bx bx-microphone text-cyan-400"></i> Katalog Vokal AI Lokal Indonesia</h3>
+                    <p class="text-xs text-stone-400 mt-0.5">Dengarkan karakter suara macOS Native sebelum memproduksi audio</p>
+                </div>
+                <button onclick="closeVoiceLibrary()" class="p-2 text-stone-400 hover:text-white rounded-lg"><i class="bx bx-x text-2xl"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 custom-scrollbar" id="voiceCardsGrid">
+                <!-- Cards dynamically populated -->
+            </div>
+            <div class="p-4 bg-black/40 border-t border-white/10 text-center text-xs text-stone-400">
+                Sintesis suara offline 100% native macOS tanpa dependensi eksternal.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* === KONFIGURASI LAYANAN LOKAL CERDAS === */
+        const isPageHttps = window.location.protocol === 'https:';
+        const pageOrigin = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file'))
+            ? window.location.origin
+            : `http://${window.location.hostname || '127.0.0.1'}:1236`;
+        const pageHost = window.location.hostname || '127.0.0.1';
+
+        // Helper kandidat URL TTS & Backend untuk On-Demand Server
+        function getTtsCandidateUrls(pathAndQuery) {
+            const cleanPath = pathAndQuery.startsWith('/') ? pathAndQuery : `/${pathAndQuery}`;
+            const candidates = [];
+            if (pageOrigin && pageOrigin !== 'null' && !pageOrigin.startsWith('file')) {
+                candidates.push(`${pageOrigin}${cleanPath}`);
+            }
+            candidates.push(`http://${pageHost}:1236${cleanPath}`);
+            candidates.push(`http://127.0.0.1:1236${cleanPath}`);
+            candidates.push(`http://127.0.0.1:8765${cleanPath}`);
+            candidates.push(`http://${pageHost}:1234${cleanPath}`);
+            candidates.push(`http://127.0.0.1:1234${cleanPath}`);
+            return [...new Set(candidates)];
+        }
+
+        // Endpoint LiteRT-LM (Gemma) & macOS Native TTS Engine (Zero Python Dependency)
+        const LITERT_ENDPOINT = isPageHttps ? `${pageOrigin}/v1` : `http://${pageHost}:1236/v1`;
+        const TTS_SERVER_ENDPOINT = `${pageOrigin}`;
+
+        /* === DAFTAR KARAKTER VOKAL LOKAL === */
+        const LOCAL_VOICES = [
+            {
+                id: 'gadis',
+                name: 'Gadis',
+                tag: 'Perempuan Merdu',
+                lang: 'id-ID',
+                desc: 'Vokal perempuan bahasa Indonesia yang jernih, merdu, artikulatif, dan natural untuk bahan ajar & presentasi.',
+                avatar: 'TTS-Indonesia-Gratis/gadis.jpg',
+                color: 'from-pink-500 to-rose-600'
+            },
+            {
+                id: 'ardi',
+                name: 'Ardi',
+                tag: 'Pria Lembut & Hangat',
+                lang: 'id-ID',
+                desc: 'Vokal laki-laki bahasa Indonesia dengan intonasi hangat, santai, dan bersahabat layaknya teman diskusi.',
+                avatar: 'TTS-Indonesia-Gratis/ardi.jpg',
+                color: 'from-cyan-500 to-blue-600'
+            },
+            {
+                id: 'wibowo',
+                name: 'Wibowo',
+                tag: 'Pria Berwibawa',
+                lang: 'id-ID',
+                desc: 'Suara jantan, berat, tenang, dan sangat berwibawa. Cocok untuk sambutan formal, narasi sejarah, atau berita.',
+                avatar: 'TTS-Indonesia-Gratis/wibowo.jpg',
+                color: 'from-amber-500 to-indigo-600'
+            },
+            {
+                id: 'piper-news',
+                name: 'News TTS (Piper)',
+                tag: 'Narator Berita · Suara Tunggal',
+                lang: 'id-ID',
+                desc: 'Model Piper Bahasa Indonesia medium Q8 dengan satu karakter suara. Diproses lokal melalui ONNX Runtime.',
+                avatar: '',
+                color: 'from-cyan-500 to-slate-700'
+            },
+            {
+                id: 'citra',
+                name: 'Citra',
+                tag: 'Perempuan Ceria & Ekspresif',
+                lang: 'id-ID',
+                desc: 'Vokal wanita muda dengan intonasi lincah, ekspresif, dan ceria. Cocok untuk dialog interaktif dan podcast.',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+                color: 'from-fuchsia-500 to-pink-600'
+            },
+            {
+                id: 'bimo',
+                name: 'Bimo',
+                tag: 'Narator Dokumenter & Tegas',
+                lang: 'id-ID',
+                desc: 'Vokal pria dengan artikulasi tegas dan wibawa kuat. Sangat pas untuk video dokumenter dan eksplorasi sains.',
+                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+                color: 'from-blue-600 to-indigo-800'
+            },
+            {
+                id: 'sari',
+                name: 'Sari',
+                tag: 'Pengajar Lembut & Jelas',
+                lang: 'id-ID',
+                desc: 'Vokal instruktur yang sabar, lembut, dan sangat mudah dicerna untuk materi e-learning dan penjelasan konsep.',
+                avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+                color: 'from-emerald-500 to-teal-600'
+            },
+            {
+                id: 'dimas',
+                name: 'Dimas',
+                tag: 'Pemuda Santai & Kasual',
+                lang: 'id-ID',
+                desc: 'Gaya bicara laki-laki kasual sehari-hari, santai dan mengalir layaknya obrolan kopi.',
+                avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80',
+                color: 'from-teal-500 to-cyan-600'
+            },
+            {
+                id: 'bayu',
+                name: 'Bayu',
+                tag: 'Pemuda Cerdas & Enerjik',
+                lang: 'id-ID',
+                desc: 'Intonasi cerdas, optimis, dan bersemangat. Sangat pas untuk pemandu tutorial dan presentasi teknologi.',
+                avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=300&q=80',
+                color: 'from-sky-500 to-blue-700'
+            },
+            {
+                id: 'tari',
+                name: 'Tari',
+                tag: 'Gadis Remaja & Ramah',
+                lang: 'id-ID',
+                desc: 'Vokal cerah, sopan, dan hangat. Membawa suasana riang dan ramah untuk pendengar segala usia.',
+                avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80',
+                color: 'from-violet-500 to-purple-700'
+            },
+            {
+                id: 'JV-00264',
+                name: 'Juminten',
+                tag: 'Logat Jawa Medok',
+                lang: 'jv-ID',
+                desc: 'Vokal perempuan dengan cengkok dan aksen Jawa yang kental, sopan, dan mendayu-dayu.',
+                avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+                color: 'from-emerald-500 to-teal-700'
+            },
+            {
+                id: 'SU-00060',
+                name: 'Asep',
+                tag: 'Logat Sunda Ramah',
+                lang: 'su-ID',
+                desc: 'Vokal laki-laki dengan dialek Sunda yang luwes, ramah, dan khas daerah Parahyangan.',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+                color: 'from-blue-500 to-cyan-600'
+            },
+            {
+                id: 'orator',
+                name: 'Orator',
+                tag: 'Karismatik & Menggelegar',
+                lang: 'id-ID',
+                desc: 'Tiruan vokal orasi tegas, menggelegar, dan penuh wibawa. Karakter vokal pria dewasa dengan resonansi dada berbobot tinggi untuk narasi heroik, pidato, dan orasi.',
+                avatar: 'TTS-Indonesia-Gratis/wibowo.jpg',
+                color: 'from-red-600 to-amber-700'
+            },
+            {
+                id: 'jokowi',
+                name: 'Jokowi',
+                tag: 'RVC Neural Asli',
+                lang: 'id-ID',
+                desc: 'Kloning vokal 100% autentik berbasis model neural RVC 175 epoch & retrieval FAISS (40 kHz). Karakteristik desah, timbre, dan artikulasi khas Jokowi asli.',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+                color: 'from-amber-500 to-emerald-600'
+            },
+            {
+                id: 'lala',
+                name: 'Lala',
+                tag: 'Anak Perempuan Imut',
+                lang: 'id-ID',
+                desc: 'Vokal anak perempuan ceria, imut, menggemaskan dengan nada tinggi manis. Sangat cocok untuk dongeng anak, lagu edukasi, dan karakter animasi lucu.',
+                avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80',
+                color: 'from-pink-500 to-rose-600'
+            },
+            {
+                id: 'kiki',
+                name: 'Kiki',
+                tag: 'Bocah Laki-laki Ceria',
+                lang: 'id-ID',
+                desc: 'Vokal bocah laki-laki polos, ceria, enerjik, dan penuh semangat berpetualang. Sangat cocok untuk cerita petualangan seru dan dialog kartun.',
+                avatar: 'https://images.unsplash.com/photo-1543332164-6e82f355badc?auto=format&fit=crop&w=300&q=80',
+                color: 'from-amber-400 to-orange-600'
+            },
+            {
+                id: 'mimi',
+                name: 'Mimi',
+                tag: 'Balita Gemas Manis',
+                lang: 'id-ID',
+                desc: 'Vokal si kecil balita lucu yang sangat menggemaskan, lembut, dan manja manis seperti adik kecil yang sedang belajar bercerita.',
+                avatar: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=300&q=80',
+                color: 'from-purple-400 to-pink-500'
+            },
+            {
+                id: 'dewi',
+                name: 'Dewi',
+                tag: 'Narator Audiobook & Puitis',
+                lang: 'id-ID',
+                desc: 'Vokal narator buku audio StorySight yang lembut, puitis, hangat, dan penuh penghayatan rasa. Sangat cocok untuk membacakan novel, puisi, dan dongeng malam yang menenangkan.',
+                avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+                color: 'from-rose-500 to-teal-600'
+            },
+            {
+                id: 'system-damayanti',
+                name: 'Damayanti (Sistem macOS)',
+                tag: 'Realtime 0ms',
+                lang: 'id-ID',
+                desc: 'Vokal sistem native macOS untuk pemrosesan streaming instan tanpa jeda.',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+                color: 'from-violet-500 to-purple-600'
+            }
+        ];
+
+        /* === 30+ PRESET GAYA BICARA & DIALEK === */
+        const TEMPLATES = [
+            { name: "Netral dan Jernih", prompt: "Gaya bicara alami, stabil, jernih, dan artikulatif tanpa emosi berlebihan." },
+            { name: "Guru Ceria & Interaktif", prompt: "Hangat, bersahabat, penuh antusiasme seperti guru yang menerangkan materi di kelas dengan santai." },
+            { name: "Dosen Formal & Akademisi", prompt: "Wibawa tinggi, tempo bicara teratur, artikulasi ilmiah dan logis layaknya kuliah umum." },
+            { name: "Storytelling Kisah & Sejarah", prompt: "Dramatis, penuh penghayatan, tempo bervariasi dengan jeda naratif yang menggugah emosi." },
+            { name: "Eksplorasi Sains & Teknologi", prompt: "Penuh rasa ingin tahu, bersemangat menjelaskan fakta baru, tempo melambat pada istilah penting." },
+            { name: "Sambutan Kepala Sekolah", prompt: "Hangat, mengayomi, kebapakan, berwibawa, dan memberikan pesan moral yang mendalam." },
+            { name: "Pengumuman Resmi Sekolah", prompt: "Tegas, tertib, lugas, informatif, dan memberikan kejelasan instruksi." },
+            { name: "Tutorial Step-by-Step", prompt: "Sabar, tempo teratur, artikulasi jelas, dengan penekanan pada kata kunci petunjuk." },
+            { name: "Iklan & Promosi Acara", prompt: "Persuasif, energetik, memikat, dengan ajakan bertindak (call to action) yang kuat." },
+            { name: "Podcast Santai", prompt: "Akrab, mengalir alami seperti obrolan hangat teman akrab dengan tawa tipis di sela kalimat." },
+            { name: "Dialek Jawa Medok", prompt: "Logat Jawa kental, penekanan vokal tebal, santun, dan mendayu." },
+            { name: "Dialek Sunda Halus", prompt: "Logat Sunda lembut, irama berlagu, ramah, dan penuh kesopanan." },
+            { name: "Dialek Betawi Asli", prompt: "Santai, ceplas-ceplos, humoris, dan menggunakan intonasi khas Jakarta pinggiran." },
+            { name: "Kakek Bijak & Petuah", prompt: "Suara berat, tempo perlahan, penuh kearifan dan petuah berharga." },
+            { name: "Motivasi Membara", prompt: "Lantang, membakar semangat, menggetarkan jiwa, dan penuh energi optimisme." }
+        ];
+
+        let state = {
+            isGenerating: false,
+            shouldStop: false,
+            selectedVoice: LOCAL_VOICES[0].id,
+            selectedStyle: TEMPLATES[0],
+            energy: "Normal",
+            mode: "Autentik",
+            speed: "Normal",
+            speedFactor: 1.0,
+            hasGeneratedForPrompt: null,
+            chunks: [],
+            results: {},
+            productionController: null,
+            resultUrls: [],
+            mergedResultUrl: null
+        };
+
+        let currentActiveAudio = null;
+        let progressivePlaybackContext = null;
+        let progressivePlaybackTail = 0;
+        const progressivePlaybackSources = new Set();
+
+        function getProgressivePlaybackContext() {
+            if (window.__eduvisAudioContext) {
+                progressivePlaybackContext = window.__eduvisAudioContext;
+            } else if (!progressivePlaybackContext) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    progressivePlaybackContext = new AudioCtx();
+                    window.__eduvisAudioContext = progressivePlaybackContext;
+                }
+            }
+            return progressivePlaybackContext;
+        }
+
+        function stopProgressivePlayback() {
+            for (const source of progressivePlaybackSources) {
+                try { source.stop(); } catch (_) {}
+            }
+            progressivePlaybackSources.clear();
+            progressivePlaybackTail = progressivePlaybackContext?.currentTime || 0;
+        }
+
+        async function queueProgressivePlayback(blob, signal) {
+            if (!document.getElementById('playAsReady').checked || !blob || signal?.aborted) return;
+            try {
+                const context = getProgressivePlaybackContext();
+                if (!context) throw new Error('Web Audio API tidak tersedia.');
+                if (context.state === 'suspended') await context.resume();
+                const audioBuffer = await context.decodeAudioData(await blob.arrayBuffer());
+                if (signal?.aborted) return;
+
+                const source = context.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(context.destination);
+                source.onended = () => progressivePlaybackSources.delete(source);
+                progressivePlaybackSources.add(source);
+                const startAt = Math.max(context.currentTime + 0.025, progressivePlaybackTail);
+                source.start(startAt);
+                progressivePlaybackTail = startAt + audioBuffer.duration + 0.12;
+            } catch (error) {
+                if (signal?.aborted) return;
+                document.getElementById('playAsReady').checked = false;
+                stopProgressivePlayback();
+                console.warn('Pemutaran progresif tidak tersedia:', error);
+            }
+        }
+
+        function triggerTtsServerWarmup() {
+            const warmUrls = getTtsCandidateUrls('/api/health?warm=1&from=tts_studio');
+            for (const url of warmUrls) {
+                fetch(url, { signal: AbortSignal.timeout(3000) }).catch(() => {});
+            }
+        }
+
+        /* === INISIALISASI === */
+        function init() {
+            populateVoiceSelect();
+            populateStyleSelect(TEMPLATES);
+            setupEventListeners();
+            updateConfigBadge();
+            triggerTtsServerWarmup();
+            checkBackendHealth();
+            scheduleBackendHealthCheck();
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    clearTimeout(backendHealthTimer);
+                } else {
+                    checkBackendHealth();
+                }
+            });
+            updateCounters();
+            renderVoiceCatalogCards();
+        }
+
+        function populateVoiceSelect() {
+            const vSelect = document.getElementById('voiceSelect');
+            vSelect.innerHTML = '';
+            LOCAL_VOICES.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.id;
+                opt.textContent = `${v.name} — ${v.tag}`;
+                vSelect.appendChild(opt);
+            });
+            vSelect.value = state.selectedVoice;
+        }
+
+        function populateStyleSelect(list) {
+            const sSelect = document.getElementById('styleSelect');
+            sSelect.innerHTML = '';
+            list.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.name;
+                opt.textContent = t.name;
+                sSelect.appendChild(opt);
+            });
+            updateStylePromptPreview();
+        }
+
+        function updateStylePromptPreview() {
+            const previewEl = document.getElementById('stylePromptPreview');
+            if (previewEl && state.selectedStyle) {
+                previewEl.textContent = `"${state.selectedStyle.prompt}"`;
+            }
+        }
+
+        function setupEventListeners() {
+            // Mode Selector
+            document.querySelectorAll('#modeSelector .segmented-item').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.parentElement.querySelectorAll('.segmented-item').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    state.mode = this.dataset.val;
+                    updateConfigBadge();
+                });
+            });
+
+            // Energy Selector
+            document.querySelectorAll('#energySelector .segmented-item').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.parentElement.querySelectorAll('.segmented-item').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    state.energy = this.dataset.val;
+                });
+            });
+
+            // Voice Select
+            document.getElementById('voiceSelect').addEventListener('change', e => {
+                state.selectedVoice = e.target.value;
+                const v = LOCAL_VOICES.find(x => x.id === state.selectedVoice);
+                document.getElementById('voiceDescPreview').textContent = `${v.name} — ${v.tag}`;
+                updateConfigBadge();
+            });
+
+            // Style Select
+            document.getElementById('styleSelect').addEventListener('change', e => {
+                state.selectedStyle = TEMPLATES.find(t => t.name === e.target.value) || TEMPLATES[0];
+                updateStylePromptPreview();
+                updateConfigBadge();
+            });
+
+            // Style Search Filter
+            document.getElementById('styleSearch').addEventListener('input', e => {
+                const query = e.target.value.toLowerCase();
+                const filtered = TEMPLATES.filter(t => t.name.toLowerCase().includes(query) || t.prompt.toLowerCase().includes(query));
+                populateStyleSelect(filtered);
+                state.selectedStyle = filtered[0] || TEMPLATES[0];
+                updateStylePromptPreview();
+            });
+
+            // Speed Range
+            document.getElementById('speedRange').addEventListener('input', e => {
+                const speeds = [
+                    { label: "0.8x (Sangat Lambat)", val: 0.8 },
+                    { label: "0.9x (Lambat)", val: 0.9 },
+                    { label: "1.0x (Normal)", val: 1.0 },
+                    { label: "1.1x (Cepat)", val: 1.1 },
+                    { label: "1.25x (Sangat Cepat)", val: 1.25 }
+                ];
+                const selected = speeds[parseInt(e.target.value)] || speeds[2];
+                state.speed = selected.label;
+                state.speedFactor = selected.val;
+                document.getElementById('speedVal').textContent = selected.label;
+            });
+
+            // Textarea Counters
+            document.getElementById('mainInput').addEventListener('input', updateCounters);
+
+            // Action Buttons
+            document.getElementById('startBtn').addEventListener('click', startProduction);
+            document.getElementById('stopBtn').addEventListener('click', stopProduction);
+            document.getElementById('mergeBtn').addEventListener('click', mergeAllResults);
+            document.getElementById('playAsReady').addEventListener('change', event => {
+                if (!event.target.checked) stopProgressivePlayback();
+            });
+
+            // Menu toggle
+            document.getElementById('menuBtn')?.addEventListener('click', toggleSidebar);
+        }
+
+        function toggleSidebar() {
+            const menu = document.getElementById('sidebarMenu');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!menu || !overlay) return;
+            const isClosed = menu.classList.contains('-translate-x-full');
+            menu.classList.toggle('-translate-x-full', !isClosed);
+            overlay.classList.toggle('hidden', !isClosed);
+        }
+
+        function updateConfigBadge() {
+            const v = LOCAL_VOICES.find(x => x.id === state.selectedVoice) || LOCAL_VOICES[0];
+            const isCerdas = state.mode === 'Cerdas';
+
+            const badgeColor = isCerdas ? 'bg-cyan-400' : 'bg-emerald-400';
+            const modeText = isCerdas ? 'MODE CERDAS (AI)' : 'MODE AUTENTIK';
+
+            document.getElementById('configLabel').innerHTML = `
+                <span class="w-2 h-2 rounded-full ${badgeColor} inline-block animate-pulse"></span>
+                KONFIGURASI: ${modeText} • ${v.name.toUpperCase()} (${state.selectedStyle.name.toUpperCase()})
+            `;
+
+            const startBtn = document.getElementById('startBtn');
+            const mainInput = document.getElementById('mainInput');
+            const modeNotice = document.getElementById('modeNotice');
+
+            if (isCerdas) {
+                if (startBtn && !state.isGenerating) {
+                    startBtn.innerHTML = `<i class="bx bx-sparkles text-lg text-cyan-300 animate-pulse"></i> GENERATE & PRODUKSI NARASI AI`;
+                }
+                if (mainInput && (!mainInput.value || mainInput.value.trim().length === 0)) {
+                    mainInput.placeholder = "Ketik topik, materi, atau instruksi narasi di sini...\nContoh: 'buatkan narasi pembelajaran fisika tentang gaya newton' atau 'kisah inspiratif penemu listrik'.\n\nAI lokal Gemma akan otomatis menyusun naskah lengkap lalu memproduksinya jadi audio vokal.";
+                }
+                if (modeNotice) {
+                    modeNotice.classList.remove('hidden');
+                }
+            } else {
+                if (startBtn && !state.isGenerating) {
+                    startBtn.innerHTML = `<i class="bx bx-play-circle text-lg"></i> MULAI PROSES NARASI (SUARA ASLI)`;
+                }
+                if (mainInput && (!mainInput.value || mainInput.value.trim().length === 0)) {
+                    mainInput.placeholder = "Tuliskan atau tempel naskah narasi jadi di sini...\nAI akan membacakan teks asli kata demi kata tanpa mengubah kalimat.";
+                }
+                if (modeNotice) {
+                    modeNotice.classList.add('hidden');
+                }
+            }
+        }
+
+        function updateCounters() {
+            const text = document.getElementById('mainInput').value;
+            const charCount = text.length;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const estSeconds = Math.round((words / 140) * 60);
+
+            document.getElementById('charCount').textContent = `${charCount} Karakter`;
+            document.getElementById('wordCount').textContent = `${words} Kata`;
+            document.getElementById('estDuration').textContent = `Estimasi Durasi: ${estSeconds}s`;
+        }
+
+        function clearText() {
+            document.getElementById('mainInput').value = '';
+            state.hasGeneratedForPrompt = null;
+            updateCounters();
+        }
+
+        /* === HEALTH CHECK SERVER LOKAL === */
+        let backendHealthTimer = null;
+        let backendHealthInFlight = false;
+
+        function scheduleBackendHealthCheck() {
+            clearTimeout(backendHealthTimer);
+            if (!document.hidden) {
+                backendHealthTimer = setTimeout(checkBackendHealth, 15000);
+            }
+        }
+
+        async function checkBackendHealth() {
+            if (document.hidden || backendHealthInFlight) return;
+            backendHealthInFlight = true;
+            try {
+                // Check LiteRT-LM
+                const litertTag = document.getElementById('litertStatusTag');
+                const candidateLlmUrls = [
+                    `${LITERT_ENDPOINT}/models`,
+                    `${pageOrigin}/v1/models`,
+                    `http://${pageHost}:1236/v1/models`,
+                    `http://127.0.0.1:1236/v1/models`
+                ];
+                const validLlm = [...new Set(candidateLlmUrls)].filter(u => !isPageHttps || !u.startsWith('http:'));
+
+                let llmOk = false;
+                for (const url of validLlm) {
+                    try {
+                        const res = await fetch(url, { signal: AbortSignal.timeout(1800) });
+                        if (res.ok) {
+                            litertTag.textContent = '● Aktif (GPU/RAM)';
+                            litertTag.className = 'text-emerald-400 font-medium';
+                            llmOk = true;
+                            break;
+                        }
+                    } catch (_) {}
+                }
+                if (!llmOk) {
+                    litertTag.textContent = '○ Standby';
+                    litertTag.className = 'text-stone-400';
+                }
+
+                // Check TTS Server On-Demand & Status
+                const ttsTag = document.getElementById('ttsServerStatusTag');
+                const healthUrls = getTtsCandidateUrls('/api/health');
+                let ttsChecked = false;
+                for (const url of healthUrls) {
+                    try {
+                        const res = await fetch(url, { signal: AbortSignal.timeout(2500) });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.synthesizer_ready || data.neural_vits_ready) {
+                                ttsTag.textContent = '● Aktif (AI VITS Neural)';
+                                ttsTag.className = 'text-emerald-400 font-medium';
+                            } else if (data.synthesizer_loading) {
+                                ttsTag.textContent = '◌ Memanaskan AI VITS...';
+                                ttsTag.className = 'text-amber-400 font-medium';
+                            } else if (data.model_ready) {
+                                ttsTag.textContent = '◌ On-Demand Standby (Siap)';
+                                ttsTag.className = 'text-cyan-400 font-medium';
+                            } else {
+                                ttsTag.textContent = '● Siap (Lokal AI & macOS Native)';
+                                ttsTag.className = 'text-emerald-400 font-medium';
+                            }
+                            ttsChecked = true;
+                            break;
+                        }
+                    } catch (_) {}
+                }
+                if (!ttsChecked) {
+                    ttsTag.textContent = '● Web Speech (Lokal)';
+                    ttsTag.className = 'text-sky-400 font-medium';
+                }
+            } catch (err) {
+                console.warn('Pemeriksaan kesehatan backend gagal:', err);
+            } finally {
+                backendHealthInFlight = false;
+                scheduleBackendHealthCheck();
+            }
+        }
+
+        /* === FITUR GENERATIF LOKAL (LiteRT-LM Gemma) === */
+        async function callLocalLLM(messages, temperature = 0.7, signal = null) {
+            const candidateUrls = [
+                `${LITERT_ENDPOINT}/chat/completions`,
+                `${pageOrigin}/v1/chat/completions`,
+                `http://${pageHost}:1236/v1/chat/completions`,
+                `http://127.0.0.1:1236/v1/chat/completions`
+            ];
+            const validUrls = [...new Set(candidateUrls)].filter(u => !isPageHttps || !u.startsWith('http:'));
+
+            for (const url of validUrls) {
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: 'gemma-4-E2B-it',
+                            messages: messages,
+                            temperature: temperature
+                        }),
+                        signal: signal || AbortSignal.timeout(15000)
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const content = data.choices?.[0]?.message?.content;
+                        if (content) return content;
+                    }
+                } catch (err) {
+                    if (signal?.aborted) throw err;
+                    console.warn(`LiteRT-LM endpoint ${url} gagal:`, err);
+                }
+            }
+            return null;
+        }
+
+        /* === FILTER & PEMBERSIH NASKAH NARASI (HANYA SUARA VOKAL MURNI) === */
+        function cleanNarrationText(text) {
+            if (!text) return "";
+            let cleaned = text;
+
+            // 1. Hapus tanda kurung siku [] sepenuhnya (hampir selalu stage directions / cues)
+            cleaned = cleaned.replace(/\[[^\]]*\]/g, '');
+
+            // 2. Hapus tanda kurung kurawal {} sepenuhnya
+            cleaned = cleaned.replace(/\{[^\}]*\}/g, '');
+
+            // 3. Hapus baris yang seluruhnya berupa tanda kurung (apapun isinya)
+            cleaned = cleaned.replace(/^\s*\([^\)]*\)\s*$/gm, '');
+
+            // 4. Hapus tanda kurung di awal teks sebelum kata pertama (misal: "(Musik latar...) Selamat pagi...")
+            cleaned = cleaned.replace(/^\s*\([^\)]*\)\s*/, '');
+
+            // 5. Hapus petunjuk audio, panggung, musik di dalam tanda kurung di mana saja
+            const cuePattern = /\([^\)]*(?:musik|music|audio|sfx|sound|efek|backsound|bgm|jeda|pause|volume|beat|upbeat|slow|fade|hening|tertawa|senyum|desah|berbisik|nada|vokal|intro|outro|visual|adegan|scene|kamera|layar|transisi|zoom|durasi|detik|instruksi|instrumen|tempo|suasana|terdengar|suara|gerak|panggung|teks|latar)[^\)]*\)/gi;
+            cleaned = cleaned.replace(cuePattern, '');
+
+            // 6. Hapus prefix peran pembicara (Narator:, Guru:, Pembicara:)
+            cleaned = cleaned.replace(/^\s*(?:narator|narrator|pembicara|guru|suara|vo|voiceover|voice\s*over)\s*[:\-–]\s*/gmi, '');
+
+            // 7. Hapus baris judul markdown / label bab / scene
+            cleaned = cleaned.replace(/^\s*#{1,6}\s+.*$/gm, '');
+            cleaned = cleaned.replace(/^\s*\*\*(?:judul|topik|bab|bagian|adegan|scene)[^\*]*\*\*\s*[:\-–]?\s*/gmi, '');
+            cleaned = cleaned.replace(/^\s*(?:judul|topik|adegan|scene\s*\d+)\s*[:\-–].*$/gmi, '');
+
+            // 8. Hilangkan formatting asterisks bold/italic
+            cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
+            cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
+
+            // 9. Normalisasi spasi dan rapikan baris kosong berlebih
+            cleaned = cleaned.replace(/[ \t]+/g, ' ');
+            cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
+
+            return cleaned;
+        }
+
+        /* Buat Narasi Otomatis dari Topik / Instruksi */
+        async function generateNarrationPrompt() {
+            let topic = document.getElementById('mainInput').value.trim();
+            if (!topic) {
+                topic = prompt("Masukkan topik atau instruksi narasi (contoh: 'pembelajaran fisika tentang gaya newton', 'sejarah candi borobudur'):");
+            }
+            if (!topic || !topic.trim()) return;
+
+            showAiOverlay(`Gemma sedang menyusun naskah narasi murni tentang:\n"${topic.slice(0, 45)}..."`);
+
+            const voiceObj = LOCAL_VOICES.find(x => x.id === state.selectedVoice) || LOCAL_VOICES[0];
+            const systemPrompt = `PERATURAN MUTLAK PENULIS NASKAH AUDIO:
+1. Tulis HANYA kalimat narasi yang diucapkan langsung oleh pembicara/narator dari kata pertama hingga kalimat penutup.
+2. DILARANG KERAS menyertakan petunjuk audio, efek musik latar, keterangan instrumen panggung, atau arahan visual seperti "(Musik latar...)", "[Musik ceria]", "(Sound effect: ...)", "[Jeda 2 detik]", dsb.
+3. DILARANG menyertakan nama pembicara seperti "Narator:", "Guru:", atau "Voiceover:".
+4. DILARANG menggunakan tanda kurung () atau tanda kurung siku [] untuk arahan apa pun.
+5. Gaya bicara: ${state.selectedStyle.prompt}.
+6. Langsung berikan kalimat narasinya saja secara utuh tanpa judul, tanpa kata pengantar, dan tanpa penutup basa-basi.`;
+            const userPrompt = `Tolong buatkan naskah narasi edukatif lengkap berdasarkan instruksi berikut:\n"${topic}"`;
+
+            const generated = await callLocalLLM([
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+            ]);
+
+            hideAiOverlay();
+
+            if (generated && generated.trim().length > 20) {
+                const cleaned = cleanNarrationText(generated);
+                document.getElementById('mainInput').value = cleaned;
+                state.hasGeneratedForPrompt = topic;
+                updateCounters();
+            } else {
+                alert("Gagal menghubungi server LiteRT-LM lokal di port 1236/1234. Pastikan service AI aktif.");
+            }
+        }
+
+        /* Optimasi / Terjemah AI Lokal */
+        async function processAI(type, extra = "") {
+            const text = document.getElementById('mainInput').value.trim();
+            if (!text) {
+                alert("Tuliskan naskah terlebih dahulu di editor.");
+                return;
+            }
+
+            const label = type === 'refine' ? "Mengoptimasi naskah untuk suara vokal..." : `Menerjemahkan ke ${extra}...`;
+            showAiOverlay(label);
+
+            let systemPrompt = "";
+            let userPrompt = "";
+
+            if (type === 'refine') {
+                systemPrompt = `Anda adalah editor audio narasi handal. Sesuaikan naskah berikut agar memiliki gaya narasi dan dialek: "${state.selectedStyle.prompt}". Perbaiki diksi, intonasi, tanda baca, ritme kalimat, dan artikulasi agar naskah sangat enak dibacakan oleh pembicara AI. Jangan ubah pesan inti. DILARANG menyertakan petunjuk audio dalam tanda kurung () atau []. Langsung berikan teks naskah hasil perbaikan saja tanpa pembuka/penutup.`;
+                userPrompt = `NASKAH:\n${text}`;
+            } else {
+                systemPrompt = `Anda adalah penerjemah handal. Terjemahkan naskah berikut ke ${extra} dengan diksi yang natural untuk dibacakan secara lisan. Langsung berikan teks hasil terjemahan saja.`;
+                userPrompt = `NASKAH:\n${text}`;
+            }
+
+            const result = await callLocalLLM([
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+            ]);
+
+            hideAiOverlay();
+
+            if (result) {
+                const cleaned = cleanNarrationText(result);
+                document.getElementById('mainInput').value = cleaned;
+                updateCounters();
+            } else {
+                alert("Gagal memproses dengan LiteRT-LM lokal.");
+            }
+        }
+
+        function showAiOverlay(text) {
+            const overlay = document.getElementById('aiOverlay');
+            const overlayText = document.getElementById('aiOverlayText');
+            if (overlayText) overlayText.textContent = text;
+            overlay?.classList.remove('hidden');
+        }
+
+        function hideAiOverlay() {
+            document.getElementById('aiOverlay')?.classList.add('hidden');
+        }
+
+        /* === PEMROGRAMAN PIPELINE PRODUKSI AUDIO (TTS) === */
+        function segmentText(text) {
+            // Memecah teks menjadi potongan segmen ideal 150-300 karakter untuk artikulasi optimal
+            const paragraphs = text.split(/\n+/).filter(p => p.trim());
+            const chunks = [];
+
+            paragraphs.forEach(p => {
+                const sentences = p.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [p];
+                let currentChunk = "";
+
+                sentences.forEach(s => {
+                    const trimmed = s.trim();
+                    if (!trimmed) return;
+                    if ((currentChunk + " " + trimmed).length > 250 && currentChunk.length >= 80) {
+                        chunks.push(currentChunk.trim());
+                        currentChunk = trimmed;
+                    } else {
+                        currentChunk = currentChunk ? currentChunk + " " + trimmed : trimmed;
+                    }
+                });
+
+                if (currentChunk.trim()) {
+                    chunks.push(currentChunk.trim());
+                }
+            });
+
+            return chunks.length ? chunks : [text];
+        }
+
+        async function startProduction() {
+            let text = document.getElementById('mainInput').value.trim();
+            if (!text || state.isGenerating) {
+                if (!text) alert("Silakan ketikkan topik narasi atau tempel naskah terlebih dahulu.");
+                return;
+            }
+
+            const controller = new AbortController();
+            state.productionController = controller;
+            state.isGenerating = true;
+            state.shouldStop = false;
+            document.getElementById('startBtn').innerHTML = `<i class="bx bx-loader-alt animate-spin text-base"></i> MEMPROSES AUDIO...`;
+            stopProgressivePlayback();
+            if (document.getElementById('playAsReady').checked) {
+                const audioContext = getProgressivePlaybackContext();
+                if (audioContext?.state === 'suspended') audioContext.resume().catch(error => {
+                    console.warn('Audio context tidak dapat diaktifkan:', error);
+                });
+            }
+
+            try {
+                // Jika dalam Mode Cerdas dan teks berupa instruksi/topik (belum berupa narasi lengkap):
+                const isInstruction = (
+                    state.mode === 'Cerdas' &&
+                    (
+                        text.length < 180 ||
+                        /^(buatkan|tuliskan|jelaskan|ceritakan|narasi|bikin|tolong|bagaimana|topik:)/i.test(text)
+                    ) &&
+                    state.hasGeneratedForPrompt !== text
+                );
+
+                if (isInstruction) {
+                    updateProgress(5, "🧠 AI sedang menyusun naskah narasi lengkap...");
+                    showAiOverlay(`Gemma AI sedang menyusun naskah narasi lengkap dari instruksi:\n"${text.slice(0, 50)}..."`);
+
+                    const systemPrompt = `PERATURAN MUTLAK PENULIS NASKAH AUDIO:
+1. Tulis HANYA kalimat narasi yang diucapkan langsung oleh pembicara/narator dari kata pertama hingga kalimat penutup.
+2. DILARANG KERAS menyertakan petunjuk audio, efek musik latar, keterangan instrumen panggung, atau arahan visual seperti "(Musik latar...)", "[Musik ceria]", "(Sound effect: ...)", "[Jeda 2 detik]", dsb.
+3. DILARANG menyertakan nama pembicara seperti "Narator:", "Guru:", atau "Voiceover:".
+4. DILARANG menggunakan tanda kurung () atau tanda kurung siku [] untuk arahan apa pun.
+5. Gaya bicara: ${state.selectedStyle.prompt}.
+6. Langsung berikan kalimat narasinya saja secara utuh tanpa judul, tanpa kata pengantar, dan tanpa penutup basa-basi.`;
+                    const userPrompt = `Tolong buatkan naskah narasi lengkap berdasarkan instruksi berikut:\n"${text}"`;
+
+                    const generated = await callLocalLLM([
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ], 0.7, controller.signal);
+
+                    if (controller.signal.aborted) return;
+                    if (generated && generated.trim().length > 20) {
+                        text = cleanNarrationText(generated);
+                        document.getElementById('mainInput').value = text;
+                        state.hasGeneratedForPrompt = text;
+                        updateCounters();
+                    } else {
+                        console.warn("Melanjutkan dengan teks asli karena AI lokal belum merespons.");
+                    }
+                }
+
+                if (controller.signal.aborted) return;
+
+                // Pastikan seluruh teks bersih dari petunjuk audio/musik/panggung sebelum diproses TTS
+                text = cleanNarrationText(text);
+                document.getElementById('mainInput').value = text;
+                updateCounters();
+
+                state.results = {};
+                releaseProductionUrls();
+                document.getElementById('resultsList').innerHTML = '';
+                document.getElementById('masterBox').classList.add('hidden');
+                document.getElementById('mergeBtn').disabled = true;
+
+                updateProgress(10, "Menganalisis & Membagi Segmen...");
+
+                state.chunks = segmentText(text);
+
+                updateProgress(20, `Memulai Konversi (0/${state.chunks.length} Segmen)...`);
+
+                for (let i = 0; i < state.chunks.length; i++) {
+                    if (controller.signal.aborted) break;
+                    const chunk = state.chunks[i];
+                    updateProgress(
+                        20 + Math.floor((i / state.chunks.length) * 75),
+                        `Memproses Segmen ${i + 1}/${state.chunks.length}...`
+                    );
+                    await processSegmentTTS(chunk, i, controller.signal);
+                }
+
+                if (!controller.signal.aborted) {
+                    updateProgress(100, "Seluruh Audio Berhasil Diproduksi!");
+                    document.getElementById('mergeBtn').disabled = false;
+                    await mergeAllResults();
+                }
+            } catch (error) {
+                if (!controller.signal.aborted) {
+                    console.error('Produksi narasi gagal:', error);
+                    updateProgress(0, `Produksi gagal: ${error.message}`);
+                }
+            } finally {
+                hideAiOverlay();
+                state.isGenerating = false;
+                state.shouldStop = false;
+                state.productionController = null;
+                updateConfigBadge();
+            }
+        }
+
+        async function processSegmentTTS(textChunk, index, signal) {
+            if (signal?.aborted || state.shouldStop) return;
+
+            if (state.selectedVoice === 'system-damayanti') {
+                // Fallback / Native System Speech
+                const wavBlob = await synthesizeWithSystemSpeech(textChunk, signal);
+                if (signal?.aborted) return;
+                state.results[index] = { blob: wavBlob, text: textChunk };
+                addSegmentResultCard(index, textChunk, wavBlob);
+                await queueProgressivePlayback(wavBlob, signal);
+                return;
+            }
+
+            // Pemrosesan Audio via On-Demand Neural TTS & Fallback Cerdas
+            try {
+                const speaker = state.selectedVoice || 'gadis';
+                const cleanChunk = textChunk.trim();
+                if (!cleanChunk) return;
+
+                let ttsStyle = "natural";
+                if (state.energy === "Energi") ttsStyle = "cheerful";
+                else if (state.energy === "Bisik") ttsStyle = "calm";
+                else if (/formal|dosen|resmi/i.test(state.selectedStyle?.name || '')) ttsStyle = "formal";
+                else if (/ceria|motivasi|promosi/i.test(state.selectedStyle?.name || '')) ttsStyle = "cheerful";
+                else if (/storytelling|kakek/i.test(state.selectedStyle?.name || '')) ttsStyle = "expressive";
+
+                const speed = state.speedFactor || 1.0;
+                let blob = null;
+                const ttsUrls = getTtsCandidateUrls(`/api/tts?text=${encodeURIComponent(cleanChunk)}&speaker=${encodeURIComponent(speaker)}&speed=${speed}&style=${ttsStyle}`);
+
+                for (const url of ttsUrls) {
+                    if (signal?.aborted || state.shouldStop) break;
+                    try {
+                        const fetchSignal = signal ? AbortSignal.any([signal, AbortSignal.timeout(35000)]) : AbortSignal.timeout(35000);
+                        const res = await fetch(url, { signal: fetchSignal });
+                        if (res.ok) {
+                            const resBlob = await res.blob();
+                            if (resBlob.size > 200) {
+                                blob = resBlob;
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        if (signal?.aborted) throw e;
+                        console.warn(`TTS endpoint ${url} gagal, mencoba kandidat berikutnya...`, e);
+                    }
+                }
+
+                if (!blob) {
+                    // Fallback cerdas: panggil system speech generator
+                    blob = await synthesizeWithSystemSpeech(cleanChunk, signal);
+                }
+
+                if (signal?.aborted) return;
+                state.results[index] = { blob: blob, text: cleanChunk };
+                addSegmentResultCard(index, cleanChunk, blob);
+                await queueProgressivePlayback(blob, signal);
+            } catch (err) {
+                if (signal?.aborted || err.name === 'AbortError') return;
+                throw new Error(`Gagal membuat audio segmen ${index + 1}: ${err.message}`, { cause: err });
+            }
+        }
+
+        function stopProduction() {
+            state.shouldStop = true;
+            state.productionController?.abort();
+            currentActiveAudio?.pause();
+            currentActiveAudio = null;
+            window.speechSynthesis?.cancel();
+            stopProgressivePlayback();
+            updateProgress(0, "Proses Dihentikan.");
+            document.getElementById('startBtn').innerHTML = `<i class="bx bx-play-circle text-lg"></i> MULAI PROSES NARASI`;
+        }
+
+        /* === SYNTHESIZE VIA SYSTEM AUDIO & PCM CONVERTER === */
+        async function synthesizeWithSystemSpeech(text, signal) {
+            // 1. Coba request via endpoint backend dengan suara Damayanti (macOS say + afconvert)
+            const fallbackUrls = getTtsCandidateUrls(`/api/tts?text=${encodeURIComponent(text)}&speaker=damayanti`);
+            for (const url of fallbackUrls) {
+                if (signal?.aborted) return null;
+                try {
+                    const fetchSignal = signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000);
+                    const res = await fetch(url, { signal: fetchSignal });
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        if (blob.size > 200) return blob;
+                    }
+                } catch (_) {}
+            }
+
+            // 2. Jika seluruh backend tidak merespons, generate synthetic tone WAV via Web Audio API
+            return generateOfflineFallbackWav(text);
+        }
+
+        function generateOfflineFallbackWav(text) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) {
+                throw new Error("Web Audio API tidak didukung pada browser/WebView ini.");
+            }
+            const sampleRate = 22050;
+            const duration = Math.max(1.0, Math.min(8.0, text.length * 0.08));
+            const totalSamples = Math.floor(sampleRate * duration);
+            const ctx = new AudioContextClass();
+            const buffer = ctx.createBuffer(1, totalSamples, sampleRate);
+            const channel = buffer.getChannelData(0);
+
+            for (let i = 0; i < totalSamples; i++) {
+                const t = i / sampleRate;
+                const env = Math.exp(-3 * (t % 1.0));
+                channel[i] = 0.15 * Math.sin(2 * Math.PI * 440 * t) * env;
+            }
+            ctx.close().catch(() => {});
+            return audioBufferToWavBlob(buffer);
+        }
+
+        function audioBufferToWavBlob(buffer) {
+            const numOfChan = buffer.numberOfChannels;
+            const length = buffer.length * numOfChan * 2 + 44;
+            const out = new DataView(new ArrayBuffer(length));
+            const channels = [];
+            let sampleRate = buffer.sampleRate;
+            let offset = 0;
+            let pos = 0;
+
+            function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
+
+            // RIFF identifier
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8);  // file length - 8
+            setUint32(0x45564157); // "WAVE"
+
+            // format chunk identifier
+            setUint32(0x20746d66); // "fmt "
+            setUint32(16);          // length = 16
+            setUint16(1);           // PCM (uncompressed)
+            setUint16(numOfChan);
+            setUint32(sampleRate);
+            setUint32(sampleRate * 2 * numOfChan); // avg. bytes/sec
+            setUint16(numOfChan * 2);              // block-align
+            setUint16(16);                         // 16-bit
+
+            // data chunk identifier
+            setUint32(0x61746164); // "data"
+            setUint32(length - pos - 4);
+
+            for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+            while (pos < length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    out.setInt16(pos, sample, true);
+                    pos += 2;
+                }
+                offset++;
+            }
+
+            return new Blob([out.buffer], { type: 'audio/wav' });
+        }
+
+        /* === HASIL SEGMEN AUDIO CARD === */
+        function addSegmentResultCard(idx, text, blob, isFallback = false) {
+            const empty = document.getElementById('emptyState');
+            if (empty) empty.remove();
+
+            const url = URL.createObjectURL(blob);
+            state.resultUrls.push(url);
+            const list = document.getElementById('resultsList');
+            const item = document.createElement('div');
+            item.className = 'glass-card p-4 rounded-xl space-y-2 border-white/10 animate-fade-in';
+            const voiceObj = LOCAL_VOICES.find(x => x.id === state.selectedVoice) || LOCAL_VOICES[0];
+            const isNativeMac = state.selectedVoice === 'system-damayanti' || state.selectedVoice === 'damayanti';
+            const badgeTag = isFallback ? '<span class="text-[9px] font-mono text-amber-400 bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-500/30">Web Speech</span>' : (isNativeMac ? '<span class="text-[9px] font-mono text-violet-300 bg-violet-950/40 px-1.5 py-0.5 rounded border border-violet-500/30">macOS Native</span>' : `<span class="text-[9px] font-mono text-emerald-400 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/30">AI VITS (${voiceObj.name})</span>`);
+            item.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                            SEGMEN ${(idx + 1).toString().padStart(2, '0')}
+                        </span>
+                        ${badgeTag}
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="playSegmentAudio('${url}', this)" class="w-8 h-8 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 flex items-center justify-center btn-macos" title="Putar audio segmen">
+                            <i class="bx bx-play text-base"></i>
+                        </button>
+                        <button onclick="copyToClipboard('${text.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 flex items-center justify-center btn-macos" title="Salin teks">
+                            <i class="bx bx-copy text-sm"></i>
+                        </button>
+                        <button onclick="downloadSegmentAudio(${idx})" class="w-8 h-8 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 flex items-center justify-center btn-macos" title="Unduh WAV">
+                            <i class="bx bx-download text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-stone-300 leading-relaxed">${text}</p>
+            `;
+            list.appendChild(item);
+        }
+
+        function playSegmentAudio(url, btn) {
+            if (currentActiveAudio) {
+                currentActiveAudio.pause();
+                currentActiveAudio = null;
+            }
+            const audio = new Audio(url);
+            currentActiveAudio = audio;
+            audio.play().catch(error => {
+                if (currentActiveAudio === audio) currentActiveAudio = null;
+                console.warn('Pemutaran audio segmen gagal:', error);
+            });
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'bx bx-pause text-base';
+                    audio.onended = () => {
+                        icon.className = 'bx bx-play text-base';
+                        if (currentActiveAudio === audio) currentActiveAudio = null;
+                    };
+                }
+            }
+        }
+
+        function extractPcmFromWav(arrayBuffer) {
+            const bytes = new Uint8Array(arrayBuffer);
+            let offset = 12;
+            while (offset < bytes.length - 8) {
+                const chunkId = String.fromCharCode(bytes[offset], bytes[offset+1], bytes[offset+2], bytes[offset+3]);
+                const chunkSize = (bytes[offset+4]) | (bytes[offset+5] << 8) | (bytes[offset+6] << 16) | ((bytes[offset+7] << 24) >>> 0);
+                if (chunkId === 'data') {
+                    return bytes.subarray(offset + 8, Math.min(bytes.length, offset + 8 + chunkSize));
+                }
+                offset += 8 + (chunkSize > 0 ? chunkSize : 0);
+            }
+            return arrayBuffer.byteLength > 44 ? bytes.subarray(44) : bytes;
+        }
+
+        /* === MERGE / GABUNGKAN SEMUA .WAV === */
+        async function mergeAllResults() {
+            const sortedIndices = Object.keys(state.results).sort((a, b) => a - b);
+            if (sortedIndices.length === 0) return;
+
+            const buffers = [];
+            let totalLength = 0;
+            const fullText = [];
+            // Jeda alami 160ms antar segmen agar tidak terjadi benturan audio/klik
+            const pauseBytes = Math.floor(22050 * 0.16) * 2;
+            const pauseBuffer = new Uint8Array(pauseBytes);
+
+            for (let i = 0; i < sortedIndices.length; i++) {
+                const idx = sortedIndices[i];
+                const blob = state.results[idx].blob;
+                const buffer = await blob.arrayBuffer();
+                const pcm = extractPcmFromWav(buffer);
+                buffers.push(pcm);
+                totalLength += pcm.byteLength;
+                fullText.push(state.results[idx].text);
+
+                // Tambahkan jeda hening antar kalimat
+                if (i < sortedIndices.length - 1) {
+                    buffers.push(pauseBuffer);
+                    totalLength += pauseBytes;
+                }
+            }
+
+            const mergedPcm = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const b of buffers) {
+                mergedPcm.set(b, offset);
+                offset += b.length;
+            }
+
+            const finalWavBlob = pcmToWav(mergedPcm, 22050);
+            if (state.mergedResultUrl) URL.revokeObjectURL(state.mergedResultUrl);
+            const finalUrl = URL.createObjectURL(finalWavBlob);
+            state.mergedResultUrl = finalUrl;
+            const combinedText = fullText.join("\n\n");
+
+            // Perkiraan durasi
+            const durSeconds = Math.round(totalLength / (22050 * 2));
+
+            document.getElementById('masterBox').classList.remove('hidden');
+            document.getElementById('mergedTextPreview').textContent = combinedText;
+            document.getElementById('mergedDurationBadge').textContent = `Durasi: ${durSeconds}s (${Math.round(totalLength / 1024)} KB)`;
+
+            document.getElementById('playMergedBtn').onclick = () => playSegmentAudio(finalUrl);
+            document.getElementById('copyMergedBtn').onclick = () => copyToClipboard(combinedText);
+            document.getElementById('saveMergedBtn').onclick = () => {
+                downloadAudioFile(finalWavBlob, `EduVis_Narasi_${state.selectedVoice}_Final.wav`);
+            };
+        }
+
+        /* === DOWNLOAD AUDIO NATIVE BRIDGE (MAC WKWEBVIEW & BROWSER) === */
+        async function downloadAudioFile(blob, filename) {
+            if (!blob) return;
+
+            // Jika berjalan di dalam aplikasi native macOS (EduVis AI Gallery / EduVis Native AI):
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.saveDocument) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    const base64data = (reader.result || '').split(',')[1] || '';
+                    if (base64data) {
+                        window.webkit.messageHandlers.saveDocument.postMessage({
+                            requestID: 'wav_save_' + Date.now(),
+                            filename: filename,
+                            mimeType: 'audio/wav',
+                            base64: base64data
+                        });
+                    }
+                };
+                reader.readAsDataURL(blob);
+                return;
+            }
+
+            // Fallback untuk browser web biasa (Chrome, Safari, Firefox):
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                a.remove();
+                URL.revokeObjectURL(url);
+            }, 1000);
+        }
+
+        function downloadSegmentAudio(idx) {
+            const seg = state.results[idx];
+            if (seg && seg.blob) {
+                downloadAudioFile(seg.blob, `EduVis_Segmen_${idx + 1}_${state.selectedVoice}.wav`);
+            }
+        }
+
+        function releaseProductionUrls() {
+            currentActiveAudio?.pause();
+            currentActiveAudio = null;
+            stopProgressivePlayback();
+            state.resultUrls.forEach(url => URL.revokeObjectURL(url));
+            state.resultUrls = [];
+            if (state.mergedResultUrl) {
+                URL.revokeObjectURL(state.mergedResultUrl);
+                state.mergedResultUrl = null;
+            }
+        }
+
+        window.addEventListener('pagehide', releaseProductionUrls);
+
+        function pcmToWav(pcmData, sampleRate) {
+            const header = new ArrayBuffer(44);
+            const view = new DataView(header);
+            const writeString = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+            writeString(0, 'RIFF');
+            view.setUint32(4, 32 + pcmData.length, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM format
+            view.setUint16(22, 1, true); // Mono channel
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true); // Byte rate
+            view.setUint16(32, 2, true);              // Block align
+            view.setUint16(34, 16, true);             // Bits per sample
+            writeString(36, 'data');
+            view.setUint32(40, pcmData.length, true);
+            return new Blob([header, pcmData], { type: 'audio/wav' });
+        }
+
+        /* === KATALOG VISUAL MODAL === */
+        function renderVoiceCatalogCards() {
+            const grid = document.getElementById('voiceCardsGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            LOCAL_VOICES.forEach(v => {
+                const card = document.createElement('div');
+                card.className = 'p-4 rounded-2xl bg-black/40 border border-white/10 hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-3';
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl overflow-hidden border border-white/20 bg-stone-800 shrink-0">
+                                ${v.avatar
+                                    ? `<img src="${v.avatar}" alt="${v.name}" class="w-full h-full object-cover" onerror="this.src='https://cdn-icons-png.freepik.com/256/8415/8415559.png'">`
+                                    : '<div class="w-full h-full grid place-items-center text-cyan-300"><i class="bx bx-microphone text-xl"></i></div>'}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">${v.name}</h4>
+                                <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-500/30">${v.tag}</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-stone-300 leading-relaxed">${v.desc}</p>
+                    </div>
+                    <div class="flex items-center gap-2 pt-2 border-t border-white/10">
+                        <button onclick="testVoiceById('${v.id}')" class="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white btn-macos flex items-center justify-center gap-1">
+                            <i class="bx bx-play text-sm"></i> Sampel
+                        </button>
+                        <button onclick="selectVoiceFromModal('${v.id}')" class="flex-1 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-xs font-bold text-slate-950 btn-macos flex items-center justify-center gap-1">
+                            Pilih
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openVoiceLibrary() {
+            const modal = document.getElementById('voiceLibraryModal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeVoiceLibrary() {
+            const modal = document.getElementById('voiceLibraryModal');
+            if (!modal) return;
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function selectVoiceFromModal(id) {
+            document.getElementById('voiceSelect').value = id;
+            state.selectedVoice = id;
+            const v = LOCAL_VOICES.find(x => x.id === id);
+            if (v) document.getElementById('voiceDescPreview').textContent = `${v.name} — ${v.tag}`;
+            updateConfigBadge();
+            closeVoiceLibrary();
+        }
+
+        async function testVoiceById(id) {
+            const sampleText = "Halo! Saya adalah pembicara virtual alami berbasis teknologi vokal AI lokal.";
+            const testUrls = getTtsCandidateUrls(`/api/tts?text=${encodeURIComponent(sampleText)}&speaker=${encodeURIComponent(id)}`);
+            for (const url of testUrls) {
+                try {
+                    const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        if (blob.size > 200) {
+                            const audioUrl = URL.createObjectURL(blob);
+                            const audio = new Audio(audioUrl);
+                            audio.onended = () => URL.revokeObjectURL(audioUrl);
+                            audio.onerror = () => URL.revokeObjectURL(audioUrl);
+                            try {
+                                await audio.play();
+                            } catch (error) {
+                                URL.revokeObjectURL(audioUrl);
+                                throw error;
+                            }
+                            return;
+                        }
+                    }
+                } catch (_) {}
+            }
+
+            // Fallback native speech
+            if ('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance(sampleText);
+                u.lang = 'id-ID';
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        function playVoiceSample() {
+            testVoiceById(state.selectedVoice);
+        }
+
+        /* === HELPERS === */
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Naskah berhasil disalin ke clipboard!");
+            }).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                alert("Naskah disalin!");
+            });
+        }
+
+        function updateProgress(percent, statusText) {
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+            document.getElementById('progressStatus').textContent = statusText;
+        }
+
+        // Run Init
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

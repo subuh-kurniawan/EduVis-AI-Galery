@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EduVis AI — Live Futuristik</title>
+<script src="nano_asset/assets/js/screen-wake-lock.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="nano_asset/assets/js/qrcode-generator.js" defer></script>
+<script src="nano_asset/assets/js/lan-qrcode.js" defer></script>
+<script src="nano_asset/assets/js/app-navigation.js" defer></script>
+<link rel="stylesheet" href="nano_asset/assets/css/boxicons.min.css">
+<script src="live-conversation.js"></script>
+<script src="nano_asset/assets/avatars/siri_live_sphere.js"></script>
+<style>
+:root{
+  --bg:#05030b;
+  --panel:rgba(18,12,36,.55);
+  --panel-solid:#0d0818;
+  --line:rgba(167,139,250,.16);
+  --line-strong:rgba(167,139,250,.38);
+  --text:#ece8f8;
+  --muted:#8d85a8;
+  --violet:#8b5cf6;
+  --violet-2:#a78bfa;
+  --magenta:#d946ef;
+  --cyan:#22d3ee;
+  --ok:#4ade80;
+  --danger:#fb7185;
+  --fs:17px;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--sans);font-size:var(--fs);
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+#stars{position:fixed;inset:0;z-index:0}
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(60% 50% at 25% 8%,rgba(139,92,246,.22),transparent 70%),
+   radial-gradient(45% 40% at 85% 100%,rgba(217,70,239,.12),transparent 70%),
+   radial-gradient(40% 35% at 5% 90%,rgba(34,211,238,.07),transparent 70%);}
+.grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(167,139,250,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(167,139,250,.05) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse at 30% 30%,#000 10%,transparent 70%);
+  mask-image:radial-gradient(ellipse at 30% 30%,#000 10%,transparent 70%);}
+
+.app{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column}
+
+/* ---------- header ---------- */
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 34px;border-bottom:1px solid var(--line);backdrop-filter:blur(14px);background:rgba(5,3,11,.5)}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .logo{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,rgba(139,92,246,.35),rgba(217,70,239,.15));border:1px solid var(--line-strong);
+  box-shadow:0 0 24px rgba(139,92,246,.45),inset 0 0 12px rgba(255,255,255,.08)}
+.brand h1{font-size:1.1em;font-weight:300;letter-spacing:.02em}
+.brand h1 b{font-weight:500;background:linear-gradient(90deg,#fff,var(--violet-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand small{display:block;font-family:var(--mono);font-size:.62em;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.hud{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.7em;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);white-space:nowrap}
+.chip.glow{color:var(--violet-2);border-color:var(--line-strong);box-shadow:0 0 18px rgba(139,92,246,.2)}
+.action-chip{font:inherit;color:var(--text);cursor:pointer;transition:border-color .2s,background .2s}
+.action-chip:hover,.action-chip[aria-expanded="true"]{border-color:var(--violet-2);background:rgba(139,92,246,.14)}
+.dot{width:7px;height:7px;border-radius:50%;background:#5b5470}
+.on .dot{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+kbd{font-family:var(--mono);border:1px solid var(--line-strong);border-radius:6px;padding:0 6px;font-size:.95em}
+
+/* ---------- layout ---------- */
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);padding:18px clamp(16px,4vw,48px) 24px}
+.card{
+  position:relative;border-radius:28px;background:var(--panel);border:1px solid var(--line);
+  backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);
+  box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);
+  overflow:hidden;min-height:0;display:flex;flex-direction:column}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(160deg,rgba(167,139,250,.55),transparent 35%,transparent 65%,rgba(217,70,239,.35));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+
+/* ---------- voice panel ---------- */
+.voice{width:min(100%,1080px);margin:0 auto;overflow:hidden}
+.stage{display:flex;flex-direction:column;align-items:center;padding:clamp(20px,4vh,36px) 28px 10px;text-align:center}
+
+.orb-wrap{position:relative;width:210px;height:210px;display:grid;place-items:center;margin-bottom:8px}
+.ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--line)}
+.ring.r2{inset:-18px;border-color:rgba(167,139,250,.09)}
+.ring.r3{inset:-38px;border-color:rgba(167,139,250,.05)}
+.ring.dash{inset:-8px;border:1px dashed rgba(167,139,250,.35);animation:spin 40s linear infinite}
+.orb{
+  position:relative;width:150px;height:150px;border-radius:50%;
+  background:
+    radial-gradient(circle at 32% 26%,rgba(255,255,255,.85),rgba(255,255,255,0) 22%),
+    radial-gradient(circle at 70% 78%,rgba(34,211,238,.55),transparent 45%),
+    radial-gradient(circle at 30% 70%,rgba(217,70,239,.8),transparent 55%),
+    radial-gradient(circle at 60% 30%,#7c3aed,#2a0f6b 80%);
+  box-shadow:0 0 60px rgba(139,92,246,.7),0 0 140px rgba(139,92,246,.35),inset -14px -18px 38px rgba(0,0,0,.55),inset 8px 8px 24px rgba(255,255,255,.18);
+  animation:breathe 5s ease-in-out infinite;transition:filter .5s, box-shadow .5s}
+.orb::after{content:"";position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent,rgba(255,255,255,.28),transparent 30%,rgba(34,211,238,.25),transparent 60%);
+  mix-blend-mode:overlay;animation:spin 9s linear infinite}
+.orb::before{content:"";position:absolute;left:14%;right:14%;top:56%;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);filter:blur(1px);opacity:.7;animation:sweep 4s ease-in-out infinite}
+.orb .speaking-avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;pointer-events:none;transition:opacity .22s}
+.orb.has-avatar, .orb.has-speaking-avatar,
+.state-speaking .orb.has-speaking-avatar{
+  width:100% !important; height:100% !important;
+  background:none !important; box-shadow:none !important; animation:none !important; filter:none !important; transform:none !important;
+}
+.orb.has-avatar::before, .orb.has-avatar::after,
+.orb.has-speaking-avatar::before, .orb.has-speaking-avatar::after{display:none !important}
+.orb.has-avatar .speaking-avatar, .orb.has-speaking-avatar .speaking-avatar{opacity:1}
+.orb-wrap.has-avatar .ring, .orb-wrap.has-avatar .pulse,
+.orb-wrap:has(.orb.has-avatar) .ring, .orb-wrap:has(.orb.has-avatar) .pulse,
+.orb-wrap:has(.orb.has-speaking-avatar) .ring, .orb-wrap:has(.orb.has-speaking-avatar) .pulse{display:none !important}
+
+/* ---------- Siri Live Sphere Customizer (Screenshot Mode) ---------- */
+.siri-sphere-card {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(13, 8, 28, 0.85);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  margin-bottom: 6px;
+}
+.siri-sphere-card label.sphere-group-lbl {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 0.68em; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--violet-2); margin-bottom: 8px; font-weight: 600;
+}
+.sphere-btn-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.sphere-btn-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+.sphere-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 9px 12px; border-radius: 12px;
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #cbd5e1; font-size: 0.78em; font-weight: 500;
+  cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none; width: 100%; text-align: center;
+}
+.sphere-btn:hover {
+  background: rgba(167, 139, 250, 0.12);
+  border-color: rgba(167, 139, 250, 0.4);
+  color: #ffffff;
+}
+.sphere-btn.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(56, 189, 248, 0.2)) !important;
+  border-color: rgba(52, 211, 153, 0.75) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  font-weight: 600;
+}
+
+/* Ambient Glow & Bottom Status Pill (Futuristik) */
+.orb-ambient-glow {
+  position: absolute; inset: -24px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(56, 189, 248, 0.22) 48%, transparent 72%);
+  filter: blur(28px); pointer-events: none; opacity: 0.65;
+  transition: opacity 0.5s ease, transform 0.5s ease, background 0.5s ease;
+  z-index: 1;
+}
+.state-speaking .orb-ambient-glow {
+  opacity: 0.98;
+  transform: scale(1.1);
+  animation: ambientGlowPulseFuturistik 1.1s ease-in-out infinite alternate;
+}
+@keyframes ambientGlowPulseFuturistik {
+  0% { transform: scale(1.02); opacity: 0.8; filter: blur(26px); }
+  100% { transform: scale(1.14); opacity: 1; filter: blur(36px); }
+}
+
+.siri-status-pill {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 7px 16px; border-radius: 9999px;
+  background: rgba(20, 14, 38, 0.88);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(167, 139, 250, 0.2);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  margin: 12px auto 6px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0;
+}
+.siri-status-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; color: #a78bfa; transition: color 0.3s ease;
+}
+.siri-eq-bars { display: flex; align-items: center; gap: 3px; height: 18px; }
+.eq-bar {
+  width: 3.5px; border-radius: 9999px; transform-origin: center;
+  animation: eqPulse var(--eq-dur, 1.3s) ease-in-out infinite;
+  transition: height 0.08s ease, background 0.3s ease;
+}
+.eq-bar.bar-1 { height: 10px; background: #38bdf8; }
+.eq-bar.bar-2 { height: 13px; background: #818cf8; animation-delay: 0.15s; }
+.eq-bar.bar-3 { height: 15px; background: #f472b6; animation-delay: 0.3s; }
+.eq-bar.bar-4 { height: 17px; background: #fbbf24; animation-delay: 0.2s; }
+@keyframes eqPulse {
+  0%, 100% { transform: scaleY(0.35); opacity: 0.6; }
+  50% { transform: scaleY(1.2); opacity: 1; }
+}
+#siriStatusDesc { font-size: 12px; font-weight: 500; color: #f1f5f9; letter-spacing: -0.2px; }
+
+/* Pembedaan Visual Jelas per State pada Kapsul Spectrum */
+/* 1. LISTENING (Mic Aktif - Hijau Emerald / Cyan) */
+.state-listening .siri-status-pill {
+  background: rgba(6, 46, 36, 0.9);
+  border-color: rgba(52, 211, 153, 0.8);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45), 0 0 24px rgba(16, 185, 129, 0.42);
+}
+.state-listening .siri-status-icon { color: #34d399; animation: micBeat 1.1s ease-in-out infinite; }
+.state-listening .eq-bar { animation: none; opacity: 1; box-shadow: 0 0 8px rgba(52, 211, 153, 0.55); }
+.state-listening .eq-bar.bar-1 { background: #10b981; }
+.state-listening .eq-bar.bar-2 { background: #34d399; }
+.state-listening .eq-bar.bar-3 { background: #22d3ee; }
+.state-listening .eq-bar.bar-4 { background: #6ee7b7; }
+@keyframes micBeat { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.22); opacity: 0.75; } }
+
+/* 2. THINKING (Memproses AI - Amber / Emas) */
+.state-thinking .siri-status-pill {
+  background: rgba(38, 26, 10, 0.9);
+  border-color: rgba(251, 191, 36, 0.72);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 20px rgba(245, 158, 11, 0.32);
+}
+.state-thinking .siri-status-icon { color: #fbbf24; }
+.state-thinking .eq-bar.bar-1 { background: #f59e0b; }
+.state-thinking .eq-bar.bar-2 { background: #fbbf24; }
+.state-thinking .eq-bar.bar-3 { background: #fde68a; }
+.state-thinking .eq-bar.bar-4 { background: #fb923c; }
+
+/* 3. SPEAKING (Berbicara - Violet / Magenta / Apple Intelligence) */
+.state-speaking .siri-status-pill {
+  background: rgba(28, 14, 52, 0.92);
+  border-color: rgba(192, 132, 252, 0.78);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45), 0 0 24px rgba(168, 85, 247, 0.42);
+}
+.state-speaking .siri-status-icon { color: #c084fc; }
+
+/* 4. ERROR (Merah Rose) */
+.state-error .siri-status-pill {
+  background: rgba(48, 12, 24, 0.9);
+  border-color: rgba(251, 113, 133, 0.75);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 18px rgba(244, 63, 94, 0.35);
+}
+.state-error .siri-status-icon { color: #fb7185; }
+.state-error .eq-bar { animation: none; height: 6px !important; background: #fb7185; opacity: 0.7; }
+.pulse{position:absolute;inset:20px;border-radius:50%;border:1px solid var(--violet-2);opacity:0}
+.state-listening .pulse{animation:ping 1.8s ease-out infinite}
+.state-listening .pulse.p2{animation-delay:.6s}
+.state-listening .orb{animation-duration:1.6s;filter:hue-rotate(-20deg) saturate(1.3)}
+.state-thinking .orb{animation:breathe 1.2s ease-in-out infinite;filter:hue-rotate(60deg)}
+.state-thinking .orb::after{animation-duration:2s}
+.state-speaking .orb{animation:talk .55s ease-in-out infinite;filter:hue-rotate(140deg) saturate(1.2)}
+.state-speaking .pulse{animation:ping 1.2s ease-out infinite}
+
+.status{font-family:var(--mono);font-size:.68em;letter-spacing:.42em;text-transform:uppercase;color:var(--violet-2);margin-top:22px;text-shadow:0 0 14px rgba(167,139,250,.7)}
+.title{font-size:1.75em;font-weight:300;letter-spacing:-.01em;margin-top:8px}
+.title em{font-style:normal;font-weight:400;background:linear-gradient(90deg,#fff,var(--violet-2) 60%,var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hint{color:var(--muted);font-size:.85em;margin-top:8px;font-weight:300}
+.response-preview{
+  width:min(580px,100%);
+  max-height:140px;
+  overflow:hidden;
+  margin:10px 0 0;
+  padding:10px 14px;
+  border:1px solid rgba(167,139,250,.32);
+  border-radius:16px;
+  background:rgba(10,6,22,.82);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  color:#f5f3ff;
+  font-size:.82em;
+  line-height:1.6;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 20px rgba(167,139,250,.18);
+  display:none; /* Sembunyi by default - hanya muncul by demand (CC) */
+  flex-direction:column;
+  position:relative;
+}
+.response-preview.show{
+  display:flex;
+  animation:hudFadeIn .28s cubic-bezier(.16,1,.3,1);
+}
+.preview-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:6px;
+  padding-bottom:4px;
+  border-bottom:1px solid rgba(167,139,250,.18);
+}
+.preview-tag{
+  font-size:.7em;
+  letter-spacing:.8px;
+  color:var(--violet-2);
+  font-weight:600;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.preview-tag::before{
+  content:'';
+  display:inline-block;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--violet-2);
+  box-shadow:0 0 8px var(--violet-2);
+}
+.preview-close{
+  background:none;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:14px;
+  padding:2px 6px;
+  border-radius:4px;
+  line-height:1;
+  transition:all .2s;
+}
+.preview-close:hover{color:#fff;background:rgba(255,255,255,.12)}
+.preview-body{
+  flex:1;
+  overflow-y:auto;
+  max-height:96px;
+}
+.preview-body::-webkit-scrollbar{width:3px}
+.preview-body::-webkit-scrollbar-thumb{background:rgba(167,139,250,.3);border-radius:3px}
+@keyframes hudFadeIn{
+  from{opacity:0;transform:translateY(6px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.wave{display:none !important}
+.wave i{display:block;width:4px;height:6px;border-radius:4px;background:linear-gradient(var(--violet-2),var(--magenta));opacity:.6;transition:height .12s}
+.state-listening .wave i,.state-speaking .wave i{animation:eq 1s ease-in-out infinite;opacity:1;box-shadow:0 0 10px rgba(167,139,250,.6)}
+.wave i:nth-child(2n){animation-delay:.15s!important}
+.wave i:nth-child(3n){animation-delay:.3s!important}
+.wave i:nth-child(5n){animation-delay:.45s!important}
+
+.controls{display:flex;gap:18px;align-items:center;justify-content:center;margin:10px 0 24px}
+.fab{width:68px;height:68px;border-radius:50%;border:1px solid var(--line-strong);cursor:pointer;display:grid;place-items:center;color:#fff;position:relative;transition:transform .2s,box-shadow .3s}
+.fab:hover{transform:translateY(-2px) scale(1.04)}
+.fab:active{transform:scale(.96)}
+.fab.mic{background:linear-gradient(135deg,#7c3aed,#d946ef 60%,#22d3ee);box-shadow:0 0 34px rgba(139,92,246,.65),inset 0 1px 0 rgba(255,255,255,.4)}
+.fab.mic.active{box-shadow:0 0 0 6px rgba(139,92,246,.18),0 0 54px rgba(217,70,239,.85)}
+.fab.stop{width:54px;height:54px;background:rgba(251,113,133,.08);border-color:rgba(251,113,133,.45);color:var(--danger)}
+.fab.stop:hover{box-shadow:0 0 24px rgba(251,113,133,.45)}
+.fab.cc{
+  width:54px;
+  height:54px;
+  background:rgba(255,255,255,.05);
+  border-color:rgba(167,139,250,.25);
+  color:var(--muted);
+  font-weight:700;
+  font-size:12px;
+  letter-spacing:.5px;
+}
+.fab.cc:hover{
+  color:#fff;
+  background:rgba(255,255,255,.1);
+  border-color:rgba(167,139,250,.5);
+}
+.fab.cc.active{
+  background:rgba(167,139,250,.24);
+  border-color:var(--violet-2);
+  color:#fff;
+  box-shadow:0 0 20px rgba(167,139,250,.5);
+}
+.fab svg{width:26px;height:26px}
+
+/* ---------- settings modal ---------- */
+.settings-modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,2,10,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.settings-modal.open{display:flex}
+.settings-modal-panel{width:min(760px,100%);max-height:min(90vh,760px);max-height:min(90dvh,760px);overflow-y:auto;overscroll-behavior:contain;padding:22px;border:1px solid var(--line-strong);border-radius:22px;background:rgba(13,8,24,.96);box-shadow:0 28px 90px rgba(0,0,0,.65)}
+.settings-modal-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+.settings-modal-head h2{font-size:1em;font-weight:500}
+.settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;padding:18px;border-radius:18px;background:rgba(0,0,0,.24);border:1px solid var(--line)}
+.field{min-width:0}
+label.lbl{display:block;font-family:var(--mono);font-size:.6em;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.input,select{
+  width:100%;appearance:none;-webkit-appearance:none;font:inherit;font-size:.82em;color:var(--text);
+  background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:12px;padding:11px 14px;outline:none;transition:.2s}
+.input{font-family:var(--mono);font-size:.76em}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23a78bfa' stroke-width='2'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+select option{background:var(--panel-solid)}
+.input:focus,select:focus{border-color:var(--violet-2);box-shadow:0 0 0 3px rgba(139,92,246,.2),0 0 20px rgba(139,92,246,.15)}
+.row{display:flex;gap:10px}
+.row .grow{flex:1}
+.icon-btn{width:44px;flex:none;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--violet-2);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--violet-2);box-shadow:0 0 16px rgba(139,92,246,.3)}
+.note{font-size:.68em;color:var(--muted);margin-top:6px}
+.note.ok{color:var(--ok)}
+.note.error{color:var(--danger)}
+.seg{display:inline-flex;padding:4px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.seg button{font:inherit;font-size:.78em;color:var(--muted);background:none;border:0;padding:7px 18px;border-radius:999px;cursor:pointer;transition:.25s}
+.seg button.on{color:#fff;background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 0 20px rgba(139,92,246,.55)}
+.between{display:flex;align-items:center;justify-content:space-between}
+.switch{position:relative;width:42px;height:24px}
+.switch input{opacity:0;position:absolute;inset:0;cursor:pointer;z-index:2}
+.switch span{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);transition:.25s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#aaa;transition:.25s}
+.switch input:checked+span{background:rgba(139,92,246,.45);border-color:var(--violet-2);box-shadow:0 0 14px rgba(139,92,246,.5)}
+.switch input:checked+span::after{transform:translateX(18px);background:#fff}
+
+/* ---------- chat ---------- */
+.history-backdrop{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.6);backdrop-filter:blur(5px)}
+.history-backdrop.open{display:block}
+.rightbar{position:fixed;top:14px;right:14px;bottom:14px;z-index:60;width:min(440px,calc(100vw - 28px));padding:12px;display:flex;flex-direction:column;transform:translateX(calc(100% + 28px));opacity:0;pointer-events:none;transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s ease;box-shadow:-12px 0 40px rgba(0,0,0,.65),0 0 24px rgba(139,92,246,.2)}
+.rightbar.open{transform:translateX(0);opacity:1;pointer-events:auto}
+.chat-head{display:block;padding:14px 14px 12px}
+.chat-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.chat-head h2{display:flex;align-items:center;gap:10px;font-size:.95em;font-weight:400;letter-spacing:.02em}
+.chat-head h2 svg{color:var(--violet-2)}
+.tools{display:flex;gap:8px}
+.tbtn{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:.74em;color:var(--text);padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.035);cursor:pointer;transition:.2s}
+.tbtn:hover{border-color:var(--violet-2);box-shadow:0 0 16px rgba(139,92,246,.25)}
+.tbtn.danger:hover{border-color:var(--danger);box-shadow:0 0 16px rgba(251,113,133,.3)}
+/* ---------- chat: gaya subtitle film ---------- */
+.screen{position:relative;flex:1;min-height:220px;margin:0 22px 14px;border-radius:20px;overflow:hidden;border:1px solid var(--line);
+  background:radial-gradient(120% 90% at 50% 30%,rgba(139,92,246,.10),rgba(0,0,0,.55) 70%),#030208}
+.screen::before,.screen::after{content:"";position:absolute;left:0;right:0;height:9%;background:#000;z-index:2;pointer-events:none}
+.screen::before{top:0}.screen::after{bottom:0}
+#chat{position:absolute;inset:9% 0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:10px;padding:0 6% 22px;overflow:hidden;z-index:1}
+#chat:empty::before{content:"Subtitel percakapan akan muncul di sini";margin:auto;color:var(--muted);font-weight:300;font-size:.8em;letter-spacing:.12em}
+.msg{max-width:min(92%,820px);text-align:center;animation:fadeSub .45s ease both}
+.msg:nth-last-child(n+3){display:none}
+#chat.history{justify-content:flex-start;overflow-y:auto;padding:26px 8%;gap:16px;scrollbar-width:thin;scrollbar-color:#3a2c63 transparent}
+#chat.history .msg:nth-last-child(n+3){display:block}
+.msg .line{display:inline;padding:.12em .55em;border-radius:6px;background:rgba(0,0,0,.72);box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  font-size:1.18em;line-height:1.75;font-weight:400;color:#fff;text-shadow:0 1px 2px #000,0 0 8px rgba(0,0,0,.9);white-space:pre-wrap}
+.msg.user .line{color:#e4fbff}
+.who{display:block;margin-bottom:4px;font-family:var(--mono);font-size:.6em;letter-spacing:.3em;text-transform:uppercase;text-shadow:0 0 10px currentColor}
+.msg.user .who{color:var(--cyan)}
+.msg.ai .who{color:var(--violet-2)}
+.msg:not(:last-child){opacity:.55}
+.cursor::after{content:"▍";color:var(--violet-2);animation:blink 1s steps(1) infinite;margin-left:2px}
+.tbtn.on{border-color:var(--violet-2);color:var(--violet-2);box-shadow:0 0 16px rgba(139,92,246,.3)}
+
+.composer{display:flex;align-items:center;gap:10px;margin:0 22px 8px;padding:8px;border:1px solid var(--line-strong);border-radius:16px;background:rgba(8,5,18,.72);transition:border-color .2s,box-shadow .2s}
+.composer:focus-within{border-color:var(--violet-2);box-shadow:0 0 18px rgba(139,92,246,.16)}
+.composer input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit;font-size:.8em;padding:8px 10px}
+.composer input::placeholder{color:var(--muted)}
+.composer .send{flex:none;border:1px solid rgba(167,139,250,.45);border-radius:12px;padding:9px 16px;background:linear-gradient(120deg,rgba(124,58,237,.85),rgba(217,70,239,.75));color:#fff;font:inherit;font-size:.76em;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.composer .send:hover{transform:translateY(-1px);box-shadow:0 0 18px rgba(139,92,246,.35)}
+
+.voice .composer{margin:8px 22px 8px;flex-shrink:0}
+footer{display:flex;justify-content:center;padding:6px 20px 16px;font-size:.7em;color:var(--muted);font-weight:300}
+
+/* ---------- animations ---------- */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+@keyframes talk{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+@keyframes sweep{0%,100%{transform:translateY(-16px) rotate(-8deg);opacity:0}50%{transform:translateY(16px) rotate(-8deg);opacity:.8}}
+@keyframes ping{0%{transform:scale(1);opacity:.7}100%{transform:scale(2);opacity:0}}
+@keyframes eq{0%,100%{height:6px}50%{height:30px}}
+@keyframes fadeSub{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes blink{50%{opacity:0}}
+
+@media (max-width:900px){
+  html,body{height:100%;overflow:hidden}
+  .app{height:100vh;height:calc(100dvh - 48px - env(safe-area-inset-bottom));min-height:0;overflow:hidden}
+  main{flex:1;min-height:0;overflow:hidden;grid-template-columns:minmax(0,1fr);padding:10px 12px 8px}
+  .voice{height:100%;min-height:0;display:flex;flex-direction:column}
+  .stage{flex:1 1 0;min-height:0;overflow:hidden;justify-content:space-between;gap:4px;padding:clamp(6px,1.2dvh,12px) clamp(10px,4vw,18px) 4px}
+  .orb-wrap{width:min(210px,26dvh,62vw);height:min(210px,26dvh,62vw);flex:0 0 auto;margin:0}
+  .orb-wrap .orb{width:min(150px,18dvh,58vw);height:min(150px,18dvh,58vw)}
+  .status{margin-top:0;font-size:.62em;letter-spacing:.3em}
+  .title{margin-top:0;font-size:clamp(20px,5.6vw,26px);line-height:1.12}
+  .hint{margin-top:0;font-size:clamp(10px,2.8vw,12px);line-height:1.25}
+  .response-preview{margin:0;max-height:min(10dvh,72px);padding:6px 10px;font-size:.72em;line-height:1.35}
+  .wave{height:clamp(16px,3dvh,24px);margin:0;gap:4px}
+  .controls{margin:0;gap:12px}
+  .fab{width:min(58px,9dvh);height:min(58px,9dvh)}
+  .fab.stop{width:min(46px,7dvh);height:min(46px,7dvh)}
+  .voice .composer{margin:6px 12px 4px;padding:4px}
+  .composer input{padding:5px;font-size:.76em}
+  .composer .send{padding:8px 12px}
+  footer{flex:0 0 auto;padding:4px 12px max(6px,env(safe-area-inset-bottom));font-size:.64em;line-height:1.2;text-align:center}
+  header{padding:14px 16px;flex-wrap:wrap;gap:12px}
+  .hud{width:100%;justify-content:space-between}
+  .hud .hide-m{display:none}
+  .chat-head{flex-wrap:wrap;gap:10px;padding:12px}
+  .tools{flex-wrap:wrap;justify-content:flex-end}
+  .rightbar{top:max(8px,env(safe-area-inset-top));right:8px;bottom:max(8px,env(safe-area-inset-bottom));width:calc(100vw - 16px);height:auto;max-height:calc(100dvh - 16px)}
+  .dock{position:fixed;left:50%;bottom:max(4px,env(safe-area-inset-bottom));transform:translateX(-50%);margin:0;padding:4px;gap:4px;z-index:40}
+}
+@media (max-width:500px){
+  .hud .glow{display:none}
+  header{padding:8px 12px;gap:6px}
+  .brand{gap:8px}
+  .brand .logo{width:30px;height:30px}
+  .brand h1{font-size:1em}
+  .brand small{display:none}
+  .hud{gap:4px;font-size:.62em}
+  .chip{gap:5px;padding:5px 8px}
+  .chat-head .tools{width:100%}
+  .settings-modal{align-items:flex-end;padding:0}
+  .settings-modal-panel{width:100%;max-height:92dvh;padding:16px 12px max(16px,env(safe-area-inset-bottom));border-radius:20px 20px 0 0}
+  .settings{grid-template-columns:minmax(0,1fr);gap:12px;padding:14px}
+  .rightbar{top:max(6px,env(safe-area-inset-top));right:6px;bottom:max(6px,env(safe-area-inset-bottom));width:calc(100vw - 12px)}
+  .voice .composer{margin:6px 8px 4px}
+  .stage{padding-left:10px;padding-right:10px}
+}
+@media (max-width:900px) and (max-height:700px){
+  header{padding:6px 10px;gap:4px}
+  .brand .logo{width:28px;height:28px}
+  .brand h1{font-size:.92em}
+  .hud{gap:3px}
+  .chip{padding:4px 6px}
+  .orb-wrap{width:min(170px,24dvh,60vw);height:min(170px,24dvh,60vw)}
+  .orb-wrap .orb{width:min(128px,18dvh,58vw);height:min(128px,18dvh,58vw)}
+  .hint{display:none}
+  .response-preview{max-height:7dvh}
+  .voice .composer{margin:4px 8px 2px}
+  footer{display:none}
+}
+body.overlay-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<app-navigation current="gemini-live-futuristik"></app-navigation>
+<canvas id="stars"></canvas>
+<div class="aurora"></div>
+<div class="grid"></div>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#c4b5fd"><path d="M12 1l2.6 7.4L22 11l-7.4 2.6L12 21l-2.6-7.4L2 11l7.4-2.6z"/></svg>
+      </div>
+      <div>
+        <h1><b>EduVis</b> Live Lokal</h1>
+        <small>LiteRT-LM · Suara Duplex Browser</small>
+      </div>
+    </div>
+    <div class="hud">
+      <span class="chip" id="latency">⏱ --ms</span>
+      <span class="chip hide-m">⌘ Pintasan <kbd>?</kbd></span>
+      <span class="chip glow">LiteRT-LM · GPU</span>
+      <span class="chip" id="conn"><i class="dot"></i><span id="connTxt">Belum aktif</span></span>
+      <button class="chip action-chip glow text-cyan-300 hover:text-white border border-cyan-400/40" id="open-chrome-btn" type="button" title="Buka di Google Chrome (Klien) untuk Google Speech Recognition">🌐 <span class="hide-m">Buka di Browser</span></button>
+      <button class="chip action-chip" id="recap-toggle" type="button" aria-label="Rekap percakapan" title="Rekap seluruh percakapan tanpa mengubah alur"><i class="bx bx-file-find"></i> <span class="hide-m">Rekap</span></button>
+      <button class="chip action-chip" id="history-toggle" type="button" aria-label="Buka percakapan" aria-controls="conversation-drawer" aria-expanded="false">☷ <span class="hide-m">Percakapan</span></button>
+      <button class="chip action-chip" id="settings-toggle" type="button" aria-label="Buka pengaturan" aria-controls="settings-modal" aria-expanded="false">⚙ <span class="hide-m">Pengaturan</span></button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ VOICE PANEL ============ -->
+    <section class="card voice" id="voicePanel">
+      <div class="stage" id="stage">
+        <div class="orb-wrap">
+          <div id="orbAmbientGlow" class="orb-ambient-glow"></div>
+          <div class="ring r3"></div><div class="ring r2"></div><div class="ring dash"></div><div class="ring"></div>
+          <div class="pulse"></div><div class="pulse p2"></div>
+          <div class="orb" id="orb">
+            <img class="speaking-avatar" id="speakingAvatar" alt="" aria-hidden="true">
+          </div>
+        </div>
+
+        <!-- Status Pill Siri Live Sphere (1 Spectrum Terpadu) -->
+        <div id="siriStatusPill" class="siri-status-pill">
+          <span id="siriStatusIcon" class="siri-status-icon"><i class="bx bx-radio-circle-marked"></i></span>
+          <div class="siri-eq-bars" id="siriEqBars">
+            <span class="eq-bar bar-1"></span>
+            <span class="eq-bar bar-2"></span>
+            <span class="eq-bar bar-3"></span>
+            <span class="eq-bar bar-4"></span>
+          </div>
+          <span id="siriStatusDesc">Siri Plasma · Pita plasma Siri mengalir tenang</span>
+        </div>
+        <div class="status" id="statusLabel">Siap mendengarkan</div>
+        <div class="title">Mulai <em>percakapan</em> suara</div>
+        <p class="hint" id="hint">Tekan tombol mikrofon atau tahan Space, lalu bicara.</p>
+        <div class="response-preview" id="responsePreview" aria-live="polite">
+          <div class="preview-header">
+            <span class="preview-tag">Transponder HUD</span>
+            <button class="preview-close" id="previewCloseBtn" type="button" title="Sembunyikan subtitel">✕</button>
+          </div>
+          <div class="preview-body" id="previewContent"></div>
+        </div>
+        <div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="controls">
+          <button class="fab mic" id="micBtn" title="Mikrofon (Space)" aria-label="Mikrofon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+          <button class="fab stop" id="stopBtn" title="Hentikan" aria-label="Hentikan">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
+          </button>
+          <button class="fab cc" id="ccToggleBtn" type="button" title="Subtitel Teks Respons (By Demand / CC)" aria-label="Toggle Subtitel">
+            <span class="cc-badge">CC</span>
+          </button>
+          <button class="fab cc" id="stageNewBtn" type="button" title="Sesi Baru / Reset Memori Percakapan" aria-label="Sesi baru">
+            <i class="bx bx-refresh" style="font-size:20px"></i>
+          </button>
+        </div>
+      </div>
+
+      <form class="composer" id="chatForm" autocomplete="off">
+        <input id="chatInput" type="text" placeholder="Ketik pesan untuk EduVis AI..." aria-label="Pesan untuk EduVis AI">
+        <button class="send" type="submit" id="chatSendBtn">Kirim ↗</button>
+      </form>
+      <footer>Gunakan mikrofon atau ketik pesan untuk memulai percakapan.</footer>
+    </section>
+  </main>
+</div>
+
+<div id="settings-modal" class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" aria-hidden="true">
+  <div class="settings-modal-panel">
+    <div class="settings-modal-head">
+      <h2 id="settings-modal-title">Pengaturan Model &amp; Suara</h2>
+      <button class="tbtn" id="settings-close" type="button" aria-label="Tutup pengaturan">×</button>
+    </div>
+    <div class="settings">
+      <!-- Siri Live Sphere Engine Customizer (Matching Screenshot) -->
+      <div class="siri-sphere-card">
+        <!-- Karakter Avatar (4 Persona) -->
+        <div style="margin-bottom: 12px;">
+          <label class="sphere-group-lbl" style="justify-content: space-between;">
+            <span style="display:flex;align-items:center;gap:6px;"><i class="bx bx-user-pin"></i> Karakter Avatar (4 Persona)</span>
+            <span style="font-size:0.7em;color:#34d399;font-family:var(--mono);">Live Sync</span>
+          </label>
+          <div class="sphere-btn-grid-2">
+            <button type="button" class="sphere-persona-btn sphere-btn" data-persona="execMale">
+              <span style="width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;border:1px solid #34d399;background:#1e3a8a;"></span>
+              <span>Eksekutif Pria</span>
+            </button>
+            <button type="button" class="sphere-persona-btn sphere-btn active" data-persona="execFemale">
+              <span style="width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;border:1px solid #fbbf24;background:#1c1917;"></span>
+              <span>Eksekutif Wanita</span>
+            </button>
+            <button type="button" class="sphere-persona-btn sphere-btn" data-persona="arsi">
+              <span style="width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;border:1px solid #f472b6;background:#3f312b;"></span>
+              <span>Arsi (Ilustrasi)</span>
+            </button>
+            <button type="button" class="sphere-persona-btn sphere-btn" data-persona="narendra">
+              <span style="width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;border:1px solid #38bdf8;background:#1e293b;"></span>
+              <span>Narendra (Ilustrasi)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Siri -->
+        <div>
+          <label class="sphere-group-lbl"><i class="bx bx-radar"></i> Status Siri</label>
+          <div class="sphere-btn-grid-4">
+            <button type="button" class="sphere-state-btn sphere-btn active" data-state="idle">Idle</button>
+            <button type="button" class="sphere-state-btn sphere-btn" data-state="listening">Listening</button>
+            <button type="button" class="sphere-state-btn sphere-btn" data-state="thinking">Thinking</button>
+            <button type="button" class="sphere-state-btn sphere-btn" data-state="speaking">Speaking</button>
+          </div>
+        </div>
+
+        <!-- Gaya Cincin -->
+        <div>
+          <label class="sphere-group-lbl"><i class="bx bx-planet"></i> Gaya Cincin</label>
+          <div class="sphere-btn-grid-2">
+            <button type="button" class="sphere-ring-btn sphere-btn" data-ring="gyro">Orbital Gyro</button>
+            <button type="button" class="sphere-ring-btn sphere-btn active" data-ring="plasma">Siri Plasma</button>
+            <button type="button" class="sphere-ring-btn sphere-btn" data-ring="aura">Emerald Aura</button>
+            <button type="button" class="sphere-ring-btn sphere-btn" data-ring="ripple">Acoustic Ripple</button>
+          </div>
+        </div>
+
+        <!-- Spektrum Warna -->
+        <div>
+          <label class="sphere-group-lbl"><i class="bx bx-palette"></i> Spektrum Warna</label>
+          <div class="sphere-btn-grid-2">
+            <button type="button" class="sphere-spectrum-btn sphere-btn" data-spectrum="emeraldGyro">
+              <span style="width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:8px;flex-shrink:0;box-shadow:0 0 8px rgba(16,185,129,0.5);background:linear-gradient(135deg, #10b981, #22d3ee);"></span>
+              <span>Emerald Gyro</span>
+            </button>
+            <button type="button" class="sphere-spectrum-btn sphere-btn active" data-spectrum="appleIntel">
+              <span style="width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:8px;flex-shrink:0;box-shadow:0 0 8px rgba(192,132,252,0.5);background:linear-gradient(135deg, #38bdf8, #c084fc, #fb7185);"></span>
+              <span>Apple Intelligence</span>
+            </button>
+            <button type="button" class="sphere-spectrum-btn sphere-btn" data-spectrum="siriClassic">
+              <span style="width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:8px;flex-shrink:0;box-shadow:0 0 8px rgba(236,72,153,0.5);background:linear-gradient(135deg, #06b6d4, #ec4899);"></span>
+              <span>Siri Classic</span>
+            </button>
+            <button type="button" class="sphere-spectrum-btn sphere-btn" data-spectrum="champagneRose">
+              <span style="width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:8px;flex-shrink:0;box-shadow:0 0 8px rgba(245,158,11,0.5);background:linear-gradient(135deg, #f59e0b, #fb7185);"></span>
+              <span>Champagne Rose</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl" for="endpoint">Endpoint LiteRT-LM</label>
+        <input class="input" id="endpoint" value="https://192.168.1.4:1234/v1" spellcheck="false">
+      </div>
+      <div class="field">
+        <label class="lbl" for="model">Model LiteRT-LM (GPU)</label>
+        <div class="row">
+          <select class="grow" id="model"><option>gemma-4-E2B-it.litertlm</option></select>
+          <button class="icon-btn" id="refreshModels" type="button" title="Muat ulang model" aria-label="Muat ulang">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>
+          </button>
+        </div>
+        <p class="note" id="modelStatus" role="status" aria-live="polite">Memeriksa model LiteRT-LM...</p>
+      </div>
+      <div class="field between">
+        <label class="lbl" style="margin:0">Mode</label>
+        <div class="seg" id="mode"><button type="button" data-m="manual">Manual</button><button type="button" data-m="auto" class="on">Auto</button></div>
+      </div>
+      <div class="field">
+        <label class="lbl" for="persona">Persona AI</label>
+        <select id="persona">
+          <option value="eduvis" selected>EduVis Konsultan Profesional</option>
+          <option value="natural">Natural dan santai</option>
+          <option value="formal">Formal dan profesional</option>
+          <option value="concise">Ringkas dan to-the-point</option>
+          <option value="tutor">Guru / Edukator Sabar</option>
+          <option value="friendly">Sahabat Hangat &amp; Empatik</option>
+          <option value="custom">Kustom sesuai permintaan</option>
+        </select>
+        <input id="persona-custom" class="input hidden" type="text" placeholder="Jelaskan peran yang diinginkan">
+        <p class="note ok">Preferensi tersimpan di perangkat ini</p>
+      </div>
+      <div class="field">
+        <label class="lbl" for="voice">Suara sintesis</label>
+        <select id="voice"></select>
+      </div>
+      <div class="field">
+        <label class="lbl" for="tts">TTS Engine</label>
+        <select id="tts">
+          <option value="drat-tts" selected>✨ AI VITS Neural Lokal (Multi-Karakter)</option>
+          <option value="system">⚡ Realtime macOS Native (Damayanti / 0ms)</option>
+          <option value="web-speech">🌐 Web Speech API (Browser)</option>
+        </select>
+      </div>
+      <div class="field between">
+        <label class="lbl" for="chime">Efek suara audio chime</label>
+        <label class="switch"><input type="checkbox" id="chime" checked><span></span></label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Rekap Percakapan (Independen, Tidak Mengubah Alur) -->
+<div id="recap-modal" class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="recap-modal-title" aria-hidden="true">
+  <div class="settings-modal-panel" style="max-width:660px;">
+    <div class="settings-modal-head">
+      <h2 id="recap-modal-title" style="display:flex;align-items:center;gap:8px;"><i class="bx bx-file-find" style="color:var(--violet-2);font-size:1.25em;"></i> Rekap Seluruh Percakapan</h2>
+      <button class="tbtn" id="recap-close" type="button" aria-label="Tutup rekap">×</button>
+    </div>
+    <p class="note" style="margin:0 0 12px;">Rekap disusun secara terpisah di latar belakang tanpa mengubah atau memutus alur percakapan yang sedang berjalan.</p>
+    <div id="recap-content" style="background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:.82em;line-height:1.65;color:#ece8f8;max-height:52vh;overflow-y:auto;white-space:pre-wrap;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap;">
+      <button class="tbtn" id="recap-refresh" type="button"><i class="bx bx-refresh"></i> Perbarui Rekap</button>
+      <div style="display:flex;gap:8px;">
+        <button class="tbtn on" id="recap-copy" type="button"><i class="bx bx-copy"></i> Salin Rekap</button>
+        <button class="tbtn" id="recap-download" type="button"><i class="bx bx-download"></i> Unduh .md</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="history-backdrop" class="history-backdrop" aria-hidden="true"></div>
+<aside class="rightbar card" id="conversation-drawer" aria-label="Percakapan">
+  <div class="chat-head">
+    <div class="chat-title">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-5.5A8 8 0 1 1 21 12z"/></svg>
+        Percakapan
+      </h2>
+      <button class="tbtn" id="history-close" type="button" title="Tutup percakapan" aria-label="Tutup percakapan">×</button>
+    </div>
+    <div class="tools">
+      <button class="tbtn on" id="histBtn" type="button" title="Tampilkan riwayat">Riwayat</button>
+      <button class="tbtn" id="copyBtn" type="button">Salin</button>
+      <button class="tbtn" id="newBtn" type="button">＋ Sesi baru</button>
+      <button class="tbtn danger" id="delBtn" type="button" title="Hapus" aria-label="Hapus percakapan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+    </div>
+    <select id="session-select" aria-label="Pilih riwayat sesi percakapan" style="margin-top:10px;width:100%;font-size:.8em;padding:7px 32px 7px 10px;"></select>
+  </div>
+  <div class="screen"><div id="chat" class="history" aria-live="polite"></div></div>
+</aside>
+
+<script>
+/* ================= Starfield ================= */
+(function(){
+  const c=document.getElementById('stars'),x=c.getContext('2d');
+  let W,H,stars=[],mx=0,my=0,frame=0,lastDraw=0;
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  let dpr=1;
+  function resize(){dpr=Math.min(devicePixelRatio||1,1.5);W=c.width=Math.round(innerWidth*dpr);H=c.height=Math.round(innerHeight*dpr);
+    stars=Array.from({length:Math.min(160,Math.floor(innerWidth*innerHeight/9000))},()=>({
+      x:Math.random()*W,y:Math.random()*H,r:(Math.random()*1.4+.3)*dpr,
+      z:Math.random()*.9+.1,p:Math.random()*6.28,s:Math.random()*.02+.005}));}
+  function draw(){
+    x.clearRect(0,0,W,H);
+    for(const s of stars){
+      s.p+=s.s;const a=.35+.65*Math.abs(Math.sin(s.p));
+      const px=s.x-mx*30*s.z*dpr,py=s.y-my*30*s.z*dpr;
+      x.beginPath();x.arc(px,py,s.r,0,6.28);
+      x.fillStyle=`rgba(${200+s.z*40|0},${190+s.z*40|0},255,${a*s.z})`;
+      if(s.r>1.2*dpr){x.shadowBlur=8*dpr;x.shadowColor='#a78bfa'}else x.shadowBlur=0;
+      x.fill();
+    }
+  }
+  function tick(now){
+    frame=0;
+    if(document.hidden)return;
+    if(now-lastDraw>=1000/30){draw();lastDraw=now;}
+    frame=requestAnimationFrame(tick);
+  }
+  function animate(){if(!reducedMotion.matches&&!document.hidden&&!frame)frame=requestAnimationFrame(tick);}
+  addEventListener('resize',()=>{resize();draw();},{passive:true});
+  addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5);my=(e.clientY/innerHeight-.5);},{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else animate();});
+  resize();draw();animate();
+})();
+
+/* ================= UI Elements & Audio Setup ================= */
+const $ = id => document.getElementById(id);
+const stage = $('stage'), statusLabel = $('statusLabel'), hint = $('hint'), chat = $('chat');
+const orb = $('orb'), speakingAvatar = $('speakingAvatar');
+const responsePreview = $('responsePreview');
+const previewContent = $('previewContent');
+const previewCloseBtn = $('previewCloseBtn');
+const ccToggleBtn = $('ccToggleBtn');
+
+let isCcEnabled = localStorage.getItem('gemini_futuristic_cc') === 'true'; // default false (sembunyi by demand)
+
+function setPreviewText(text) {
+  if (previewContent) {
+    previewContent.textContent = text || '';
+    previewContent.scrollTop = previewContent.scrollHeight;
+  }
+  if (isCcEnabled && text && text.trim()) {
+    responsePreview?.classList.add('show');
+  } else {
+    responsePreview?.classList.remove('show');
+  }
+}
+
+function updateCcState(enabled) {
+  isCcEnabled = enabled;
+  localStorage.setItem('gemini_futuristic_cc', String(enabled));
+  ccToggleBtn?.classList.toggle('active', enabled);
+  if (!enabled) {
+    responsePreview?.classList.remove('show');
+  } else if (previewContent?.textContent?.trim()) {
+    responsePreview?.classList.add('show');
+  }
+}
+
+ccToggleBtn?.addEventListener('click', () => {
+  updateCcState(!isCcEnabled);
+});
+
+previewCloseBtn?.addEventListener('click', () => {
+  updateCcState(false);
+});
+
+// Terapkan status awal CC
+updateCcState(isCcEnabled);
+const waveBars = document.querySelectorAll('#wave i');
+const endpointInput = $('endpoint');
+const modelSelect = $('model');
+const requestedModel = new URLSearchParams(window.location.search).get('model')?.trim() || '';
+if (requestedModel) {
+  const option = document.createElement('option');
+  option.value = requestedModel;
+  option.textContent = requestedModel;
+  modelSelect.replaceChildren(option);
+}
+const refreshModelsBtn = $('refreshModels');
+const personaSelect = $('persona');
+const personaCustomInput = $('persona-custom');
+const voiceSelect = $('voice');
+const ttsSelect = $('tts');
+const chimeToggle = $('chime');
+const micBtn = $('micBtn');
+const stopBtn = $('stopBtn');
+const latencyChip = $('latency');
+const connChip = $('conn');
+const connTxt = $('connTxt');
+const settingsToggle = $('settings-toggle');
+const settingsModal = $('settings-modal');
+const settingsClose = $('settings-close');
+const historyToggle = $('history-toggle');
+const historyClose = $('history-close');
+const historyBackdrop = $('history-backdrop');
+const conversationDrawer = $('conversation-drawer');
+
+const STATES = {
+  idle: ['Siap mendengarkan', 'Tekan tombol mikrofon atau tahan Space, lalu bicara.'],
+  listening: ['Mendengarkan…', 'Silakan bicara, saya menyimak.'],
+  thinking: ['Berpikir…', 'Memproses di GPU lokal...'],
+  speaking: ['Berbicara…', 'Menjawab dengan suara natural...'],
+  error: ['Perhatian', 'Periksa koneksi model AI atau mikrofon.']
+};
+
+let currentState = 'idle';
+let liveAI = null;
+let speechQueryStartTime = null;
+let activeAiMsgBody = null;
+let conversationHistory = [];
+let sessionDb = null;
+let activeSession = null;
+let sessionSaveTimer = null;
+const sessionSelect = $('session-select');
+
+/* ================= Penyimpanan Sesi Standar (Kompatibel dengan Gemini Live) ================= */
+function createSessionId() {
+  return window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function openSessionDb() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('index.db', 1);
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains('sessions')) {
+        request.result.createObjectStore('sessions', { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function storeRequest(request) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function createSessionRecord() {
+  const now = Date.now();
+  return {
+    id: createSessionId(),
+    title: 'Sesi baru',
+    createdAt: now,
+    updatedAt: now,
+    persona: personaSelect?.value || 'eduvis',
+    personaPrompt: typeof getPersonaPrompt === 'function' ? getPersonaPrompt() : '',
+    messages: []
+  };
+}
+
+function normalizeMessageRecord(msg) {
+  const text = String(msg?.text ?? msg?.content ?? '').trim();
+  const role = msg?.role === 'user' ? 'user' : 'assistant';
+  return {
+    id: msg?.id || createSessionId(),
+    role,
+    text,
+    content: text,
+    createdAt: msg?.createdAt || msg?.timestamp || Date.now()
+  };
+}
+
+function syncConversationHistoryFromSession() {
+  const raw = Array.isArray(activeSession?.messages) ? activeSession.messages : [];
+  conversationHistory = raw
+    .map(normalizeMessageRecord)
+    .filter(m => m.text.length > 0);
+  if (activeSession) activeSession.messages = conversationHistory;
+}
+
+async function saveActiveSession() {
+  if (!sessionDb || !activeSession) return;
+  activeSession.updatedAt = Date.now();
+  await storeRequest(sessionDb.transaction('sessions', 'readwrite').objectStore('sessions').put(activeSession));
+}
+
+function queueSessionSave() {
+  if (!sessionDb || !activeSession) return;
+  clearTimeout(sessionSaveTimer);
+  sessionSaveTimer = setTimeout(async () => {
+    try {
+      await saveActiveSession();
+      await refreshSessionSelect();
+    } catch (err) {
+      console.warn('Gagal menyimpan sesi ke IndexedDB:', err);
+    }
+  }, 250);
+}
+
+async function listSessions() {
+  if (!sessionDb) return [];
+  return storeRequest(sessionDb.transaction('sessions', 'readonly').objectStore('sessions').getAll());
+}
+
+async function refreshSessionSelect() {
+  if (!sessionSelect || !sessionDb) return;
+  const sessions = (await listSessions()).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  sessionSelect.innerHTML = '';
+  sessions.forEach(session => {
+    const option = document.createElement('option');
+    option.value = session.id;
+    const count = Array.isArray(session.messages) ? session.messages.length : 0;
+    const dateStr = new Date(session.updatedAt || session.createdAt || Date.now()).toLocaleDateString('id-ID');
+    option.textContent = `${session.title || 'Sesi baru'} (${count}) · ${dateStr}`;
+    sessionSelect.appendChild(option);
+  });
+  if (activeSession) sessionSelect.value = activeSession.id;
+}
+
+function renderActiveSessionMessages() {
+  chat.innerHTML = '';
+  activeAiMsgBody = null;
+  if (!conversationHistory.length) {
+    setPreviewText('');
+    return;
+  }
+  conversationHistory.forEach(msg => {
+    addMessage(msg.role === 'user' ? 'user' : 'ai', msg.text);
+  });
+  const lastMsg = conversationHistory[conversationHistory.length - 1];
+  if (lastMsg) {
+    setPreviewText(lastMsg.role === 'user' ? `Anda: ${lastMsg.text}` : lastMsg.text);
+  }
+}
+
+async function restoreSession(session) {
+  if (!session) return;
+  if (liveAI?.running) liveAI.stop();
+  activeSession = session;
+  syncConversationHistoryFromSession();
+  if (liveAI) {
+    liveAI.options.conversationContext = getConversationContext();
+    liveAI.setTurnHistory?.(conversationHistory);
+  }
+  renderActiveSessionMessages();
+  await refreshSessionSelect();
+  setState('idle');
+}
+
+function appendSessionMessage(role, rawText) {
+  const text = String(rawText || '').trim();
+  if (!text) return;
+  if (!activeSession) activeSession = createSessionRecord();
+  const msg = normalizeMessageRecord({ id: createSessionId(), role, text, createdAt: Date.now() });
+  activeSession.messages.push(msg);
+  if (role === 'user' && (!activeSession.title || activeSession.title === 'Sesi baru')) {
+    activeSession.title = text.slice(0, 34);
+  }
+  conversationHistory = activeSession.messages;
+  if (liveAI) {
+    liveAI.options.conversationContext = getConversationContext();
+    liveAI.setTurnHistory?.(conversationHistory);
+  }
+  queueSessionSave();
+}
+
+async function initializeSessionStore() {
+  try {
+    sessionDb = await openSessionDb();
+    let sessions = await listSessions();
+    if (!sessions.length) {
+      activeSession = createSessionRecord();
+      await saveActiveSession();
+      sessions = [activeSession];
+    } else {
+      activeSession = sessions.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+    }
+    await restoreSession(activeSession);
+  } catch (err) {
+    console.warn('IndexedDB index.db gagal dimuat:', err);
+  }
+}
+
+sessionSelect?.addEventListener('change', async event => {
+  if (!sessionDb || !event.target.value) return;
+  const session = await storeRequest(sessionDb.transaction('sessions', 'readonly').objectStore('sessions').get(event.target.value));
+  await restoreSession(session);
+});
+let assistantName = 'Arsi';
+let nativeTtsFallbackActive = false;
+let audioVisualizerFrame = null;
+let micAudioStream = null;
+let micAnalyser = null;
+let micAnalyserSource = null;
+
+let activePersona = localStorage.getItem('gemini_live_persona') || 'execFemale';
+let currentRingStyle = localStorage.getItem('gemini_live_ring_style') || 'plasma';
+let currentSpectrum = localStorage.getItem('gemini_live_spectrum') || 'appleIntel';
+
+const siriRingNames = {
+  gyro: 'Orbital Gyro',
+  plasma: 'Siri Plasma',
+  aura: 'Emerald Aura',
+  ripple: 'Acoustic Ripple'
+};
+const siriStateDescs = {
+  idle: 'Pita plasma Siri mengalir tenang',
+  listening: 'Mendengarkan perintah suara Anda...',
+  thinking: 'Memproses konteks kecerdasan AI...',
+  speaking: 'Merespons dengan gelombang suara'
+};
+
+const siriStateIcons = {
+  idle: '<i class="bx bx-radio-circle-marked"></i>',
+  listening: '<i class="bx bx-microphone"></i>',
+  thinking: '<i class="bx bx-loader-alt bx-spin"></i>',
+  speaking: '<i class="bx bx-volume-full"></i>',
+  error: '<i class="bx bx-error-circle"></i>'
+};
+
+function updateStatusPill(state) {
+  const pillDesc = document.getElementById('siriStatusDesc');
+  const pillIcon = document.getElementById('siriStatusIcon');
+  const ringName = siriRingNames[currentRingStyle] || 'Siri Plasma';
+
+  if (pillIcon) {
+    pillIcon.innerHTML = siriStateIcons[state] || siriStateIcons.idle;
+  }
+
+  if (pillDesc) {
+    if (state === 'listening') {
+      pillDesc.textContent = 'Mic Mendengarkan · Silakan bicara...';
+    } else if (state === 'thinking') {
+      pillDesc.textContent = 'Memproses AI · Menganalisis permintaan...';
+    } else if (state === 'error') {
+      pillDesc.textContent = 'Perhatian · Periksa koneksi atau mikrofon';
+    } else {
+      const stateDesc = siriStateDescs[state] || siriStateDescs.idle;
+      pillDesc.textContent = `${ringName} · ${stateDesc}`;
+    }
+  }
+
+  const eqSpeed = state === 'speaking' ? 0.42 : state === 'thinking' ? 0.68 : state === 'listening' ? 0.55 : 1.3;
+  document.querySelectorAll('#siriEqBars .eq-bar').forEach((bar, i) => {
+    bar.style.setProperty('--eq-dur', `${(eqSpeed + i * 0.08).toFixed(2)}s`);
+    if (state !== 'listening') {
+      bar.style.height = '';
+    }
+  });
+
+  const glowEl = document.getElementById('orbAmbientGlow');
+  if (glowEl && typeof SiriLiveSphere !== 'undefined') {
+    const pal = SiriLiveSphere.SPECTRUMS[currentSpectrum] || SiriLiveSphere.SPECTRUMS.appleIntel;
+    if (state === 'listening') {
+      glowEl.style.background = 'radial-gradient(circle, rgba(16, 185, 129, 0.52) 0%, rgba(34, 211, 238, 0.28) 48%, transparent 72%)';
+    } else if (state === 'thinking') {
+      glowEl.style.background = 'radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(168, 85, 247, 0.24) 48%, transparent 72%)';
+    } else {
+      glowEl.style.background = `radial-gradient(circle, ${pal.emerald}77 0%, ${pal.blue}44 48%, transparent 72%)`;
+    }
+  }
+}
+
+function getSpeakingAvatarPath() {
+  const persona = (activePersona === 'execMale' || activePersona === 'execFemale') ? activePersona : (activePersona === 'narendra' ? 'execMale' : 'execFemale');
+  return `nano_asset/assets/avatars/siri-live-sphere-${persona}-320px.svg`;
+}
+
+function updateSiriSphere(stateOverride) {
+  const sState = stateOverride || currentState || 'idle';
+  updateStatusPill(sState);
+  
+  if (typeof SiriLiveSphere !== 'undefined') {
+    if (speakingAvatar) speakingAvatar.style.display = 'none';
+    let mountEl = document.getElementById('siriSphereMount');
+    if (!mountEl) {
+      mountEl = document.createElement('div');
+      mountEl.id = 'siriSphereMount';
+      mountEl.style.position = 'relative';
+      mountEl.style.zIndex = '6';
+      mountEl.style.width = '100%';
+      mountEl.style.height = '100%';
+      mountEl.style.pointerEvents = 'none';
+      orb.prepend(mountEl);
+    }
+    SiriLiveSphere.mount(mountEl, {
+      persona: activePersona,
+      siriState: sState,
+      ringStyle: currentRingStyle,
+      spectrum: currentSpectrum,
+      size: '100%',
+      animatePortrait: false
+    });
+    orb.classList.add('has-avatar');
+    orb.classList.add('has-speaking-avatar');
+    document.querySelector('.orb-wrap')?.classList.add('has-avatar');
+  } else {
+    if (speakingAvatar) speakingAvatar.style.display = '';
+    const avatarPath = getSpeakingAvatarPath();
+    if (speakingAvatar && speakingAvatar.dataset.avatarPath !== avatarPath) {
+      speakingAvatar.dataset.avatarPath = avatarPath;
+      speakingAvatar.src = avatarPath;
+    }
+    orb.classList.add('has-avatar');
+    orb.classList.add('has-speaking-avatar');
+    document.querySelector('.orb-wrap')?.classList.add('has-avatar');
+  }
+}
+
+function showSpeakingAvatar() {
+  updateSiriSphere();
+}
+
+speakingAvatar.addEventListener('load', () => {
+  if (speakingAvatar.dataset.avatarPath === getSpeakingAvatarPath()) {
+    orb.classList.add('has-speaking-avatar');
+  }
+});
+speakingAvatar.addEventListener('error', () => {
+  orb.classList.remove('has-speaking-avatar');
+  console.error(`Avatar orb gagal dimuat: ${speakingAvatar.dataset.avatarPath}`);
+});
+
+function getSharedAudioContext() {
+  if (window.__eduvisAudioContext) return window.__eduvisAudioContext;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return null;
+  window.__eduvisAudioContext = new AudioCtx();
+  return window.__eduvisAudioContext;
+}
+
+function setState(s) {
+  currentState = s;
+  updateSiriSphere(s);
+  document.querySelectorAll('.sphere-state-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.state === s);
+  });
+  stage.parentElement.classList.remove('state-idle', 'state-listening', 'state-thinking', 'state-speaking', 'state-error');
+  stage.parentElement.classList.add('state-' + s);
+  const copy = STATES[s] || STATES.idle;
+  const usingNativeFallback = s === 'speaking' && nativeTtsFallbackActive;
+  statusLabel.textContent = usingNativeFallback ? 'Berbicara · Realtime Native' : copy[0];
+  hint.textContent = usingNativeFallback
+    ? 'TTS lokal gagal; jawaban dilanjutkan dengan suara native.'
+    : copy[1];
+  if (s !== 'speaking') nativeTtsFallbackActive = false;
+  micBtn.classList.toggle('active', s === 'listening');
+  const on = s !== 'idle' && s !== 'error';
+  connChip.classList.toggle('on', on);
+  connTxt.textContent = on ? 'Aktif' : (s === 'error' ? 'Error' : 'Belum aktif');
+
+  if (s === 'listening') {
+    playChime('listening');
+    startMicVisualizer();
+  } else if (s === 'thinking') {
+    playChime('thinking');
+    stopVisualizer();
+  } else if (s === 'speaking') {
+    startSpeakingVisualizer();
+  } else {
+    stopVisualizer();
+    if (s === 'idle') playChime('idle');
+  }
+}
+
+function addMessage(role, text) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+  d.innerHTML = `<span class="who">${role === 'user' ? 'Anda' : assistantName}</span><span class="line body"></span>`;
+  const b = d.querySelector('.body');
+  b.textContent = text;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+  return b;
+}
+
+/* ================= Audio Chime (Tone Indikator Bicara) ================= */
+function playChime(mode) {
+  if (!chimeToggle.checked) return;
+  try {
+    const ctx = getSharedAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+
+    if (mode === 'listening' || mode === true) {
+      // Arpeggio dua nada harmonis (D5 -> A5): Sinyal jelas bagi pengguna untuk mulai berbicara
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      const gain2 = ctx.createGain();
+
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now); // D5
+      osc2.frequency.setValueAtTime(880.00, now + 0.09); // A5
+
+      gain1.gain.setValueAtTime(0.001, now);
+      gain1.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+      gain2.gain.setValueAtTime(0.001, now + 0.09);
+      gain2.gain.exponentialRampToValueAtTime(0.26, now + 0.11);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+
+      osc1.start(now);
+      osc1.stop(now + 0.15);
+      osc2.start(now + 0.09);
+      osc2.stop(now + 0.35);
+    } else if (mode === 'thinking') {
+      // Nada lembut konfirmasi suara ditangkap dan AI mulai memproses (G5 -> D5)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(783.99, now); // G5
+      osc.frequency.exponentialRampToValueAtTime(587.33, now + 0.12);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(0.09, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.16);
+    } else if (mode === 'idle' || mode === false) {
+      // Nada penutup lembut saat sesi berakhir
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, now);
+      osc.frequency.exponentialRampToValueAtTime(392.00, now + 0.15); // G4
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.18);
+    }
+  } catch(_) {}
+}
+
+/* ================= Audio Visualizer (1 Spectrum Terpadu di Kapsul Atas) ================= */
+function getTopEqBars() {
+  return document.querySelectorAll('#siriEqBars .eq-bar');
+}
+
+async function startMicVisualizer() {
+  if (window.matchMedia('(max-width: 900px)').matches) {
+    startSimulatedWave();
+    return;
+  }
+
+  try {
+    if (!micAudioStream) {
+      micAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    }
+    if (currentState !== 'listening') {
+      stopVisualizer();
+      return;
+    }
+    const ctx = getSharedAudioContext();
+    if (!ctx) return startSimulatedWave();
+    if (ctx.state === 'suspended') await ctx.resume();
+    micAnalyserSource?.disconnect();
+    micAnalyserSource = ctx.createMediaStreamSource(micAudioStream);
+    micAnalyser = ctx.createAnalyser();
+    micAnalyser.fftSize = 64;
+    micAnalyserSource.connect(micAnalyser);
+
+    const dataArray = new Uint8Array(micAnalyser.frequencyBinCount);
+    const eqBars = getTopEqBars();
+    function render() {
+      if (currentState !== 'listening') return;
+      micAnalyser.getByteFrequencyData(dataArray);
+      for (let i = 0; i < eqBars.length; i++) {
+        const val = dataArray[i * 3 + 1] || 0;
+        const h = Math.max(5, Math.min(18, Math.round(5 + (val / 255) * 14)));
+        eqBars[i].style.height = `${h}px`;
+      }
+      audioVisualizerFrame = requestAnimationFrame(render);
+    }
+    render();
+  } catch(_) {
+    startSimulatedWave();
+  }
+}
+
+function startSpeakingVisualizer() {
+  stopVisualizer();
+}
+
+function stopVisualizer() {
+  if (audioVisualizerFrame) {
+    cancelAnimationFrame(audioVisualizerFrame);
+    clearTimeout(audioVisualizerFrame);
+    audioVisualizerFrame = null;
+  }
+  if (micAnalyserSource) {
+    try { micAnalyserSource.disconnect(); } catch(_) {}
+    micAnalyserSource = null;
+  }
+  if (micAudioStream) {
+    try { micAudioStream.getTracks().forEach(t => t.stop()); } catch(_) {}
+    micAudioStream = null;
+    micAnalyser = null;
+  }
+  getTopEqBars().forEach(b => { b.style.height = ''; });
+}
+
+function startSimulatedWave() {
+  const eqBars = getTopEqBars();
+  function render() {
+    if (currentState !== 'listening') return;
+    for (let i = 0; i < eqBars.length; i++) {
+      const h = Math.max(5, Math.min(18, Math.round(6 + Math.random() * 12)));
+      eqBars[i].style.height = `${h}px`;
+    }
+    audioVisualizerFrame = setTimeout(() => {
+      audioVisualizerFrame = requestAnimationFrame(render);
+    }, 85);
+  }
+  render();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopVisualizer();
+  } else if (currentState === 'listening') {
+    startMicVisualizer();
+  } else if (currentState === 'speaking') {
+    startSpeakingVisualizer();
+  }
+});
+
+/* ================= Persona Prompts ================= */
+const PERSONA_PROMPTS = {
+  eduvis: "Berperanlah sebagai konsultan profesional EduVis lintas topik dan bidang. Berkomunikasilah secara profesional, jelas, terstruktur, dan berimbang. Pahami kebutuhan pengguna, berikan penjelasan dan saran praktis yang relevan, serta nyatakan ketidakpastian jika informasi belum cukup.",
+  natural: "Anda adalah asisten suara AI lokal yang cerdas, ramah, dan santai. Berikan jawaban yang alami dan bersahabat.",
+  formal: "Anda adalah asisten profesional berwibawa tinggi. Berikan jawaban yang terstruktur, formal, dan logis.",
+  concise: "Jawab dengan sangat ringkas, padat, langsung pada inti tanpa basa-basi.",
+  tutor: "Anda adalah guru dan edukator yang sabar, antusias, dan senang menerangkan konsep secara bertahap.",
+  friendly: "Anda adalah sahabat diskusi yang hangat, empatik, suportif, dan menyenangkan."
+};
+
+function getSelectedPersonaPrompt() {
+  if (personaSelect.value === 'custom') {
+    return personaCustomInput.value.trim() || PERSONA_PROMPTS.eduvis;
+  }
+  return PERSONA_PROMPTS[personaSelect.value] || PERSONA_PROMPTS.eduvis;
+}
+
+function getSystemPrompt() {
+  return `Nama Anda ${assistantName}. Anda berperan sebagai konsultan profesional EduVis untuk berbagai topik dan bidang. Jika ditanya nama, jawab "${assistantName}"; jika ditanya peran, jelaskan bahwa Anda adalah konsultan EduVis. Berikan jawaban dalam bahasa Indonesia kecuali diminta bahasa lain; utamakan ketepatan, kejelasan, struktur, dan saran yang praktis. Jangan mengulang salam, sapaan (seperti Halo, Hai, Selamat pagi/siang/sore/malam), atau perkenalan diri di setiap jawaban; langsung jawab ke inti pertanyaan secara natural. Jangan sertakan arahan musik, efek audio, atau kurung panggung dalam ucapan.`;
+}
+
+function getConversationContext() {
+  return conversationHistory.slice(-120)
+    .map(message => `${message.role === 'assistant' ? assistantName : 'Pengguna'}: ${String(message.text ?? message.content ?? '')}`)
+    .join('\n');
+}
+
+function syncAvatarWithGender(gender) {
+  if (gender !== 'male' && gender !== 'female') return;
+  const isVectorStyle = (activePersona === 'arsi' || activePersona === 'narendra');
+  const targetPersona = gender === 'male'
+    ? (isVectorStyle ? 'narendra' : 'execMale')
+    : (isVectorStyle ? 'arsi' : 'execFemale');
+
+  if (activePersona !== targetPersona) {
+    activePersona = targetPersona;
+    localStorage.setItem('gemini_live_persona', activePersona);
+    document.querySelectorAll('.sphere-persona-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.persona === activePersona);
+    });
+    updateSiriSphere();
+  }
+}
+
+async function updateAssistantIdentityFromVoice() {
+  const selectedVoice = voiceSelect.selectedOptions[0];
+  const gender = LiveConversationController.getVoiceGender({
+    id: selectedVoice?.value,
+    name: selectedVoice?.dataset.voiceName || selectedVoice?.textContent,
+    gender: selectedVoice?.dataset.gender,
+    voiceURI: selectedVoice?.value
+  });
+  if (gender === 'unknown') return;
+
+  if (liveAI) liveAI.options.voiceGender = gender;
+  syncAvatarWithGender(gender);
+  const nextName = gender === 'male' ? 'Narendra' : 'Arsi';
+  if (nextName === assistantName) return;
+
+  assistantName = nextName;
+  showSpeakingAvatar();
+  document.querySelectorAll('.msg.ai .who').forEach(label => {
+    label.textContent = assistantName;
+  });
+  if (!liveAI) return;
+
+  liveAI.options.systemPrompt = getSystemPrompt();
+  liveAI.options.voiceGender = gender;
+  liveAI.options.conversationContext = getConversationContext();
+  liveAI.setTurnHistory?.(conversationHistory);
+  if (liveAI.running) {
+    try {
+      liveAI.session = await liveAI.createSession();
+    } catch (error) {
+      statusLabel.textContent = 'Perhatian';
+      hint.textContent = `Nama suara diperbarui, tetapi sesi AI gagal dimuat ulang: ${error.message}`;
+    }
+  }
+}
+
+/* ================= Init & Models/Voices Population ================= */
+async function loadModels(baseUrl) {
+  const status = $('modelStatus');
+  const selectedModel = liveAI?.options.litertModel || modelSelect.value;
+  status.classList.remove('error', 'ok');
+  status.textContent = 'Menghubungi endpoint LiteRT-LM...';
+  try {
+    const response = await fetch(`${baseUrl.replace(/\/+$/u, '')}/models`, {
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!response.ok) {
+      const details = await response.text();
+      throw new Error(`HTTP ${response.status}${details ? ` — ${details.slice(0, 200)}` : ''}`);
+    }
+
+    const result = await response.json();
+    const models = (Array.isArray(result.data) ? result.data : Array.isArray(result.models) ? result.models : [])
+      .map(model => typeof model === 'string' ? model : model.id)
+      .filter(model => typeof model === 'string' && model.length > 0);
+    if (!models.length) throw new Error('Server tidak melaporkan model yang tersedia.');
+
+    modelSelect.replaceChildren(...models.map(model => {
+      const option = document.createElement('option');
+      option.value = model;
+      option.textContent = model;
+      return option;
+    }));
+    modelSelect.value = models.includes(selectedModel) ? selectedModel : models[0];
+    if (liveAI) liveAI.options.litertModel = modelSelect.value;
+    status.classList.add('ok');
+    status.textContent = `${models.length} model tersedia · GPU lokal`;
+    return true;
+  } catch (error) {
+    status.classList.add('error');
+    status.textContent = `Gagal memuat model: ${error.message}`;
+    return false;
+  } finally {
+    refreshModelsBtn.disabled = false;
+  }
+}
+
+async function loadVoices() {
+  voiceSelect.innerHTML = '';
+  const selectDefaultVoice = () => {
+    const wibowo = Array.from(voiceSelect.options).find(option => option.value === 'wibowo');
+    voiceSelect.value = wibowo?.value || voiceSelect.options[0]?.value || '';
+  };
+  const fallbackVoices = [
+    { id: "gadis", name: "Gadis — Perempuan Merdu & Elegan (ID)", lang: "id-ID", gender: "female" },
+    { id: "ardi", name: "Ardi — Pria Lembut & Bersahabat (ID)", lang: "id-ID", gender: "male" },
+    { id: "wibowo", name: "Wibowo — Pria Dewasa & Berwibawa (ID)", lang: "id-ID", gender: "male" },
+    { id: "citra", name: "Citra — Perempuan Ceria & Ekspresif (ID)", lang: "id-ID", gender: "female" },
+    { id: "bimo", name: "Bimo — Narator Dokumenter & Tegas (ID)", lang: "id-ID", gender: "male" },
+    { id: "sari", name: "Sari — Pengajar Lembut & Artikulatif (ID)", lang: "id-ID", gender: "female" },
+    { id: "dimas", name: "Dimas — Pemuda Santai & Kasual (ID)", lang: "id-ID", gender: "male" },
+    { id: "bayu", name: "Bayu — Pemuda Cerdas & Enerjik (ID)", lang: "id-ID", gender: "male" },
+    { id: "tari", name: "Tari — Gadis Remaja & Ramah (ID)", lang: "id-ID", gender: "female" },
+    { id: "JV-00264", name: "Juminten — Logat Jawa Medok Autentik (JV)", lang: "jv-ID", gender: "female" },
+    { id: "SU-00060", name: "Asep — Logat Sunda Akang Ramah (SU)", lang: "su-ID", gender: "male" },
+    { id: "orator", name: "Orator — Karismatik, Tegas & Menggelegar (ID)", lang: "id-ID", gender: "male" },
+    { id: "jokowi", name: "Jokowi — RVC Neural 40kHz Asli (ID)", lang: "id-ID", gender: "male" },
+    { id: "lala", name: "Lala — Anak Perempuan Lucu & Imut (ID)", lang: "id-ID", gender: "female" },
+    { id: "kiki", name: "Kiki — Bocah Laki-laki Ceria & Enerjik (ID)", lang: "id-ID", gender: "male" },
+    { id: "mimi", name: "Mimi — Balita Gemas & Manis (ID)", lang: "id-ID", gender: "female" },
+    { id: "dewi", name: "Dewi — Narator Audiobook & Puitis (ID)", lang: "id-ID", gender: "female" },
+    { id: "piper-news", name: "News TTS — Narator Berita Piper (ID)", lang: "id-ID", gender: "unknown" },
+    { id: "damayanti", name: "Damayanti — macOS Native Realtime (0ms)", lang: "id-ID", gender: "female" }
+  ];
+
+  try {
+    const origin = window.location.origin || '';
+    fetch(`${origin}/api/health?warm=1`).catch(() => {});
+    const res = await fetch(`${origin}/api/speakers`);
+    if (res.ok) {
+      const list = await res.json();
+      if (Array.isArray(list) && list.length) {
+        list.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.id;
+          opt.textContent = v.name;
+          opt.dataset.voiceName = v.name;
+          opt.dataset.voiceLang = v.lang || 'id-ID';
+          opt.dataset.gender = v.gender || LiveConversationController.getVoiceGender(v);
+          voiceSelect.appendChild(opt);
+        });
+        selectDefaultVoice();
+        return;
+      }
+    }
+  } catch(_) {}
+
+  fallbackVoices.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    opt.textContent = v.name;
+    opt.dataset.voiceName = v.name;
+    opt.dataset.voiceLang = v.lang || 'id-ID';
+    opt.dataset.gender = v.gender;
+    voiceSelect.appendChild(opt);
+  });
+  selectDefaultVoice();
+}
+
+function initController() {
+  const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+  const host = window.location.hostname || '127.0.0.1';
+  const port = window.location.port === '1236' ? '1236' : '1234';
+  const baseUrl = `${protocol}//${host}:${port}/v1`;
+  endpointInput.value = baseUrl;
+
+  if (typeof LiveConversationController === 'undefined') {
+    console.error("LiveConversationController belum termuat.");
+    return;
+  }
+
+  liveAI = new LiveConversationController({
+    manualMode: $('mode').querySelector('.on')?.dataset.m === 'manual',
+    systemPrompt: getSystemPrompt(),
+    personaPrompt: getSelectedPersonaPrompt(),
+    voiceURI: voiceSelect.value || 'wibowo',
+    voiceGender: voiceSelect.selectedOptions[0]?.dataset.gender || 'unknown',
+    useLocalTts: ttsSelect.value === 'drat-tts',
+    litertBaseUrl: baseUrl,
+    litertModel: modelSelect.value || 'gemma-4-E2B-it.litertlm',
+    onStateChange: s => {
+      setState(s);
+    },
+    onLocalTtsFallback: () => {
+      nativeTtsFallbackActive = true;
+      showToast('Menghubungkan model vokal AI lokal...');
+    },
+    onBeforeAsk: text => {
+      const requestedRole = LiveConversationController.extractPersonaChangeRequest(text);
+      if (!requestedRole) return;
+      personaSelect.value = 'custom';
+      personaCustomInput.value = requestedRole;
+      personaCustomInput.classList.remove('hidden');
+      liveAI.options.personaPrompt = getSelectedPersonaPrompt();
+    },
+    onTranscript: data => {
+      if (data.final && data.final.trim()) {
+        speechQueryStartTime = performance.now();
+        addMessage('user', data.final.trim());
+        setPreviewText(`Anda: ${data.final.trim()}`);
+        appendSessionMessage('user', data.final.trim());
+        activeAiMsgBody = null;
+      }
+    },
+    onResponse: data => {
+      if (speechQueryStartTime && data.text) {
+        const elapsed = Math.round(performance.now() - speechQueryStartTime);
+        latencyChip.textContent = `⏱ ${elapsed}ms`;
+        speechQueryStartTime = null;
+      }
+      if (data.text) {
+        setPreviewText(data.text);
+      }
+      if (!activeAiMsgBody) {
+        activeAiMsgBody = addMessage('ai', data.text || '');
+      } else {
+        activeAiMsgBody.textContent = data.text || '';
+        chat.scrollTop = chat.scrollHeight;
+      }
+      if (data.done && data.text && data.text.trim()) {
+        appendSessionMessage('assistant', data.text.trim());
+      }
+    },
+    onError: err => {
+      statusLabel.textContent = 'Perhatian';
+      hint.textContent = err.message || 'Gagal memproses suara.';
+      connChip.classList.remove('on');
+      connTxt.textContent = 'Error';
+    }
+  });
+
+  void loadModels(baseUrl);
+}
+
+/* ================= Event Handlers ================= */
+function triggerStart() {
+  if (!liveAI) return;
+  try {
+    liveAI.start();
+  } catch (error) {
+    setState('error');
+    statusLabel.textContent = 'Perhatian';
+    hint.textContent = error.message || 'Gagal memulai percakapan.';
+  }
+}
+
+function setMode(mode) {
+  const isManual = mode === 'manual';
+  document.querySelectorAll('#mode button').forEach(button => {
+    const selected = button.dataset.m === mode;
+    button.classList.toggle('on', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+  if (!liveAI) return;
+  liveAI.options.manualMode = isManual;
+  if (liveAI.running) {
+    if (isManual) {
+      liveAI.clearRecognitionRestartTimer();
+      liveAI.recognition?.stop();
+      liveAI.listening = false;
+      liveAI.setState('idle');
+    } else {
+      liveAI.setState('listening');
+      liveAI.startListening();
+    }
+  }
+}
+
+async function submitTextMessage(event) {
+  event.preventDefault();
+  const text = $('chatInput').value.trim();
+  if (!text || !liveAI) return;
+
+  $('chatInput').value = '';
+  addMessage('user', text);
+  setPreviewText(`Anda: ${text}`);
+  activeAiMsgBody = null;
+  appendSessionMessage('user', text);
+  speechQueryStartTime = performance.now();
+  const audioContext = getSharedAudioContext();
+  if (audioContext?.state === 'suspended') await audioContext.resume();
+
+  try {
+    if (!liveAI.running || !liveAI.session) {
+      const hasSpeechRecognition = Boolean(
+        window.webkit?.messageHandlers?.nativeSpeech ||
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition
+      );
+      if (hasSpeechRecognition) {
+        liveAI.createRecognition();
+      } else if (!liveAI.options.manualMode) {
+        setMode('manual');
+      }
+      liveAI.session = await liveAI.createSession();
+      liveAI.running = true;
+    }
+    if (liveAI.listening) {
+      liveAI.recognition?.stop();
+      liveAI.listening = false;
+    }
+    await liveAI.ask(text);
+  } catch (error) {
+    setState('error');
+    statusLabel.textContent = 'Perhatian';
+    hint.textContent = error.message || 'Gagal mengirim pesan.';
+  }
+}
+
+micBtn.onclick = () => {
+  if (!liveAI) return;
+  if (currentState === 'listening') {
+    liveAI.stop();
+  } else {
+    void triggerStart();
+  }
+};
+
+stopBtn.onclick = () => {
+  if (liveAI) liveAI.stop();
+  setState('idle');
+};
+
+const openChromeBtn = $('open-chrome-btn');
+if (openChromeBtn) {
+  openChromeBtn.onclick = () => {
+    const url = window.location.href;
+    if (window.webkit?.messageHandlers?.openExternal) {
+      window.webkit.messageHandlers.openExternal.postMessage(url);
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+}
+
+function updateOverlayState() {
+  const settingsOpen = settingsModal.classList.contains('open');
+  const historyOpen = conversationDrawer.classList.contains('open');
+  document.body.classList.toggle('overlay-open', settingsOpen || historyOpen);
+  settingsToggle.setAttribute('aria-expanded', String(settingsOpen));
+  historyToggle.setAttribute('aria-expanded', String(historyOpen));
+  settingsModal.setAttribute('aria-hidden', String(!settingsOpen));
+  conversationDrawer.setAttribute('aria-hidden', String(!historyOpen));
+  conversationDrawer.inert = !historyOpen;
+  historyBackdrop.setAttribute('aria-hidden', String(!historyOpen));
+}
+
+function setSettingsModalOpen(open, restoreFocus = true) {
+  if (open) setHistoryOpen(false, false);
+  settingsModal.classList.toggle('open', open);
+  updateOverlayState();
+  if (open) settingsClose.focus();
+  else if (restoreFocus) settingsToggle.focus();
+}
+
+function setHistoryOpen(open, restoreFocus = true) {
+  if (open) setSettingsModalOpen(false, false);
+  conversationDrawer.classList.toggle('open', open);
+  historyBackdrop.classList.toggle('open', open);
+  updateOverlayState();
+  if (open) {
+    void refreshSessionSelect();
+    chat.scrollTop = chat.scrollHeight;
+    historyClose.focus();
+  } else if (restoreFocus) {
+    historyToggle.focus();
+  }
+}
+
+updateOverlayState();
+settingsToggle.onclick = () => setSettingsModalOpen(!settingsModal.classList.contains('open'));
+settingsClose.onclick = () => setSettingsModalOpen(false);
+settingsModal.onclick = event => {
+  if (event.target === settingsModal) setSettingsModalOpen(false);
+};
+historyToggle.onclick = () => setHistoryOpen(!conversationDrawer.classList.contains('open'));
+historyClose.onclick = () => setHistoryOpen(false);
+historyBackdrop.onclick = () => setHistoryOpen(false);
+settingsModal.onkeydown = event => {
+  if (event.key !== 'Tab') return;
+  const focusable = [...settingsModal.querySelectorAll('button:not([disabled]), select:not([disabled]), input:not([disabled])')]
+    .filter(element => element.getClientRects().length > 0);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+};
+
+let spacePressed = false;
+addEventListener('keydown', e => {
+  if (e.code === 'Space' && !spacePressed && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) {
+    e.preventDefault();
+    spacePressed = true;
+    if (liveAI && currentState !== 'listening') {
+      void triggerStart();
+    }
+  }
+  if (e.code === 'Escape') {
+    if (settingsModal.classList.contains('open')) {
+      setSettingsModalOpen(false);
+      return;
+    }
+    if (conversationDrawer.classList.contains('open')) {
+      setHistoryOpen(false);
+      return;
+    }
+    if (liveAI) liveAI.stop();
+    setState('idle');
+  }
+});
+
+addEventListener('keyup', e => {
+  if (e.code === 'Space' && spacePressed) {
+    spacePressed = false;
+    const isManual = $('mode').querySelector('.on')?.dataset.m === 'manual';
+    if (isManual && liveAI && currentState === 'listening') {
+      liveAI.stopListening();
+    }
+  }
+});
+
+document.querySelectorAll('#mode button').forEach(b => {
+  b.onclick = () => {
+    setMode(b.dataset.m);
+  };
+});
+
+personaSelect.onchange = async () => {
+  if (!liveAI) return;
+  personaCustomInput.classList.toggle('hidden', personaSelect.value !== 'custom');
+  liveAI.options.systemPrompt = getSystemPrompt();
+  liveAI.options.personaPrompt = getSelectedPersonaPrompt();
+  if (!liveAI.running) return;
+  liveAI.options.conversationContext = getConversationContext();
+  liveAI.setTurnHistory?.(conversationHistory);
+  try {
+    liveAI.session = await liveAI.createSession();
+  } catch (error) {
+    statusLabel.textContent = 'Perhatian';
+    hint.textContent = `Persona diperbarui, tetapi sesi gagal dimuat ulang: ${error.message}`;
+  }
+};
+
+personaCustomInput.oninput = () => {
+  if (liveAI) liveAI.options.personaPrompt = getSelectedPersonaPrompt();
+};
+
+voiceSelect.onchange = () => {
+  if (liveAI) {
+    const selectedVoice = voiceSelect.selectedOptions[0];
+    liveAI.options.voiceURI = voiceSelect.value;
+    liveAI.options.voiceName = selectedVoice?.dataset.voiceName || '';
+    liveAI.options.voiceLanguage = selectedVoice?.dataset.voiceLang || 'id-ID';
+    liveAI.options.voiceGender = selectedVoice?.dataset.gender || 'unknown';
+  }
+  void updateAssistantIdentityFromVoice();
+};
+
+ttsSelect.onchange = () => {
+  if (liveAI) {
+    liveAI.options.useLocalTts = ttsSelect.value === 'drat-tts';
+  }
+  if (ttsSelect.value === 'system') {
+    const damayantiOpt = Array.from(voiceSelect.options).find(o => o.value === 'damayanti' || /damayanti/i.test(o.textContent));
+    if (damayantiOpt) {
+      voiceSelect.value = damayantiOpt.value;
+    } else {
+      syncAvatarWithGender('female');
+    }
+  }
+  void updateAssistantIdentityFromVoice();
+};
+
+refreshModelsBtn.onclick = () => {
+  refreshModelsBtn.disabled = true;
+  void loadModels(endpointInput.value.trim());
+};
+
+endpointInput.onchange = () => {
+  const url = endpointInput.value.trim();
+  if (liveAI) liveAI.options.litertBaseUrl = url.replace(/\/+$/u, '');
+  void loadModels(url);
+};
+
+modelSelect.onchange = () => {
+  if (liveAI) liveAI.options.litertModel = modelSelect.value;
+};
+
+$('copyBtn').onclick = () => {
+  const text = [...chat.querySelectorAll('.msg')].map(m => {
+    const who = m.querySelector('.who')?.textContent || '';
+    const body = m.querySelector('.body')?.textContent || '';
+    return `${who}: ${body}`;
+  }).join('\n\n');
+  navigator.clipboard?.writeText(text);
+  alert("Percakapan berhasil disalin ke clipboard!");
+};
+
+$('histBtn').onclick = e => {
+  chat.classList.toggle('history');
+  e.currentTarget.classList.toggle('on');
+  chat.scrollTop = chat.scrollHeight;
+};
+
+async function resetNewSession() {
+  chat.innerHTML = '';
+  setPreviewText('');
+  conversationHistory = [];
+  if (liveAI) {
+    liveAI.resetConversation?.();
+    liveAI.stop();
+  }
+  activeSession = createSessionRecord();
+  if (sessionDb) {
+    await saveActiveSession();
+    await refreshSessionSelect();
+  }
+  setState('idle');
+  addMessage('ai', 'Sesi baru dimulai. Memori percakapan telah direset, silakan bicara!');
+}
+
+$('newBtn').onclick = () => { void resetNewSession(); };
+$('stageNewBtn').onclick = () => { void resetNewSession(); };
+
+/* ================= Modal Rekap Percakapan (Independen) ================= */
+const recapModal = $('recap-modal');
+const recapContent = $('recap-content');
+let lastRecapText = '';
+
+async function runConversationRecap(forceRefresh = false) {
+  if (!recapContent) return;
+  const msgs = (activeSession?.messages && activeSession.messages.length)
+    ? activeSession.messages
+    : (conversationHistory.length ? conversationHistory : (liveAI?.turnHistory || []));
+  if (!msgs.length) {
+    lastRecapText = 'Belum ada percakapan untuk direkap pada sesi ini.';
+    recapContent.textContent = lastRecapText;
+    return;
+  }
+  if (!forceRefresh && activeSession?.lastRecap && activeSession.recapMessageCount === msgs.length) {
+    lastRecapText = activeSession.lastRecap;
+    recapContent.textContent = lastRecapText;
+    return;
+  }
+  recapContent.textContent = '⏳ Menyusun rekap seluruh percakapan di latar belakang...';
+  try {
+    lastRecapText = await liveAI.generateRecap(msgs);
+    recapContent.textContent = lastRecapText;
+    if (activeSession) {
+      activeSession.lastRecap = lastRecapText;
+      activeSession.recapMessageCount = msgs.length;
+      activeSession.recapUpdatedAt = Date.now();
+      queueSessionSave();
+    }
+  } catch (err) {
+    lastRecapText = `Gagal menyusun rekap: ${err.message || err}`;
+    recapContent.textContent = lastRecapText;
+  }
+}
+
+function setRecapModalOpen(open) {
+  if (!recapModal) return;
+  recapModal.classList.toggle('open', open);
+  recapModal.setAttribute('aria-hidden', String(!open));
+  if (open) void runConversationRecap(false);
+}
+
+$('recap-toggle')?.addEventListener('click', () => setRecapModalOpen(true));
+$('recap-close')?.addEventListener('click', () => setRecapModalOpen(false));
+$('recap-refresh')?.addEventListener('click', () => void runConversationRecap(true));
+recapModal?.addEventListener('click', e => {
+  if (e.target === recapModal) setRecapModalOpen(false);
+});
+$('recap-copy')?.addEventListener('click', async () => {
+  if (!lastRecapText) return;
+  try {
+    await navigator.clipboard.writeText(lastRecapText);
+    const btn = $('recap-copy');
+    if (btn) {
+      const prev = btn.innerHTML;
+      btn.textContent = '✓ Tersalin';
+      setTimeout(() => { btn.innerHTML = prev; }, 1600);
+    }
+  } catch (_) {}
+});
+function downloadMarkdownFile(content, filename) {
+  if (!content) return false;
+  // Native macOS WKWebView bridge (EduVis AI Gallery / EduVis Native AI)
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.saveDocument) {
+    try {
+      const bytes = new TextEncoder().encode(content);
+      let binary = '';
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+      }
+      window.webkit.messageHandlers.saveDocument.postMessage({
+        requestID: 'md_save_' + Date.now(),
+        filename: filename,
+        mimeType: 'text/markdown',
+        base64: btoa(binary)
+      });
+      return true;
+    } catch (err) {
+      console.warn('Native saveDocument fallback:', err);
+    }
+  }
+  // Fallback browser biasa (Chrome, Safari, Firefox)
+  const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 1500);
+  return true;
+}
+
+$('recap-download')?.addEventListener('click', () => {
+  const content = lastRecapText || recapContent?.textContent?.trim() || '';
+  if (!content) return;
+  const ok = downloadMarkdownFile(content, `rekap-eduvis-futuristik-${new Date().toISOString().slice(0, 10)}.md`);
+  if (ok) {
+    const btn = $('recap-download');
+    if (btn) {
+      const prev = btn.innerHTML;
+      btn.textContent = '✓ Diunduh';
+      setTimeout(() => { btn.innerHTML = prev; }, 1600);
+    }
+  }
+});
+
+$('delBtn').onclick = async () => {
+  chat.innerHTML = '';
+  setPreviewText('');
+  conversationHistory = [];
+  if (activeSession) {
+    activeSession.messages = [];
+    activeSession.title = 'Sesi baru';
+    delete activeSession.lastRecap;
+    delete activeSession.recapMessageCount;
+    delete activeSession.recapUpdatedAt;
+    if (sessionDb) {
+      await saveActiveSession();
+      await refreshSessionSelect();
+    }
+  }
+  if (liveAI) {
+    liveAI.resetConversation?.();
+    liveAI.stop();
+  }
+  setState('idle');
+};
+
+$('chatForm').addEventListener('submit', submitTextMessage);
+
+/* Inisialisasi Siri Live Sphere Controls */
+function initSiriSphereControls() {
+  document.querySelectorAll('.sphere-persona-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.persona === activePersona);
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sphere-persona-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activePersona = btn.dataset.persona;
+      localStorage.setItem('gemini_live_persona', activePersona);
+      assistantName = (activePersona === 'execMale' || activePersona === 'narendra') ? 'Narendra' : 'Arsi';
+      updateSiriSphere();
+    });
+  });
+
+  document.querySelectorAll('.sphere-ring-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.ring === currentRingStyle);
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sphere-ring-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRingStyle = btn.dataset.ring;
+      localStorage.setItem('gemini_live_ring_style', currentRingStyle);
+      updateSiriSphere();
+    });
+  });
+
+  document.querySelectorAll('.sphere-spectrum-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.spectrum === currentSpectrum);
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sphere-spectrum-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSpectrum = btn.dataset.spectrum;
+      localStorage.setItem('gemini_live_spectrum', currentSpectrum);
+      updateSiriSphere();
+    });
+  });
+
+  document.querySelectorAll('.sphere-state-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sphere-state-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const targetState = btn.dataset.state;
+      setState(targetState);
+      updateSiriSphere(targetState);
+    });
+  });
+
+  updateSiriSphere('idle');
+}
+
+/* Inisialisasi */
+setState('idle');
+initSiriSphereControls();
+loadVoices().then(() => {
+  void updateAssistantIdentityFromVoice();
+  initController();
+  void initializeSessionStore();
+});
+</script>
+</body>
+</html>

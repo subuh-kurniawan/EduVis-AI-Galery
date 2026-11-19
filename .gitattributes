@@ -1,0 +1,9 @@
+# Binary web assets (<= 26 MB each, stored directly without requiring Git LFS)
+*.wasm binary
+*.zip binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.mp4 binary
+*.woff2 binary
