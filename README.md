@@ -2,9 +2,12 @@
 
 **EduVis AI Gallery** adalah rangkaian aplikasi AI lokal (*on-device*) berbasis **Gemma 4** dan **LiteRT-LM** yang berjalan sepenuhnya di perangkat Anda tanpa kunci API berbayar maupun ketergantungan cloud. Proyek ini menggabungkan **antarmuka web client-side (WebGPU/WASM)**, **server LAN HTTPS**, **percakapan suara interaktif (EduVis Live & Futuristik)**, **TTS Neural lokal**, serta **aplikasi native macOS SwiftUI**.
 
+![EduVis AI Gallery — Launcher Space Lens](docs/screenshots/01-eduvis-gallery-launcher.webp)
+
 ---
 
 ## 📑 Daftar Isi
+- [Galeri Tangkapan Layar](#-galeri-tangkapan-layar)
 - [Fitur Utama & Ruang Kerja](#-fitur-utama--ruang-kerja)
 - [Arsitektur Sistem & Alur Lengkap](#️-arsitektur-sistem--alur-lengkap)
 - [Alur Mode EduVis Live & EduVis Live Futuristik](#️-alur-mode-eduvis-live--eduvis-live-futuristik)
@@ -16,6 +19,35 @@
 - [Ekspor Visualisasi & Uji Regresi](#-ekspor-visualisasi--uji-regresi)
 - [Struktur File Utama](#-struktur-file-utama)
 - [Troubleshooting & FAQ](#️-troubleshooting--faq)
+- [Kredit & Atribusi Open-Source](#-kredit--atribusi-open-source)
+
+---
+
+## 📸 Galeri Tangkapan Layar
+
+### EduVis AI Gallery (Launcher, Visualisasi, TTS Studio, & Mode Live)
+
+| EduVis AI Gallery — Space Lens Launcher | Workspace Utama — Flowchart Mermaid & RAG |
+| :---: | :---: |
+| ![EduVis AI Gallery Launcher](docs/screenshots/01-eduvis-gallery-launcher.webp) | ![Workspace Utama Flowchart](docs/screenshots/02-workspace-utama-flowchart.webp) |
+
+| TTS Studio AI — Narasi 100% Offline | EduVis Live — Auto VAD & Siri Live Sphere |
+| :---: | :---: |
+| ![TTS Studio AI Lokal](docs/screenshots/03-tts-studio-lokal.webp) | ![EduVis Live](docs/screenshots/04-eduvis-live.webp) |
+
+| EduVis Live Futuristik — Suara Duplex GPU | |
+| :---: | :---: |
+| ![EduVis Live Futuristik](docs/screenshots/05-eduvis-live-futuristik.webp) | **Mode Suara Real-Time:** Mendukung Auto VAD, Push-to-Talk, TTS lokal on-demand (VITS/Piper/RVC), fallback Realtime Native, avatar **Siri Live Sphere**, dan akses lintas perangkat via QR LAN. |
+
+### EduVis Native AI (Aplikasi macOS 100% SwiftUI Liquid Glass)
+
+| EduVis Native AI Studio | Obrolan Gemma 4 Lokal & Render Markdown |
+| :---: | :---: |
+| ![EduVis Native AI Studio](docs/screenshots/06-eduvis-native-studio.webp) | ![EduVis Native AI Chat](docs/screenshots/07-eduvis-native-chat.webp) |
+
+| Peluncur 13 Ruang Kerja Hybrid (Native & Web Asli) | Tentang Aplikasi, Arsitektur, & Developer |
+| :---: | :---: |
+| ![Peluncur 13 Ruang Kerja Hybrid](docs/screenshots/08-eduvis-native-workspace-launcher.webp) | ![Tentang EduVis Native AI](docs/screenshots/09-eduvis-native-about.webp) |
 
 ---
 
@@ -289,6 +321,18 @@ Unduh sertifikat DER dari `https://IP-MAC:1234/api/lan-ca` (file CA tersimpan di
 2. **Tab/Browser crash (Out of Memory):** Model melebihi kapasitas RAM/VRAM. Muat ulang halaman dan pilih varian lebih kecil (misalnya **E2B-it** atau **E4B-it**).
 3. **Mikrofon ditolak di perangkat LAN lain:** Pastikan sertifikat CA lokal dari `https://IP-MAC:1234/api/lan-ca` sudah diinstal dan dipercaya (*Always Trust*), lalu muat ulang halaman.
 4. **Suara TTS lokal tidak keluar di EduVis Live:** Sistem akan otomatis beralih ke **Realtime Native**. Pastikan model TTS sudah diunduh via `python3 scripts/download_models.py` jika ingin memakai suara lokal VITS (Wibowo).
+
+---
+
+## 🙏 Kredit & Atribusi Open-Source
+
+Fitur **TTS Lokal** dan percakapan suara pada EduVis AI Gallery dibangun dengan memanfaatkan serta menghargai karya proyek-proyek open-source berikut:
+
+- **[drat/TTS-Indonesia-Gratis](https://github.com/drat/TTS-Indonesia-Gratis)** — Implementasi TTS lokal bahasa Indonesia, Jawa, dan Sunda berbasis G2P & VITS beserta profil suara bawaan (**Wibowo**, **Ardi**, **Gadis**, **Juminten**, **Asep**).
+- **[Wikidepia/indonesian-tts](https://github.com/Wikidepia/indonesian-tts)** — Pelatihan dan rilis model VITS TTS Bahasa Indonesia (`checkpoint_1260000-inference.pth`). *Catatan lisensi dari pembuat model: **khusus non-komersial (DO NOT USE FOR COMMERCIAL PURPOSES)**.*
+- **[coqui-ai/TTS](https://github.com/coqui-ai/TTS)** — Mesin sintesis suara neural VITS.
+- **[rhasspy/piper](https://github.com/rhasspy/piper)** & **[okasi/piper-indonesian-news-tts-onnx-q8](https://huggingface.co/okasi/piper-indonesian-news-tts-onnx-q8)** — Runtime Piper (GPL-3.0-or-later) dan model suara opsional **News TTS** Bahasa Indonesia (ONNX Q8).
+- **[RVC-Project/Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)** — Pipeline inferensi konversi suara opsional (RVC & RMVPE).
 
 ---
 
