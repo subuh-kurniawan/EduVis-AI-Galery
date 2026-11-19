@@ -25,19 +25,15 @@
 
 ## 📸 Galeri Tangkapan Layar
 
-### EduVis AI Gallery (Launcher, Visualisasi, TTS Studio, & Mode Live)
+### EduVis AI Gallery (Visualisasi, TTS Studio, & Mode Live)
 
-| EduVis AI Gallery — Space Lens Launcher | Workspace Utama — Flowchart Mermaid & RAG |
+| Workspace Utama — Flowchart Mermaid & RAG | TTS Studio AI — Narasi 100% Offline |
 | :---: | :---: |
-| ![EduVis AI Gallery Launcher](docs/screenshots/01-eduvis-gallery-launcher.webp) | ![Workspace Utama Flowchart](docs/screenshots/02-workspace-utama-flowchart.webp) |
+| ![Workspace Utama Flowchart](docs/screenshots/02-workspace-utama-flowchart.webp) | ![TTS Studio AI Lokal](docs/screenshots/03-tts-studio-lokal.webp) |
 
-| TTS Studio AI — Narasi 100% Offline | EduVis Live — Auto VAD & Siri Live Sphere |
+| EduVis Live — Auto VAD & Siri Live Sphere | EduVis Live Futuristik — Suara Duplex GPU |
 | :---: | :---: |
-| ![TTS Studio AI Lokal](docs/screenshots/03-tts-studio-lokal.webp) | ![EduVis Live](docs/screenshots/04-eduvis-live.webp) |
-
-| EduVis Live Futuristik — Suara Duplex GPU | |
-| :---: | :---: |
-| ![EduVis Live Futuristik](docs/screenshots/05-eduvis-live-futuristik.webp) | **Mode Suara Real-Time:** Mendukung Auto VAD, Push-to-Talk, TTS lokal on-demand (VITS/Piper/RVC), fallback Realtime Native, avatar **Siri Live Sphere**, dan akses lintas perangkat via QR LAN. |
+| ![EduVis Live](docs/screenshots/04-eduvis-live.webp) | ![EduVis Live Futuristik](docs/screenshots/05-eduvis-live-futuristik.webp) |
 
 ### EduVis Native AI (Aplikasi macOS 100% SwiftUI Liquid Glass)
 
