@@ -776,7 +776,7 @@
     <script src="nano_asset/assets/js/ai-mermaid-controls.js" defer></script>
     <script src="nano_asset/assets/js/table-png-export.js" defer></script>
     <script src="nano_asset/assets/js/marked.min.js"></script>
-    <script src="live-conversation.js"></script>
+    <script src="live-conversation.js?v=20261119-reset"></script>
     <script src="nano_asset/assets/avatars/siri_live_sphere.js"></script>
 </head>
 <body>
@@ -1537,7 +1537,15 @@
 
         async function restoreSession(session, useSavedPreferences = false) {
             if (!session) return;
+            clearTimeout(sessionSaveTimer);
             if (liveAI.running) liveAI.stop();
+            finalTranscript = '';
+            lastFinalTranscript = '';
+            latestAssistantResponse = '';
+            userTimelineEntry = null;
+            assistantTimelineEntry = null;
+            activeUserMessageId = null;
+            activeAssistantMessageId = null;
             activeSession = session;
             const hasSavedPersona = useSavedPreferences && savedPreferences.persona;
             const persona = hasSavedPersona ? savedPreferences.persona : session.persona || 'eduvis';
@@ -1906,6 +1914,10 @@
                     updateSessionMessage('assistant', data.text.trim());
                     const entry = updateTimelineEntry(null, 'assistant', assistantName, data.text.trim());
                     renderAssistantVisuals(entry);
+                    activeUserMessageId = null;
+                    activeAssistantMessageId = null;
+                    userTimelineEntry = null;
+                    assistantTimelineEntry = null;
                 }
             },
             onSpeechProgress: data => {
@@ -2312,8 +2324,16 @@
             await restoreSession(session);
         });
         newSessionButton.addEventListener('click', async () => {
-            if (liveAI.running) liveAI.stop();
+            clearTimeout(sessionSaveTimer);
             liveAI.resetConversation?.();
+            if (liveAI.running) liveAI.stop();
+            finalTranscript = '';
+            lastFinalTranscript = '';
+            latestAssistantResponse = '';
+            userTimelineEntry = null;
+            assistantTimelineEntry = null;
+            activeUserMessageId = null;
+            activeAssistantMessageId = null;
             activeSession = createSessionRecord();
             activeSession.persona = personaSelect.value;
             activeSession.personaPrompt = liveAI.options.personaPrompt;
@@ -2321,6 +2341,8 @@
                 await saveActiveSession();
             }
             await restoreSession(activeSession);
+            liveAI.options.conversationContext = '';
+            liveAI.setTurnHistory?.([]);
             setState('idle');
             showToast('Sesi baru dimulai · Memori percakapan direset');
         });
@@ -2515,9 +2537,15 @@
         setMode(savedPreferences.mode || 'auto');
         liveAI.options.personaPrompt = selectedPersonaPrompt();
         personaCustom.classList.toggle('hidden', personaSelect.value !== 'custom');
-        document.getElementById('clear-conversation').addEventListener('click', () => {
+        document.getElementById('clear-conversation').addEventListener('click', async () => {
+            clearTimeout(sessionSaveTimer);
+            liveAI.resetConversation?.();
+            if (liveAI.running) liveAI.stop();
+            liveAI.options.conversationContext = '';
+            liveAI.setTurnHistory?.([]);
             finalTranscript = '';
             lastFinalTranscript = '';
+            latestAssistantResponse = '';
             userTimelineEntry = null;
             assistantTimelineEntry = null;
             activeUserMessageId = null;
@@ -2528,9 +2556,14 @@
                 delete activeSession.lastRecap;
                 delete activeSession.recapMessageCount;
                 delete activeSession.recapUpdatedAt;
-                queueSessionSave();
+                if (sessionDb) {
+                    await saveActiveSession();
+                    await refreshSessionSelect();
+                }
             }
             conversationTimeline.innerHTML = '<p id="timeline-empty" class="text-sm leading-6 text-stone-500">Belum ada percakapan.<br><span class="text-xs text-stone-600">Mulai bicara untuk membuka sesi baru.</span></p>';
+            setState('idle');
+            showToast('Sesi dibersihkan · Memori percakapan direset');
         });
         const sessionStoreReady = initializeSessionStore();
         loadLiteRtModels();

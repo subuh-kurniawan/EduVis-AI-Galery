@@ -373,6 +373,7 @@
             this.speechPlaybackPending = false;
             this.abortController = null;
             this.turnHistory = [];
+            this.sessionEpoch = 0;
             this.lastUserPrompt = '';
             this.selfSpeechLock = false;
             this.ttsSuppressionUntil = 0;
@@ -454,8 +455,14 @@
             this.clearRecognitionRestartTimer();
             this.clearSpeechChunkTimer();
             this.clearSpeechSubmitTimer();
-            this.recognition?.stop();
+            this.finalTranscript = '';
+            this.interimTranscript = '';
+            try {
+                if (typeof this.recognition?.abort === 'function') this.recognition.abort();
+                else this.recognition?.stop();
+            } catch (_) {}
             this.audioQueue = [];
+            this.isPlayingQueue = false;
             if (this.currentAudioSource) {
                 try { this.currentAudioSource.stop(); } catch (_) {}
                 this.currentAudioSource = null;
@@ -618,7 +625,7 @@
 
         handleRecognitionResult(event) {
             const now = Date.now();
-            if (this.selfSpeechLock || this.speaking || now < this.ttsSuppressionUntil) return;
+            if (!this.running || this.selfSpeechLock || this.speaking || now < this.ttsSuppressionUntil) return;
             let interim = '';
             let finalText = '';
             for (let index = event.resultIndex; index < event.results.length; index += 1) {
@@ -718,13 +725,28 @@
         }
 
         resetConversation() {
+            this.sessionEpoch += 1;
+            this.running = false;
+            this.listening = false;
             this.abortController?.abort();
+            this.abortController = null;
+            this.clearRecognitionRestartTimer();
             this.clearSpeechChunkTimer();
+            this.clearSpeechSubmitTimer();
+            this.finalTranscript = '';
+            this.interimTranscript = '';
+            try {
+                if (typeof this.recognition?.abort === 'function') this.recognition.abort();
+                else this.recognition?.stop();
+            } catch (_) {}
             this.audioQueue = [];
+            this.isPlayingQueue = false;
             if (this.currentAudioSource) {
                 try { this.currentAudioSource.stop(); } catch (_) {}
                 this.currentAudioSource = null;
             }
+            this.systemSpeechUtterances.clear();
+            window.speechSynthesis?.cancel();
             this.turnHistory = [];
             this.options.conversationContext = '';
             this.responseBuffer = '';
@@ -735,6 +757,8 @@
             this.speechPlaybackPending = false;
             this.speaking = false;
             this.selfSpeechLock = false;
+            this.ttsSuppressionUntil = 0;
+            this.autoListenCooldown = 0;
             this.session = null;
             this.options.onSpeechProgress({ phase: 'reset', text: '', charIndex: 0 });
         }
@@ -770,6 +794,14 @@
                         usedChars += len;
                     }
                     selectedTurns.reverse();
+                    const normalizedPrompt = String(text || '').trim();
+                    if (
+                        selectedTurns.length > 0 &&
+                        selectedTurns[selectedTurns.length - 1].role === 'user' &&
+                        selectedTurns[selectedTurns.length - 1].content.trim() === normalizedPrompt
+                    ) {
+                        selectedTurns.pop();
+                    }
                     const messages = [{ role: 'system', content: systemContent }, ...selectedTurns, { role: 'user', content: text }];
                     let response;
                     try {
@@ -854,11 +886,12 @@
             this.speechPlaybackPending = false;
             this.options.onSpeechProgress({ phase: 'reset', text: '', charIndex: 0 });
             const requestController = new AbortController();
+            const requestEpoch = this.sessionEpoch;
             this.abortController = requestController;
 
             try {
                 await this.options.onBeforeAsk(text);
-                if (requestController.signal.aborted) return;
+                if (requestController.signal.aborted || requestEpoch !== this.sessionEpoch) return;
 
                 const prompt = this.session.promptStreaming
                     ? this.session.promptStreaming(text, { signal: requestController.signal })
@@ -866,7 +899,7 @@
 
                 if (this.session.promptStreaming) {
                     for await (const chunk of prompt) {
-                        if (requestController.signal.aborted) return;
+                        if (requestController.signal.aborted || requestEpoch !== this.sessionEpoch) return;
                         const value = this.extractChunk(chunk);
                         if (!value) continue;
                         this.responseBuffer += value;
@@ -876,10 +909,12 @@
                     }
                 } else {
                     this.fullResponseText = await prompt;
+                    if (requestController.signal.aborted || requestEpoch !== this.sessionEpoch) return;
                     this.responseBuffer = this.fullResponseText;
                     this.options.onResponse({ text: this.fullResponseText, done: false });
                 }
 
+                if (requestController.signal.aborted || requestEpoch !== this.sessionEpoch) return;
                 this.responseComplete = true;
                 if (this.fullResponseText.trim()) {
                     this.turnHistory.push({ role: 'user', content: text });

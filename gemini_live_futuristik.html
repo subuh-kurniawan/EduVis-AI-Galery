@@ -11,7 +11,7 @@
 <script src="nano_asset/assets/js/lan-qrcode.js" defer></script>
 <script src="nano_asset/assets/js/app-navigation.js" defer></script>
 <link rel="stylesheet" href="nano_asset/assets/css/boxicons.min.css">
-<script src="live-conversation.js"></script>
+<script src="live-conversation.js?v=20261119-reset"></script>
 <script src="nano_asset/assets/avatars/siri_live_sphere.js"></script>
 <style>
 :root{
@@ -1025,6 +1025,8 @@ function renderActiveSessionMessages() {
 
 async function restoreSession(session) {
   if (!session) return;
+  clearTimeout(sessionSaveTimer);
+  activeAiMsgBody = null;
   if (liveAI?.running) liveAI.stop();
   activeSession = session;
   syncConversationHistoryFromSession();
@@ -1693,6 +1695,8 @@ function initController() {
 function triggerStart() {
   if (!liveAI) return;
   try {
+    liveAI.options.conversationContext = getConversationContext();
+    liveAI.setTurnHistory?.(conversationHistory);
     liveAI.start();
   } catch (error) {
     setState('error');
@@ -1966,12 +1970,16 @@ $('histBtn').onclick = e => {
 };
 
 async function resetNewSession() {
+  clearTimeout(sessionSaveTimer);
   chat.innerHTML = '';
   setPreviewText('');
+  activeAiMsgBody = null;
   conversationHistory = [];
   if (liveAI) {
     liveAI.resetConversation?.();
     liveAI.stop();
+    liveAI.options.conversationContext = '';
+    liveAI.setTurnHistory?.([]);
   }
   activeSession = createSessionRecord();
   if (sessionDb) {
@@ -2099,9 +2107,17 @@ $('recap-download')?.addEventListener('click', () => {
 });
 
 $('delBtn').onclick = async () => {
+  clearTimeout(sessionSaveTimer);
   chat.innerHTML = '';
   setPreviewText('');
+  activeAiMsgBody = null;
   conversationHistory = [];
+  if (liveAI) {
+    liveAI.resetConversation?.();
+    liveAI.stop();
+    liveAI.options.conversationContext = '';
+    liveAI.setTurnHistory?.([]);
+  }
   if (activeSession) {
     activeSession.messages = [];
     activeSession.title = 'Sesi baru';
@@ -2112,10 +2128,6 @@ $('delBtn').onclick = async () => {
       await saveActiveSession();
       await refreshSessionSelect();
     }
-  }
-  if (liveAI) {
-    liveAI.resetConversation?.();
-    liveAI.stop();
   }
   setState('idle');
 };
