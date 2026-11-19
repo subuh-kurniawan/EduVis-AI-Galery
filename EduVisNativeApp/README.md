@@ -43,15 +43,18 @@ Setiap halaman portal web non-native telah dikonversi menjadi tampilan ruang ker
 
 ---
 
-## 🚀 Menjalankan Aplikasi
+## 🚀 Build & Menjalankan Aplikasi
 
-Aplikasi bundle siap pakai:
+Prasyarat: macOS 14.0+ dengan Xcode Command Line Tools (`swiftc`, `xcrun`).
+
+Untuk mengompilasi bundle `EduVis Native AI.app` dari folder root proyek:
 ```bash
-open "/Users/subuhkurniawan/Gemma4/EduVisNativeApp/EduVis Native AI.app"
+cd EduVisNativeApp
+chmod +x build_native_app.sh
+./build_native_app.sh
 ```
 
-Untuk mengompilasi ulang kapan saja:
+Menjalankan aplikasi hasil build:
 ```bash
-cd "/Users/subuhkurniawan/Gemma4/EduVisNativeApp"
-./build_native_app.sh
+open "EduVisNativeApp/EduVis Native AI.app"
 ```

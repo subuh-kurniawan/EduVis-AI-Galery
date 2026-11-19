@@ -213,6 +213,53 @@ Untuk mengunduh juga aset opsional (GitHub Releases `assets-v1` dan suara Piper)
 python3 scripts/download_models.py --all
 ```
 
+### 🍎 Panduan Build Aplikasi macOS (EduVis AI Gallery & EduVis Native AI)
+
+**Prasyarat:**
+- macOS 14.0+ (Sonoma atau lebih baru, disarankan Apple Silicon)
+- Xcode Command Line Tools (`xcode-select --install` — menyediakan `swiftc`, `xcrun`, dan `hdiutil`)
+- Python 3.10+
+- Pastikan model lokal sudah diunduh (`python3 scripts/download_models.py`) bila baru melakukan `git clone`.
+
+#### 1. Build & Jalankan **EduVis AI Gallery** (WebView + Launcher + LAN HTTPS)
+- **Build bundle mandiri `.app` saja** (menghasilkan `EduVis AI Gallery.app` di folder proyek):
+  ```bash
+  python3 scripts/build_dmg.py --app-only
+  ```
+- **Build/perbarui dan langsung jalankan** (juga memasang ke `~/Applications/`):
+  ```bash
+  python3 gemma_chat_gui.py
+  ```
+  Atau klik dua kali `Jalankan Gemma AI Gallery.command`.
+
+#### 2. Build & Jalankan **EduVis Native AI** (100% Native SwiftUI Liquid Glass)
+- **Kompilasi bundle `EduVisNativeApp/EduVis Native AI.app`:**
+  ```bash
+  cd EduVisNativeApp
+  chmod +x build_native_app.sh
+  ./build_native_app.sh
+  ```
+- **Jalankan aplikasi hasil build:**
+  ```bash
+  open "EduVisNativeApp/EduVis Native AI.app"
+  ```
+  Detail fitur 13 ruang kerja native dapat dilihat di [EduVisNativeApp/README.md](EduVisNativeApp/README.md).
+
+#### 3. Build Installer **DMG** Lengkap (Keduanya dalam 1 Paket)
+Untuk mempaketkan **EduVis AI Gallery.app** dan **EduVis Native AI.app** sekaligus ke dalam installer `dist/EduVis-AI-Gallery-macOS.dmg`:
+
+```bash
+python3 scripts/build_dmg.py
+```
+
+Jika kedua bundle `.app` sudah dikompilasi dan hanya ingin mengemas ulang `.dmg` tanpa kompilasi ulang:
+
+```bash
+python3 scripts/build_dmg.py --dmg-only
+```
+
+> **Catatan Gatekeeper macOS:** Karena aplikasi dibangun secara lokal (ad-hoc signing), saat pertama kali dibuka di Mac lain, klik kanan ikon aplikasi → pilih **Open / Buka**.
+
 ### Suara Piper Indonesia (opsional)
 Piper menyediakan satu suara tambahan bernama **News TTS** di TTS Studio dan halaman EduVis Live. Untuk memasangnya di runtime lokal:
 
