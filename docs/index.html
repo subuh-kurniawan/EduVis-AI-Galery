@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduVis AI Gallery — Gemma 4 Local AI Suite &amp; macOS Native Studio</title>
+  <meta name="description" content="Rangkaian aplikasi AI lokal (on-device) berbasis Gemma 4 dan LiteRT-LM: 15 ruang kerja interaktif, EduVis Live & Futuristik dengan Siri Live Sphere, TTS Neural lokal, dan aplikasi macOS 100% SwiftUI Liquid Glass.">
+  <meta property="og:title" content="EduVis AI Gallery — Gemma 4 Local AI Suite">
+  <meta property="og:description" content="100% AI lokal di perangkat Anda: Gemma 4, LiteRT-LM, EduVis Live Voice, TTS Studio Lokal, dan macOS Native SwiftUI.">
+  <meta property="og:image" content="screenshots/01-eduvis-gallery-launcher.webp">
+  <style>
+    :root {
+      --bg-0: #0d0a1a;
+      --bg-1: #16112b;
+      --bg-2: #1f183c;
+      --surface: rgba(34, 27, 64, 0.62);
+      --surface-strong: rgba(42, 34, 78, 0.85);
+      --border: rgba(255, 255, 255, 0.11);
+      --border-strong: rgba(168, 139, 250, 0.35);
+      --text: #f4f2ff;
+      --muted: #b7b0d6;
+      --accent: #9b87f5;
+      --accent-2: #38bdf8;
+      --accent-3: #f472b6;
+      --radius: 20px;
+      --radius-sm: 12px;
+      --shadow: 0 24px 60px rgba(4, 2, 14, 0.55);
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; color-scheme: dark; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% -5%, rgba(139, 92, 246, 0.28), transparent 60%),
+        radial-gradient(900px 500px at 85% 5%, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(1000px 600px at 50% 100%, rgba(244, 114, 182, 0.14), transparent 60%),
+        linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 50%, var(--bg-0) 100%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; height: auto; display: block; }
+
+    .container {
+      width: min(1160px, 92vw);
+      margin-inline: auto;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      background: rgba(15, 11, 30, 0.72);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+    }
+    .brand-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--accent-3));
+      box-shadow: 0 0 18px rgba(155, 135, 245, 0.5);
+      display: grid;
+      place-items: center;
+      font-size: 0.85rem;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.35rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.2rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--border-strong);
+      background: var(--surface-strong);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #6366f1 55%, #0ea5e9);
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow: 0 10px 28px rgba(99, 102, 241, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #8b5cf6, #818cf8 55%, #38bdf8);
+    }
+
+    /* Hero */
+    .hero {
+      padding: clamp(3rem, 7vw, 5.5rem) 0 3rem;
+      text-align: center;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.38rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #ddd6fe;
+      background: rgba(139, 92, 246, 0.16);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      margin: 0 auto 1rem;
+      max-width: 18ch;
+      font-size: clamp(2.15rem, 5.2vw, 3.85rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      background: linear-gradient(180deg, #ffffff 10%, #d8ccf8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero p {
+      margin: 0 auto 1.85rem;
+      max-width: 66ch;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.8vw, 1.15rem);
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+    }
+    .hero-frame {
+      position: relative;
+      padding: 0.75rem;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .hero-frame button {
+      all: unset;
+      display: block;
+      width: 100%;
+      cursor: zoom-in;
+      border-radius: 17px;
+      overflow: hidden;
+    }
+    .hero-frame img {
+      width: 100%;
+      border-radius: 17px;
+    }
+
+    /* Sections */
+    section {
+      padding: clamp(2.75rem, 6vw, 4.75rem) 0;
+    }
+    .section-head {
+      text-align: center;
+      max-width: 68ch;
+      margin: 0 auto 2.5rem;
+    }
+    .section-head h2 {
+      margin: 0 0 0.65rem;
+      font-size: clamp(1.65rem, 3.2vw, 2.35rem);
+      letter-spacing: -0.02em;
+    }
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    /* Glass Cards */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.1rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 1.25rem;
+    }
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      box-shadow: 0 12px 32px rgba(5, 3, 18, 0.35);
+    }
+    .card h3 {
+      margin: 0.6rem 0 0.45rem;
+      font-size: 1.1rem;
+    }
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+    .icon-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 1.2rem;
+      background: rgba(155, 135, 245, 0.16);
+      border: 1px solid rgba(155, 135, 245, 0.3);
+    }
+
+    /* Live Pipeline */
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1.75rem;
+    }
+    .step {
+      background: rgba(25, 19, 50, 0.72);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem 1.05rem;
+    }
+    .step-num {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-2);
+      background: rgba(56, 189, 248, 0.14);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      margin-bottom: 0.45rem;
+    }
+    .step h4 { margin: 0 0 0.3rem; font-size: 0.95rem; }
+    .step p { margin: 0; font-size: 0.84rem; color: var(--muted); }
+
+    .compare-card img {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+      cursor: zoom-in;
+    }
+    .compare-card ul {
+      margin: 0.6rem 0 0;
+      padding-left: 1.15rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .compare-card li { margin-bottom: 0.35rem; }
+
+    /* Gallery */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.55rem;
+      margin-bottom: 1.75rem;
+    }
+    .filter-btn {
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .filter-btn[aria-pressed="true"],
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: var(--border-strong);
+      background: rgba(139, 92, 246, 0.24);
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.15rem;
+    }
+    .shot-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+    .shot-card[hidden] { display: none; }
+    .shot-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+    }
+    .shot-trigger {
+      all: unset;
+      display: block;
+      width: 100%;
+      cursor: zoom-in;
+    }
+    .shot-trigger img {
+      width: 100%;
+      aspect-ratio: 16 / 9.7;
+      object-fit: cover;
+      background: #120d26;
+    }
+    .shot-meta {
+      padding: 0.85rem 1rem 1rem;
+    }
+    .shot-meta strong {
+      display: block;
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+    .shot-meta span {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    /* Code blocks */
+    .code-card {
+      background: rgba(14, 11, 28, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .code-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #d8ccf8;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .copy-btn {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(155, 135, 245, 0.15);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: rgba(155, 135, 245, 0.3); }
+    pre {
+      margin: 0;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.83rem;
+      line-height: 1.55;
+      color: #e2e8f0;
+    }
+
+    /* Credits & Footer */
+    .credits-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.9rem;
+    }
+    .credit-item {
+      display: block;
+      padding: 1rem 1.15rem;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: border-color 0.16s ease, transform 0.16s ease;
+    }
+    .credit-item:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .credit-item strong { display: block; font-size: 0.95rem; color: #ddd6fe; }
+    .credit-item span { font-size: 0.84rem; color: var(--muted); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 0 2.75rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    footer a { color: #c4b5fd; }
+    footer a:hover { text-decoration: underline; }
+
+    /* Native Lightbox Dialog (modern-web-guidance compliant) */
+    dialog {
+      padding: 0;
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      background: #140f29;
+      color: var(--text);
+      max-width: min(1120px, 94vw);
+      max-height: 92vh;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+    }
+    dialog[open] {
+      display: flex;
+      flex-direction: column;
+    }
+    dialog:modal {
+      overscroll-behavior: contain;
+    }
+    dialog::backdrop {
+      background: rgba(6, 4, 16, 0.82);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+      overscroll-behavior: contain;
+    }
+    .lightbox-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .lightbox-bar h3 {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 600;
+    }
+    .lightbox-close {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .lightbox-body {
+      padding: 0.85rem;
+      overflow: auto;
+      background: #0d091d;
+    }
+    .lightbox-body img {
+      width: 100%;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 780px) {
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a class="brand" href="#top">
+        <span class="brand-dot" aria-hidden="true">✦</span>
+        <span>EduVis AI Gallery</span>
+      </a>
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a href="#fitur">Fitur</a>
+        <a href="#live">EduVis Live</a>
+        <a href="#galeri">Galeri</a>
+        <a href="#instalasi">Instalasi &amp; Build</a>
+        <a href="#kredit">Kredit</a>
+      </nav>
+      <a class="btn btn-primary" href="https://github.com/subuh-kurniawan/EduVis-AI-Galery" target="_blank" rel="noopener">
+        GitHub Repo ↗
+      </a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container">
+        <span class="pill">✦ 100% On-Device · Gemma 4 · LiteRT-LM · macOS SwiftUI + WebGPU</span>
+        <h1>Ekosistem AI Lokal Lengkap di Perangkat Anda</h1>
+        <p>
+          <strong>EduVis AI Gallery</strong> menggabungkan 15 ruang kerja AI interaktif, percakapan suara dua arah
+          <strong>EduVis Live &amp; Futuristik</strong> dengan TTS Neural lokal, akses LAN HTTPS + QR lintas perangkat,
+          serta aplikasi <strong>EduVis Native AI</strong> 100% SwiftUI Liquid Glass untuk macOS — tanpa biaya API dan tanpa cloud.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://github.com/subuh-kurniawan/EduVis-AI-Galery" target="_blank" rel="noopener">
+            Buka Repositori GitHub
+          </a>
+          <a class="btn" href="#instalasi">Panduan Instalasi &amp; Build macOS</a>
+          <a class="btn" href="#galeri">Lihat 11 Tangkapan Layar</a>
+        </div>
+
+        <div class="hero-frame">
+          <button type="button" data-lightbox="screenshots/01-eduvis-gallery-launcher.webp" data-title="EduVis AI Gallery — Space Lens Launcher &amp; 15 Ruang Kerja">
+            <img
+              src="screenshots/01-eduvis-gallery-launcher.webp"
+              alt="EduVis AI Gallery — Space Lens Launcher dengan 15 ruang kerja AI lokal"
+              width="1600"
+              height="967"
+              fetchpriority="high"
+            >
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="fitur">
+      <div class="container">
+        <div class="section-head">
+          <h2>Satu Suite, Dua Jalur Eksekusi</h2>
+          <p>Jalan murni di browser melalui WebGPU/WASM + OPFS, atau melalui aplikasi desktop macOS &amp; server LAN HTTPS bertenaga LiteRT-LM GPU Metal.</p>
+        </div>
+        <div class="grid-4">
+          <article class="card">
+            <div class="icon-badge" aria-hidden="true">⚡</div>
+            <h3>100% Privat &amp; Offline</h3>
+            <p>Model Gemma 4 berjalan langsung di GPU/RAM perangkat Anda. Mendukung cache OPFS browser maupun file <code>.litertlm</code> lokal.</p>
+          </article>
+          <article class="card">
+            <div class="icon-badge" aria-hidden="true">🍎</div>
+            <h3>Native SwiftUI + WebView</h3>
+            <p>Pilih <strong>EduVis Native AI</strong> (100% SwiftUI Liquid Glass, <code>⌘K</code> Spotlight, 13 Studio) atau <strong>EduVis AI Gallery</strong> (Launcher Space Lens).</p>
+          </article>
+          <article class="card">
+            <div class="icon-badge" aria-hidden="true">🎙️</div>
+            <h3>Suara Live &amp; TTS Neural</h3>
+            <p>Percakapan dua arah dengan Auto Silence VAD, Siri Live Sphere, server TTS VITS/Piper/RVC on-demand, dan fallback Realtime Native.</p>
+          </article>
+          <article class="card">
+            <div class="icon-badge" aria-hidden="true">📱</div>
+            <h3>LAN HTTPS &amp; QR Code</h3>
+            <p>Bagikan AI lokal ke iPhone, iPad, atau laptop lain di Wi-Fi yang sama lewat <code>https://IP-MAC:1234</code> dengan pemindaian QR.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="live">
+      <div class="container">
+        <div class="section-head">
+          <h2>Alur EduVis Live &amp; EduVis Live Futuristik</h2>
+          <p>Ditenagai <code>live-conversation.js</code>, streaming LiteRT-LM GPU, visualizer <strong>Siri Live Sphere</strong>, dan pemisahan prosa TTS dari visual (KaTeX, Chart.js, Mermaid, kode).</p>
+        </div>
+
+        <div class="pipeline">
+          <div class="step">
+            <span class="step-num">01 · INPUT</span>
+            <h4>Suara / Teks + VAD</h4>
+            <p>Web Speech / native <code>SFSpeechRecognizer</code> dengan Auto Silence VAD atau Push-to-Talk.</p>
+          </div>
+          <div class="step">
+            <span class="step-num">02 · PERSONA</span>
+            <h4>Arsi / Narendra &amp; Kustom</h4>
+            <p>Peran bawaan konsultan EduVis; permintaan ganti peran otomatis beralih ke mode Kustom.</p>
+          </div>
+          <div class="step">
+            <span class="step-num">03 · LLM GPU</span>
+            <h4>Streaming LiteRT-LM</h4>
+            <p>Respons di-stream real-time melalui <code>/v1/chat/completions</code> dengan akselerasi GPU.</p>
+          </div>
+          <div class="step">
+            <span class="step-num">04 · FILTER</span>
+            <h4>Visual vs Prosa TTS</h4>
+            <p>Rumus KaTeX, grafik Chart.js, diagram Mermaid, dan kode dirender tanpa dibacakan TTS.</p>
+          </div>
+          <div class="step">
+            <span class="step-num">05 · AUDIO</span>
+            <h4>TTS On-Demand &amp; Barge-in</h4>
+            <p>Suara lokal <strong>Wibowo</strong> (VITS/Piper/RVC) + fallback Realtime Native, Siri Sphere, &amp; potong bicara.</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <article class="card compare-card">
+            <img
+              src="screenshots/04-eduvis-live.webp"
+              alt="EduVis Live dengan Auto VAD dan Siri Live Sphere"
+              width="1600"
+              height="967"
+              loading="lazy"
+              data-lightbox="screenshots/04-eduvis-live.webp"
+              data-title="EduVis Live — Auto VAD &amp; Siri Live Sphere"
+            >
+            <h3>EduVis Live (<code>gemini_live.html</code>)</h3>
+            <p>Antarmuka percakapan suara lengkap dengan panel pengaturan mendalam dan penyimpanan preferensi permanen di <code>localStorage</code>.</p>
+            <ul>
+              <li>Pilihan avatar Siri Live Sphere (<code>execFemale</code>, <code>execMale</code>, ilustrasi Arsi &amp; Narendra).</li>
+              <li>Mode <strong>Auto (VAD)</strong>, <strong>Manual / Push-to-Talk</strong>, serta pintasan ke <strong>TTS Studio Lokal</strong>.</li>
+              <li>Menyimpan persona kustom, model, dan pilihan fallback TTS antar sesi.</li>
+            </ul>
+          </article>
+
+          <article class="card compare-card">
+            <img
+              src="screenshots/05-eduvis-live-futuristik.webp"
+              alt="EduVis Live Futuristik dengan Suara Duplex GPU"
+              width="1600"
+              height="967"
+              loading="lazy"
+              data-lightbox="screenshots/05-eduvis-live-futuristik.webp"
+              data-title="EduVis Live Futuristik — Suara Duplex GPU"
+            >
+            <h3>EduVis Live Futuristik (<code>gemini_live_futuristik.html</code>)</h3>
+            <p>Tampilan layar lebar sinematik bergaya HUD untuk percakapan hands-free yang fokus pada sphere dan transkrip langsung.</p>
+            <ul>
+              <li>Visualisasi <strong>Siri Live Sphere</strong> responsif terhadap riak audio real-time.</li>
+              <li>Dilengkapi <code>Screen Wake Lock</code>, tombol <strong>Perangkat lain (QR)</strong>, dan buka di browser.</li>
+              <li>Fallback otomatis ke Realtime Native selama sesi berjalan jika TTS lokal tidak tersedia.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="galeri">
+      <div class="container">
+        <div class="section-head">
+          <h2>Galeri Tangkapan Layar</h2>
+          <p>Klik gambar mana saja untuk memperbesar dalam tampilan penuh.</p>
+        </div>
+
+        <div class="filter-bar" role="group" aria-label="Filter galeri">
+          <button type="button" class="filter-btn" data-filter="all" aria-pressed="true">Semua (11)</button>
+          <button type="button" class="filter-btn" data-filter="gallery" aria-pressed="false">EduVis AI Gallery</button>
+          <button type="button" class="filter-btn" data-filter="native" aria-pressed="false">EduVis Native AI</button>
+          <button type="button" class="filter-btn" data-filter="lan" aria-pressed="false">Multi-Perangkat LAN</button>
+        </div>
+
+        <div class="gallery-grid">
+          <article class="shot-card" data-category="gallery">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/01-eduvis-gallery-launcher.webp" data-title="EduVis AI Gallery — Space Lens Launcher">
+              <img src="screenshots/01-eduvis-gallery-launcher.webp" alt="Space Lens Launcher" width="1600" height="967" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>Space Lens Launcher</strong>
+              <span>15 ruang kerja AI lokal, Quick Ask (⌘K), dan QR LAN</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="gallery">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/02-workspace-utama-flowchart.webp" data-title="Workspace Utama — Flowchart Mermaid &amp; RAG">
+              <img src="screenshots/02-workspace-utama-flowchart.webp" alt="Workspace Utama Flowchart Mermaid" width="1600" height="967" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>Workspace Utama &amp; Flowchart</strong>
+              <span>Render Mermaid, ekspor PNG/SVG, Prompt Library, dan RAG</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="gallery">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/03-tts-studio-lokal.webp" data-title="TTS Studio AI — Produksi Audio &amp; Narasi 100% Offline">
+              <img src="screenshots/03-tts-studio-lokal.webp" alt="TTS Studio AI Lokal" width="1600" height="967" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>TTS Studio AI (100% Offline)</strong>
+              <span>VITS Neural Indonesia, Piper News TTS, kontrol tempo &amp; gabung WAV</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="gallery">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/04-eduvis-live.webp" data-title="EduVis Live — Auto VAD &amp; Siri Live Sphere">
+              <img src="screenshots/04-eduvis-live.webp" alt="EduVis Live" width="1600" height="967" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>EduVis Live Voice</strong>
+              <span>Auto Silence VAD, kontrol manual, dan Siri Live Sphere</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="gallery">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/05-eduvis-live-futuristik.webp" data-title="EduVis Live Futuristik — Suara Duplex GPU">
+              <img src="screenshots/05-eduvis-live-futuristik.webp" alt="EduVis Live Futuristik" width="1600" height="967" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>EduVis Live Futuristik</strong>
+              <span>Mode layar lebar sinematik dengan akselerasi LiteRT-LM GPU</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="native">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/06-eduvis-native-studio.webp" data-title="EduVis Native AI Studio — SwiftUI Liquid Glass">
+              <img src="screenshots/06-eduvis-native-studio.webp" alt="EduVis Native AI Studio" width="1600" height="969" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>EduVis Native AI Studio</strong>
+              <span>Aplikasi macOS murni SwiftUI Liquid Glass &amp; inferensi Gemma 4 lokal</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="native">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/07-eduvis-native-chat.webp" data-title="EduVis Native AI — Obrolan Gemma 4 &amp; Markdown">
+              <img src="screenshots/07-eduvis-native-chat.webp" alt="Obrolan EduVis Native AI" width="1600" height="969" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>Obrolan Gemma 4 Native</strong>
+              <span>Streaming token real-time, Markdown rapi, dan RAG terintegrasi</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="native">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/08-eduvis-native-workspace-launcher.webp" data-title="Peluncur 13 Ruang Kerja Hybrid — Native &amp; Web Asli">
+              <img src="screenshots/08-eduvis-native-workspace-launcher.webp" alt="Peluncur 13 Ruang Kerja Hybrid" width="1600" height="969" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>Peluncur 13 Studio Hybrid</strong>
+              <span>Beralih instan antara mode Native Liquid Glass dan Web Canvas Asli</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="native">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/09-eduvis-native-about.webp" data-title="Tentang EduVis Native AI, Arsitektur Sistem, &amp; Developer">
+              <img src="screenshots/09-eduvis-native-about.webp" alt="Tentang EduVis Native AI" width="1600" height="969" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>Panel Arsitektur &amp; Developer</strong>
+              <span>Dual Engine (Pure Swift + Python LiteRT-LM), SQLiteVectorStore, &amp; pintasan</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="lan">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/10-multi-device-lan-chat.webp" data-title="Chat &amp; Rumus KaTeX Lintas Perangkat (iPhone, MacBook, iPad)">
+              <img src="screenshots/10-multi-device-lan-chat.webp" alt="Tampilan Multi-Perangkat LAN Chat" width="1600" height="813" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>Multi-Perangkat LAN — Chat &amp; KaTeX</strong>
+              <span>Responsif di iPhone, MacBook Air, dan iPad Air lewat HTTPS lokal</span>
+            </div>
+          </article>
+
+          <article class="shot-card" data-category="lan">
+            <button type="button" class="shot-trigger" data-lightbox="screenshots/11-multi-device-lan-live.webp" data-title="EduVis Live Futuristik Lintas Perangkat (iPhone, MacBook, iPad)">
+              <img src="screenshots/11-multi-device-lan-live.webp" alt="Tampilan Multi-Perangkat LAN Live" width="1600" height="795" loading="lazy">
+            </button>
+            <div class="shot-meta">
+              <strong>Multi-Perangkat LAN — EduVis Live</strong>
+              <span>Percakapan suara duplex &amp; Siri Live Sphere langsung dari HP/tablet</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="instalasi">
+      <div class="container">
+        <div class="section-head">
+          <h2>Instalasi, Unduh Model Mandiri, &amp; Build macOS</h2>
+          <p>Repositori GitHub dibuat ringan (~48 MB tanpa Git LFS). Model berat diunduh otomatis melalui skrip mandiri ke lokasi lokal yang tepat.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="code-card">
+            <div class="code-head">
+              <span>1. Clone &amp; Unduh Model Mandiri</span>
+              <button type="button" class="copy-btn" data-copy="code-clone">Salin</button>
+            </div>
+            <pre id="code-clone">git clone https://github.com/subuh-kurniawan/EduVis-AI-Galery.git
+cd EduVis-AI-Galery
+
+# Unduh model embedding &amp; TTS Indonesia otomatis
+python3 scripts/download_models.py
+
+# Opsional: ikut unduh aset GitHub Releases &amp; Piper
+python3 scripts/download_models.py --all</pre>
+          </div>
+
+          <div class="code-card">
+            <div class="code-head">
+              <span>2. Build &amp; Jalankan EduVis AI Gallery</span>
+              <button type="button" class="copy-btn" data-copy="code-gallery">Salin</button>
+            </div>
+            <pre id="code-gallery"># Jalankan langsung (sekaligus pasang ke ~/Applications/)
+python3 gemma_chat_gui.py
+
+# Atau build bundle mandiri EduVis AI Gallery.app saja
+python3 scripts/build_dmg.py --app-only</pre>
+          </div>
+
+          <div class="code-card">
+            <div class="code-head">
+              <span>3. Build EduVis Native AI (macOS 14+ SwiftUI)</span>
+              <button type="button" class="copy-btn" data-copy="code-native">Salin</button>
+            </div>
+            <pre id="code-native">cd EduVisNativeApp
+chmod +x build_native_app.sh
+./build_native_app.sh
+
+open "EduVisNativeApp/EduVis Native AI.app"</pre>
+          </div>
+
+          <div class="code-card">
+            <div class="code-head">
+              <span>4. Build Installer DMG Lengkap (Gallery + Native)</span>
+              <button type="button" class="copy-btn" data-copy="code-dmg">Salin</button>
+            </div>
+            <pre id="code-dmg"># Menghasilkan dist/EduVis-AI-Gallery-macOS.dmg
+python3 scripts/build_dmg.py
+
+# Atau kemas ulang DMG tanpa kompilasi ulang
+python3 scripts/build_dmg.py --dmg-only</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="kredit">
+      <div class="container">
+        <div class="section-head">
+          <h2>Kredit &amp; Atribusi Open-Source</h2>
+          <p>Penghargaan untuk proyek open-source yang menopang TTS lokal, inferensi on-device, dan ekosistem suara pada EduVis AI Gallery.</p>
+        </div>
+
+        <div class="credits-list">
+          <a class="credit-item" href="https://github.com/drat/TTS-Indonesia-Gratis" target="_blank" rel="noopener">
+            <strong>drat/TTS-Indonesia-Gratis ↗</strong>
+            <span>Integrasi TTS lokal Indonesia, Jawa, &amp; Sunda (G2P &amp; suara Wibowo, Ardi, Gadis, Juminten, Asep).</span>
+          </a>
+          <a class="credit-item" href="https://github.com/Wikidepia/indonesian-tts" target="_blank" rel="noopener">
+            <strong>Wikidepia/indonesian-tts ↗</strong>
+            <span>Model VITS TTS Bahasa Indonesia (non-komersial / DO NOT USE FOR COMMERCIAL PURPOSES).</span>
+          </a>
+          <a class="credit-item" href="https://github.com/coqui-ai/TTS" target="_blank" rel="noopener">
+            <strong>coqui-ai/TTS ↗</strong>
+            <span>Kerangka kerja sintesis suara neural VITS.</span>
+          </a>
+          <a class="credit-item" href="https://github.com/rhasspy/piper" target="_blank" rel="noopener">
+            <strong>rhasspy/piper &amp; okasi/piper-indonesian-news-tts ↗</strong>
+            <span>Runtime Piper ONNX (GPL-3.0-or-later) dan model suara opsional News TTS Bahasa Indonesia.</span>
+          </a>
+          <a class="credit-item" href="https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI" target="_blank" rel="noopener">
+            <strong>RVC-Project / RMVPE ↗</strong>
+            <span>Pipeline inferensi konversi suara opsional berbasis RVC.</span>
+          </a>
+          <a class="credit-item" href="https://huggingface.co/litert-community" target="_blank" rel="noopener">
+            <strong>Google AI Edge / LiteRT Community ↗</strong>
+            <span>Distribusi model Gemma 4 terkuantisasi format <code>.litertlm</code> dan MediaPipe Web LLM API.</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>
+        Dikembangkan oleh <strong>Subuh Kurniawan (EduVis Project)</strong> ·
+        <a href="https://github.com/subuh-kurniawan/EduVis-AI-Galery" target="_blank" rel="noopener">GitHub Repository</a> ·
+        <a href="https://github.com/subuh-kurniawan/EduVis-AI-Galery/blob/main/README.md" target="_blank" rel="noopener">Dokumentasi Lengkap</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Native modal lightbox (modern-web-guidance compliant) -->
+  <dialog id="lightbox" closedby="any" aria-labelledby="lightbox-title">
+    <div class="lightbox-bar">
+      <h3 id="lightbox-title">Pratinjau</h3>
+      <form method="dialog">
+        <button class="lightbox-close" type="submit" autofocus>Tutup (Esc)</button>
+      </form>
+    </div>
+    <div class="lightbox-body">
+      <img id="lightbox-img" src="" alt="">
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      const dialog = document.getElementById('lightbox');
+      const lbImg = document.getElementById('lightbox-img');
+      const lbTitle = document.getElementById('lightbox-title');
+
+      document.querySelectorAll('[data-lightbox]').forEach((el) => {
+        el.addEventListener('click', () => {
+          const src = el.getAttribute('data-lightbox');
+          const title = el.getAttribute('data-title') || 'Pratinjau';
+          lbImg.src = src;
+          lbImg.alt = title;
+          lbTitle.textContent = title;
+          dialog.showModal();
+        });
+      });
+
+      dialog.addEventListener('close', () => {
+        dialog.returnValue = '';
+      });
+
+      // Fallback light-dismiss untuk browser yang belum mendukung <dialog closedby="any"> (mis. Safari)
+      if (!('closedBy' in HTMLDialogElement.prototype)) {
+        const outside = (e, d) => {
+          const r = d.getBoundingClientRect();
+          return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+        };
+        let pressedOutside = false;
+        dialog.addEventListener('pointerdown', (e) => { pressedOutside = outside(e, dialog); });
+        dialog.addEventListener('pointerup', (e) => { if (pressedOutside && outside(e, dialog)) dialog.close(); });
+      }
+
+      // Filter galeri
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const cards = document.querySelectorAll('.shot-card');
+      filterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.filter;
+          filterBtns.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          cards.forEach((card) => {
+            card.hidden = target !== 'all' && card.dataset.category !== target;
+          });
+        });
+      });
+
+      // Tombol salin perintah
+      document.querySelectorAll('.copy-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const pre = document.getElementById(btn.dataset.copy);
+          if (!pre) return;
+          try {
+            await navigator.clipboard.writeText(pre.textContent.trim());
+            const prev = btn.textContent;
+            btn.textContent = 'Tersalin ✓';
+            setTimeout(() => { btn.textContent = prev; }, 1600);
+          } catch (_) {
+            btn.textContent = 'Gagal';
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

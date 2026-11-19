@@ -1,5 +1,7 @@
 # 🤖 EduVis AI Gallery & Gemma 4 Local AI Suite
 
+🌐 **Halaman Showcase:** [https://subuh-kurniawan.github.io/EduVis-AI-Galery](https://subuh-kurniawan.github.io/EduVis-AI-Galery)
+
 **EduVis AI Gallery** adalah rangkaian aplikasi AI lokal (*on-device*) berbasis **Gemma 4** dan **LiteRT-LM** yang berjalan sepenuhnya di perangkat Anda tanpa kunci API berbayar maupun ketergantungan cloud. Proyek ini menggabungkan **antarmuka web client-side (WebGPU/WASM)**, **server LAN HTTPS**, **percakapan suara interaktif (EduVis Live & Futuristik)**, **TTS Neural lokal**, serta **aplikasi native macOS SwiftUI**.
 
 ![EduVis AI Gallery — Launcher Space Lens](docs/screenshots/01-eduvis-gallery-launcher.webp)
